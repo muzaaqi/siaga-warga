@@ -189,16 +189,20 @@ flowchart LR
 
 ## 6. Tech Stack Rekomendasi (Cepat & Stabil untuk Lomba)
 
-| Layer | Rekomendasi | Alternatif |
+| Layer | Rekomendasi | Catatan / Keunggulan |
 |---|---|---|
-| Frontend | **Next.js 14** atau **SvelteKit** | React + Vite |
-| UI Components | **shadcn/ui + Tailwind CSS** | Chakra UI |
-| Peta | **Leaflet.js** (gratis, open source) | Mapbox GL JS |
-| Backend + DB | **Supabase** (auth + DB + realtime) | Firebase |
-| Deploy | **Vercel** (gratis, HTTPS otomatis) | Netlify |
+| **Runtime & Package Manager** | **Bun** | Runtime JavaScript/TypeScript dan package manager ultra-cepat untuk development dan build |
+| **Frontend Framework** | **TanStack Start** (React) | Fullstack SSR/Streaming, routing tipe aman tingkat tinggi (TanStack Router) |
+| **UI Components & Styling** | **shadcn/ui + Tailwind CSS** | Komponen modern, aksesibel, mudah dikustomisasi |
+| **Form Handling & Validasi** | **TanStack Form + Zod** | Validasi skema tipe aman end-to-end, performa render tinggi pada form pelaporan |
+| **Peta & Visualisasi** | **MapLibre GL JS** / Leaflet | Ringan, gratis, performa render klaster GeoJSON & titik panas satelit tinggi |
+| **Database & Spatial Engine** | **Neon PostgreSQL + PostGIS** | Serverless Postgres dengan ekstensi PostGIS (`ST_DWithin` klastering duplikasi spasial) |
+| **ORM & Migrasi** | **Drizzle ORM** | Type-safe schema, zero-overhead, koneksi cepat via `@neondatabase/serverless` |
+| **Object Storage (Bukti Foto)** | **Cloudflare R2** | Zero egress S3-compatible, upload langsung dari browser via **Signed/Presigned URL** |
+| **Deploy / Hosting** | **Cloudflare Workers** | Edge computing global dengan latensi rendah di seluruh Indonesia, didukung preset TanStack Start / Nitro / Wrangler |
 
 > [!TIP]
-> **Supabase Realtime** adalah cara paling cepat membuat tracking status yang hidup — cukup subscribe ke tabel `reports` dan status update otomatis tanpa polling.
+> **Presigned URL ke Cloudflare R2** memungkinkan browser mengunggah file bukti foto langsung ke storage tanpa membebani kuota memori/waktu eksekusi Cloudflare Workers. Database **Neon PostgreSQL** dengan PostGIS memastikan deteksi duplikat laporan dapat dieksekusi secara instan di level SQL.
 
 ---
 
@@ -246,7 +250,7 @@ Pertanyaan yang kemungkinan besar ditanyakan:
 
 | Pertanyaan Juri | Jawaban yang Kuat |
 |---|---|
-| "Bagaimana skalabilitas sistem ini?" | Arsitektur serverless (Supabase/Vercel) auto-scale, database PostgreSQL dengan indeks proper |
+| "Bagaimana skalabilitas sistem ini?" | Arsitektur edge serverless (Cloudflare Workers) auto-scale secara global dengan latensi sangat rendah, database PostgreSQL dengan connection pooling & indeks optimal |
 | "Apakah data laporan ini aman?" | Auth berbasis session, data sensitif tidak diekspos publik, hanya pelapor + admin yang bisa lihat detail |
 | "Kenapa bukan pakai 113 saja?" | 113 tidak punya transparansi status — warga tidak tahu apakah laporan diterima. Platform ini mengisi gap itu |
 | "Bagaimana integrasinya dengan Damkar nyata?" | API-first design — siap diintegrasikan via REST API. Ini adalah proof of concept yang production-ready |
