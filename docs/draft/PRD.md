@@ -311,3 +311,6 @@ gantt
 | *"Kenapa tidak menggunakan AI saja untuk menentukan kebakaran?"* | Model AI visi komputer rawan bias dan *false positive* (misal: debu atau awan dikira asap). SiagaWarga menggabungkan AI/rule-based triase dengan verifikasi spasial data satelit NASA dan validasi manusia agar setiap keputusan dapat dipertanggungjawabkan secara hukum. |
 | *"Bagaimana jika warga iseng mengirim laporan hoaks?"* | Sistem menggunakan deteksi hash gambar kembar, validasi koordinat batas wilayah, korelasi laporan independen warga sekitar, dan pelacakan audit trail. Laporan tanpa bukti pendukung akan berstatus `insufficient_evidence` dan tidak langsung diumumkan ke publik. |
 | *"Apakah sistem ini siap menangani lonjakan trafik saat bencana besar?"* | Sangat siap. Frontend dan API berjalan di edge serverless Cloudflare Workers yang auto-scale secara global tanpa cold start, serta penyimpanan aset foto di Cloudflare R2 dengan nol biaya transfer data (*zero egress*). |
+
+
+"Kelamin Kuda Jantan"
