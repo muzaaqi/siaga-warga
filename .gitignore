@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+.dev.vars
+
+# Build & Runtime Outputs
+dist/
+dist-ssr/
+.output/
+.vinxi/
+.wrangler/
+
+# TanStack Router Auto-generated
+src/routeTree.gen.ts
+routeTree.gen.ts
+
+# Logs & Temporary files
+*.log
+.DS_Store
