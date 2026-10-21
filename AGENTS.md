@@ -9,7 +9,7 @@
 
 ## 1. Project Overview
 
-**SiagaWarga** is a high-performance *civic reporting and public service tracking* web application for monitoring and verifying wildfire/forest fires (karhutla) and urban residential fires in Indonesia. Developed for **Web In Action (WIA) — Multimedia In Action 2026** under the subtheme *"Public Service Tracking"*.
+**SiagaWarga** is a high-performance _civic reporting and public service tracking_ web application for monitoring and verifying wildfire/forest fires (karhutla) and urban residential fires in Indonesia. Developed for **Web In Action (WIA) — Multimedia In Action 2026** under the subtheme _"Public Service Tracking"_.
 
 - **Architecture:** Fullstack standalone web application (non-monorepo, based on `shortU` conventions).
 - **Core Philosophy:** **System Honesty** — strict separation between automated input validation, spatial clustering, human-in-the-loop verification, and official handling confirmation.
@@ -19,25 +19,25 @@
 
 ## 2. Tech Stack
 
-| Layer | Technology | Specification / Notes |
-|---|---|---|
-| **Runtime & PM** | **Bun** | `v1.1+` — Package manager, script runner, test runner (`bun test`) |
-| **Framework** | **TanStack Start** | React 19 + Vite — Fullstack SSR and streaming on Edge |
-| **Routing** | **TanStack Router** | File-based routing in `src/routes/`. `routeTree.gen.ts` strictly gitignored |
-| **Data Fetching** | **TanStack Query** | v5 — Server function caching, optimistic updates, SSR hydration |
-| **Form Handling** | **TanStack Form** | Controlled form state with granular re-rendering |
-| **Schema Validation** | **Zod** | Isomorphic schemas in `src/lib/schema/` |
-| **UI Primitives** | **shadcn/ui** with **Base UI** | `@base-ui/react` — **NOT Radix UI** |
-| **Styling** | **Tailwind CSS v4** | `@tailwindcss/vite` — OKLCH design tokens mapped to CSS variables |
-| **Icons** | **Lucide React** | Latest — Strict `*Icon` imports, zero emojis in system UI |
-| **Database** | **Neon PostgreSQL** | Serverless Postgres enabled with **PostGIS** extension |
-| **ORM & Migrations** | **Drizzle ORM** | `drizzle-orm` + `drizzle-kit` via `@neondatabase/serverless` |
-| **Object Storage** | **Cloudflare R2** | S3 API — Direct browser upload via **Presigned PUT URLs** |
-| **Hosting & Edge** | **Cloudflare Workers** | `@cloudflare/vite-plugin` — Low latency Edge compute in Indonesia |
-| **Maps & Spatial** | **MapLibre GL JS** | CARTO Positron vector tiles, GeoJSON clustering, dual-layer view |
-| **Satellite Hotspots** | **NASA FIRMS API** | Active fire data (VIIRS 375m & MODIS) with 6-hour PostGIS cache |
-| **Linter & Formatter** | **ESLint** | Strict TypeScript and React rules |
-| **Testing** | **Bun Test** | Native runner for unit and server function integration tests |
+| Layer                  | Technology                                   | Specification / Notes                                                                                             |
+| ---------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Runtime & PM**       | **Bun**                                      | `v1.1+` — Package manager, script runner, test runner (`bun test`)                                                |
+| **Framework**          | **TanStack Start**                           | React 19 + Vite — Fullstack SSR and streaming on Edge                                                             |
+| **Routing**            | **TanStack Router**                          | File-based routing in `src/routes/`. `routeTree.gen.ts` strictly gitignored                                       |
+| **Data Fetching**      | **TanStack Query**                           | v5 — Server function caching, optimistic updates, SSR hydration                                                   |
+| **Form Handling**      | **TanStack Form**                            | Controlled form state with granular re-rendering                                                                  |
+| **Schema Validation**  | **Zod**                                      | Isomorphic schemas in `src/lib/schema/`                                                                           |
+| **UI Primitives**      | **shadcn/ui** with **Base UI**               | `@base-ui/react` — **NOT Radix UI**                                                                               |
+| **Styling**            | **Tailwind CSS v4**                          | `@tailwindcss/vite` — OKLCH design tokens mapped to CSS variables                                                 |
+| **Icons**              | **Lucide React**                             | Latest — Strict `*Icon` imports, zero emojis in system UI                                                         |
+| **Database**           | **Neon PostgreSQL**                          | Serverless Postgres enabled with **PostGIS** extension                                                            |
+| **ORM & Migrations**   | **Drizzle ORM**                              | `drizzle-orm` + `drizzle-kit` via `@neondatabase/serverless`                                                      |
+| **Object Storage**     | **Cloudflare R2**                            | S3 API — Direct browser upload via **Presigned PUT URLs**                                                         |
+| **Hosting & Edge**     | **Cloudflare Workers**                       | `@cloudflare/vite-plugin` — Low latency Edge compute in Indonesia                                                 |
+| **Maps & Spatial**     | **MapLibre GL JS**                           | CARTO Positron vector tiles, GeoJSON clustering, dual-layer view                                                  |
+| **Satellite Hotspots** | **NASA FIRMS API**                           | Active fire data (VIIRS 375m & MODIS) with 6-hour PostGIS cache                                                   |
+| **Linter & Formatter** | **ESLint** + **@shadcn/lint** + **Prettier** | ESLint (TypeScript/React) + `@shadcn/lint` (design system enforcement) + Prettier (`prettier-plugin-tailwindcss`) |
+| **Testing**            | **Bun Test**                                 | Native runner for unit and server function integration tests                                                      |
 
 ---
 
@@ -46,10 +46,13 @@
 To prevent merge conflicts, migration collisions, and blocking dependencies within the team:
 
 ### 3.1 Strict Gitignore of Generated Code
+
 `src/routeTree.gen.ts` must **never** be committed to Git. It is generated locally via `bun run generate-routes` or during dev/build.
 
 ### 3.2 Modular Drizzle Schema (`src/server/db/schema/`)
+
 Never put all database definitions into a single `schema.ts`. Schemas are partitioned by domain:
+
 - `src/server/db/schema/reports.ts` — Report records and status fields
 - `src/server/db/schema/evidence.ts` — Media uploads and metadata
 - `src/server/db/schema/hotspots.ts` — NASA FIRMS satellite cache
@@ -57,15 +60,19 @@ Never put all database definitions into a single `schema.ts`. Schemas are partit
 - `src/server/db/schema/index.ts` — Central barrel re-exporting all schemas
 
 ### 3.3 Migration Gatekeeper (Pilot Role)
+
 To eliminate Drizzle migration file collisions (`0001_xxx.sql` conflicts), only the **Pilot (Lead)** runs `bun run db:generate` and commits migration files to `main`. Team members work on schema definitions and test against their local/dev branch.
 
 ### 3.4 Vertical Feature Slicing
+
 Team members work on isolated feature slices (route + server function + colocated components), avoiding cross-touching the same files:
+
 - **Member 1:** Citizen Reporting (`src/routes/lapor.tsx` + `src/server/functions/reports.ts` + `src/components/report/`)
 - **Member 2:** Public Map & Satellites (`src/routes/pantau.tsx` + `src/server/functions/hotspots.ts` + `src/components/map/`)
 - **Member 3 / Pilot:** Core Infrastructure, Moderator Triage (`src/routes/admin/` + `src/server/functions/moderator.ts` + `src/components/triage/`)
 
 ### 3.5 Short-Lived Branches & Rebase
+
 - Branch naming: `feat/<feature-name>`, `fix/<issue-name>`.
 - Branches must not live longer than 1–2 days.
 - Always run `git pull --rebase origin main` before opening PRs.
@@ -81,7 +88,7 @@ Team members work on isolated feature slices (route + server function + colocate
 3. **Rule 3 — Direct Cloudflare R2 Upload via Presigned URL:**  
    Photo uploads must never buffer through Cloudflare Workers. The client requests a signed PUT URL via `getPresignedUploadUrl`, uploads directly to R2, and submits the verified object key.
 4. **Rule 4 — Mandatory Photo Upload with Safety Disclaimer:**  
-   Photo upload is mandatory for citizen reports to eliminate spam. The upload zone must display a prominent safety notice: *"Ambil foto dari jarak aman dan lokasi terlindung! Jangan membahayakan diri mendekati api"*. Photos are compressed client-side (max 5 MB, WebP/JPEG) before upload.
+   Photo upload is mandatory for citizen reports to eliminate spam. The upload zone must display a prominent safety notice: _"Ambil foto dari jarak aman dan lokasi terlindung! Jangan membahayakan diri mendekati api"_. Photos are compressed client-side (max 5 MB, WebP/JPEG) before upload.
 5. **Rule 5 — PostGIS Native Spatial Deduplication & Clustering:**  
    Detecting duplicate reports within 2 km and 4 hours must be executed using PostGIS `ST_DWithin`. Duplicate reports are accepted, linked to the active `cluster_id`, and serve as reinforcing evidence.
 6. **Rule 6 — NASA FIRMS 6-Hour Caching in PostGIS:**  
@@ -94,8 +101,8 @@ Team members work on isolated feature slices (route + server function + colocate
    Never equate `verified` with `resolved`. Keep `verification_status` (evidence validity), `priority` (urgency for response), and `handling_status` (physical agency intervention) as independent fields.
 10. **Rule 10 — Base UI Primitives (NOT Radix UI):**  
     This project uses shadcn with **Base UI (`@base-ui/react`)**. Do not import from `@radix-ui/*`.
-11. **Rule 11 — Modify UI Components at Source:**  
-    Customizations must be made in `src/components/ui/*.tsx`. Avoid inline styling overrides (`!important` or utility soup) at usage sites.
+11. **Rule 11 — Modify UI Components at Source (@shadcn/lint Enforced):**  
+    Customizations must be made in `src/components/ui/*.tsx`. Avoid inline styling overrides (`!important` or utility soup) at usage sites. Enforced statically via `@shadcn/lint` (`shadcn/no-restyle`).
 12. **Rule 12 — Responsive Overlays Standard:**  
     All modal dialogs must use `src/components/ui/responsive-overlay.tsx` (Drawer <768px, Dialog ≥768px).
 13. **Rule 13 — Zero Gradients & Zero Information Redundancy:**  
@@ -228,9 +235,12 @@ bun run db:push          # Push schema directly to dev Neon DB (prototyping)
 bun run db:migrate       # Apply pending migrations
 bun run db:studio        # Open Drizzle Studio visual GUI
 
-# Code Quality & Formatting (ESLint)
-bun run lint             # ESLint check
+# Code Quality & Formatting (ESLint & Prettier)
+bun run lint             # ESLint check (includes @shadcn/lint design system enforcement)
 bun run lint:fix         # ESLint auto-fix
+bun run lint:design      # Dedicated @shadcn/lint check
+bun run format           # Prettier format (with Tailwind class sorting) + ESLint fix
+bun run check            # Prettier style check
 bun run typecheck        # TypeScript strict typecheck (tsc --noEmit)
 
 # Testing
@@ -248,25 +258,31 @@ bun run deploy           # Deploy to Cloudflare Workers via Wrangler
 ## 8. Code Conventions
 
 ### Path Aliases
-Always import project files using the `~/` path alias:
+
+Always import project files using the `@/` path alias:
+
 ```ts
-import { db } from "~/server/db";
-import { reportSchema } from "~/lib/schema";
-import { Button } from "~/components/ui/button";
+import { db } from '@/server/db'
+import { reportSchema } from '@/lib/schema'
+import { Button } from '@/components/ui/button'
 ```
 
 ### Type-Safe Links and Routing
-Always use TanStack Router's `<Link>` component for internal navigation:
-```tsx
-import { Link } from "@tanstack/react-router";
 
-<Link to="/lacak/$code" params={{ code: report.trackingCode }}>
+Always use TanStack Router's `<Link>` component for internal navigation:
+
+```tsx
+import { Link } from '@tanstack/react-router'
+
+;<Link to="/lacak/$code" params={{ code: report.trackingCode }}>
   Lihat Status Laporan
 </Link>
 ```
 
 ### Documentation and Comments
+
 Every server function and non-trivial helper must contain a JSDoc block stating:
+
 1. Purpose & behavior
 2. Input/output constraints
 3. Where it is called from

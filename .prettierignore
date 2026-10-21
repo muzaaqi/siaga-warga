@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Lockfiles
+bun.lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Build & Runtime Outputs
+dist/
+dist-ssr/
+.output/
+.vinxi/
+.wrangler/
+.nitro/
+.tanstack/
+
+# Environment Variables
+.env*
+.dev.vars
+
+# TanStack Router Generated
+src/routeTree.gen.ts
+routeTree.gen.ts
+
+# Drizzle Migrations (auto-generated)
+drizzle/migrations/
+
+# Agent Skills & Guides
+.agents/
+docs/guides/
+docs/plans/

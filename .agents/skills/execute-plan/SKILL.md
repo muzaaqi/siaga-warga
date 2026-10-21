@@ -88,7 +88,8 @@ Run all 4 quality gates in order. All must pass with zero warnings/errors before
 # Gate 1: Tests
 bun test
 
-# Gate 2: Code Quality & Lint (ESLint)
+# Gate 2: Code Quality & Design System Lint (Prettier + ESLint + @shadcn/lint)
+bun run check
 bun run lint
 
 # Gate 3: Typecheck

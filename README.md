@@ -6,19 +6,19 @@
 
 ## 📌 Ringkasan Proyek
 
-| Informasi | Keterangan |
-|---|---|
-| **Kompetisi** | Web In Action (WIA) — Multimedia In Action (MIA) 2026 |
-| **Penyelenggara** | KSM Multimedia UPN Veteran Jakarta |
-| **Tema Utama** | *From Visionaries to Architects of Change* |
-| **Subtema** | **Public Service Tracking** |
-| **Target URL** | *(Live deployment di Cloudflare Workers)* |
+| Informasi         | Keterangan                                            |
+| ----------------- | ----------------------------------------------------- |
+| **Kompetisi**     | Web In Action (WIA) — Multimedia In Action (MIA) 2026 |
+| **Penyelenggara** | KSM Multimedia UPN Veteran Jakarta                    |
+| **Tema Utama**    | _From Visionaries to Architects of Change_            |
+| **Subtema**       | **Public Service Tracking**                           |
+| **Target URL**    | _(Live deployment di Cloudflare Workers)_             |
 
 ---
 
 ## 🚀 Tech Stack
 
-Dibangun dengan arsitektur modern berbasis Edge Computing, *type-safety* end-to-end, dan performa tinggi:
+Dibangun dengan arsitektur modern berbasis Edge Computing, _type-safety_ end-to-end, dan performa tinggi:
 
 - **Runtime & Package Manager:** [Bun](https://bun.sh/) (Eksekusi script & package management ultra-cepat)
 - **Frontend & Fullstack Framework:** [TanStack Start](https://tanstack.com/start) (React 19 / SSR / Streaming di Edge)
@@ -74,28 +74,36 @@ Berbeda dari aplikasi pelaporan konvensional yang mengklaim status sepihak, Siag
 Ikuti langkah-langkah berikut untuk menjalankan project di lingkungan lokal:
 
 ### 1. Prasyarat
+
 Pastikan telah menginstal:
+
 - [Bun](https://bun.sh/) (v1.1+ atau versi terbaru)
 - Git CLI
 - Akun Cloudflare (untuk Wrangler CLI)
 
 ### 2. Clone Repository
+
 ```bash
 git clone https://github.com/muzaaqi/siaga-warga.git
 cd siaga-warga
 ```
 
 ### 3. Install Dependensi
+
 ```bash
 bun install
 ```
 
 ### 4. Konfigurasi Environment Variables
+
 Salin file `.env.example` ke `.env`:
+
 ```bash
 cp .env.example .env
 ```
+
 Isi variabel yang diperlukan:
+
 ```env
 # Database Neon PostgreSQL dengan PostGIS
 DATABASE_URL="postgresql://user:password@ep-xyz.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
@@ -116,6 +124,7 @@ SESSION_SECRET="super-secret-crypto-key-at-least-32-chars"
 ```
 
 ### 5. Setup Database & Migrasi
+
 ```bash
 # Push skema langsung ke Neon DB (dev)
 bun run db:push
@@ -125,33 +134,39 @@ bun run db:migrate
 ```
 
 ### 6. Jalankan Development Server
+
 ```bash
 bun run dev
 ```
+
 Aplikasi akan berjalan di `http://localhost:3000`.
 
-### 7. Build & Deploy ke Cloudflare Workers
+### 7. Scripts Lainnya
+
 ```bash
-bun run build
-bunx wrangler deploy
+bun run lint         # Jalankan ESLint
+bun run typecheck    # Jalankan TypeScript strict check
+bun test             # Jalankan Bun test runner
+bun run build        # Build produksi untuk Cloudflare Workers
+bun run deploy       # Deploy ke Cloudflare Workers
 ```
 
 ---
 
 ## 📊 Progress Saat Ini (WIA 2026 Milestone)
 
-| Komponen / Fitur | Status | Catatan |
-|---|---|---|
-| **Riset & Problem Framing** | ✅ Selesai | Analisis subtema *Public Service Tracking* & studi kasus karhutla |
-| **Dokumen Perancangan & PRD** | ✅ Selesai | PRD v1.0, arsitektur data multi-status, etika pelaporan warga |
-| **Workflow & Operating Manual** | ✅ Selesai | AGENTS.md, DESIGN.md, & AI skills (`/write-plan`, `/audit-plan`, `/execute-plan`) |
-| **Setup Project & Tooling** | 🔄 Dalam Proses | Inisialisasi TanStack Start, Tailwind v4, & konfigurasi Wrangler |
-| **Landing Page & Edukasi Warga** | 🔄 Dalam Proses | Antarmuka responsif, panduan keselamatan darurat 112/113 |
-| **Formulir Pelaporan Spasial** | ⏳ Terjadwal | TanStack Form + Zod + Geolocation Picker |
-| **Spatial Deduplication & PostGIS** | ⏳ Terjadwal | Query pendeteksi laporan klaster & radius |
-| **Integrasi NASA FIRMS Hotspot** | ⏳ Terjadwal | Ingestion API titik panas satelit real-time |
-| **Moderator Triage Dashboard** | ⏳ Terjadwal | Antrean triase prioritas & panel peninjauan bukti |
-| **Public Tracking & Audit Timeline** | ⏳ Terjadwal | Peta insiden publik + transparansi status penanganan |
+| Komponen / Fitur                     | Status             | Catatan                                                                           |
+| ------------------------------------ | ------------------ | --------------------------------------------------------------------------------- |
+| **Riset & Problem Framing**          | ✅ Selesai         | Analisis subtema _Public Service Tracking_ & studi kasus karhutla                 |
+| **Dokumen Perancangan & PRD**        | ✅ Selesai         | PRD v1.0, arsitektur data multi-status, etika pelaporan warga                     |
+| **Workflow & Operating Manual**      | ✅ Selesai         | AGENTS.md, DESIGN.md, & AI skills (`/write-plan`, `/audit-plan`, `/execute-plan`) |
+| **Setup Project & Tooling**          | ✅ Selesai         | Inisialisasi TanStack Start, Tailwind v4, Neon Drizzle, Base UI, ESLint           |
+| **Landing Page & Edukasi Warga**     | 🔄 Siap Dikerjakan | Antarmuka responsif, panduan keselamatan darurat 112/113                          |
+| **Formulir Pelaporan Spasial**       | ⏳ Terjadwal       | TanStack Form + Zod + Geolocation Picker                                          |
+| **Spatial Deduplication & PostGIS**  | ⏳ Terjadwal       | Query pendeteksi laporan klaster & radius                                         |
+| **Integrasi NASA FIRMS Hotspot**     | ⏳ Terjadwal       | Ingestion API titik panas satelit real-time                                       |
+| **Moderator Triage Dashboard**       | ⏳ Terjadwal       | Antrean triase prioritas & panel peninjauan bukti                                 |
+| **Public Tracking & Audit Timeline** | ⏳ Terjadwal       | Peta insiden publik + transparansi status penanganan                              |
 
 > Target **First Draft Submission (01 November 2026):** Landing page, alur dasar form pelaporan, dan dokumen PDF progress tim siap dikumpulkan.
 
@@ -181,7 +196,7 @@ ON-FIRE/
 │   │   ├── functions/              # Endpoints: reports, evidence, hotspots, moderator
 │   │   └── services/               # PostGIS spatial, R2 presigner, NASA FIRMS
 │   ├── lib/                        # Zod schemas, exifr metadata, utils
-│   └── styles/                     # Tailwind CSS v4 styling
+│   └── styles.css                  # Tailwind CSS v4 styling & OKLCH tokens
 ├── drizzle/                        # Drizzle migrations generated via drizzle-kit
 ├── docs/                           # Dokumentasi & implementation plans
 │   ├── guides/                     # Guidebook resmi lomba
@@ -196,9 +211,10 @@ ON-FIRE/
 ## 👥 Tim Pengembang
 
 Disusun oleh Tim Peserta **Web In Action (WIA) — Multimedia In Action 2026**:
+
 - **Ketua Tim / Fullstack Engineer:** Muzaaqi
 - **Domain:** Public Service Tracking & Civic Accountability
 
 ---
 
-*Lisensi: Proyek ini dikembangkan secara orisinal untuk Multimedia In Action (MIA) 2026.*
+_Lisensi: Proyek ini dikembangkan secara orisinal untuk Multimedia In Action (MIA) 2026._
