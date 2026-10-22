@@ -212,8 +212,9 @@ ON-FIRE/
 
 Disusun oleh Tim Peserta **Web In Action (WIA) — Multimedia In Action 2026**:
 
-- **Ketua Tim / Fullstack Engineer:** Muzaaqi
-- **Domain:** Public Service Tracking & Civic Accountability
+- **Ketua Tim / Fullstack Engineer:** Muzaaqi ([@muzaaqi](https://github.com/muzaaqi))
+- **Pengembang / Frontend Engineer:** Hanif Musa Daut ([@Hanifmd45](https://github.com/Hanifmd45))
+- **Pengembang / Frontend Engineer:** Wildan Akmal ([@Khairil-12](https://github.com/Khairil-12))
 
 ---
 
