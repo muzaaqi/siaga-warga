@@ -71,11 +71,18 @@ Team members work on isolated feature slices (route + server function + colocate
 - **Member 2:** Public Map & Satellites (`src/routes/pantau.tsx` + `src/server/functions/hotspots.ts` + `src/components/map/`)
 - **Member 3 / Pilot:** Core Infrastructure, Moderator Triage (`src/routes/admin/` + `src/server/functions/moderator.ts` + `src/components/triage/`)
 
-### 3.5 Short-Lived Branches & Rebase
+### 3.5 Mandatory Branching & Pull Request Workflow (Zero Direct Commit to Main)
 
-- Branch naming: `feat/<feature-name>`, `fix/<issue-name>`.
-- Branches must not live longer than 1–2 days.
-- Always run `git pull --rebase origin main` before opening PRs.
+- **Zero Direct Commit to `main`:** All changes (features, bug fixes, docs, refactoring) must be developed on a dedicated branch created from `main`. Never run `git commit` directly on `main`.
+- **Branch Naming Standard:**
+  - `feat/<feature-name>` (e.g. `feat/01-landing-page`)
+  - `fix/<issue-name>` (e.g. `fix/schema-zod-bounds`)
+  - `chore/<task-name>` (e.g. `chore/shadcn-base-docs`)
+- **Zero Local Merges to `main`:** Never execute `git merge <branch>` locally into `main`. Merging into `main` must occur exclusively through remote Pull Requests (PR) on GitHub.
+- **Short-Lived Branches & Rebase:**
+  - Branches must not live longer than 1–2 days.
+  - Always run `git pull --rebase origin main` before pushing and opening a PR.
+  - Submit changes via PR (`gh pr create` or web PR) with quality gate verification results.
 
 ---
 
@@ -90,7 +97,7 @@ Team members work on isolated feature slices (route + server function + colocate
 4. **Rule 4 — Mandatory Photo Upload with Safety Disclaimer:**  
    Photo upload is mandatory for citizen reports to eliminate spam. The upload zone must display a prominent safety notice: _"Ambil foto dari jarak aman dan lokasi terlindung! Jangan membahayakan diri mendekati api"_. Photos are compressed client-side (max 5 MB, WebP/JPEG) before upload.
 5. **Rule 5 — PostGIS Native Spatial Deduplication & Clustering:**  
-   Detecting duplicate reports within 2 km and 4 hours must be executed using PostGIS `ST_DWithin`. Duplicate reports are accepted, linked to the active `cluster_id`, and serve as reinforcing evidence.
+   Detecting duplicate reports within 2 km and 4 hours must be executed using PostGIS `ST_DWithin`. Duplicate reports are accepted, linked to the active `cluster_id`, and serve as reinforcing evidence. If browser geolocation fails or returns coordinates outside Indonesian boundaries (e.g. Null Island `0, 0`), the UI must provide a responsive manual map pin picker as a fallback instead of blocking form submission.
 6. **Rule 6 — NASA FIRMS 6-Hour Caching in PostGIS:**  
    Satellite hotspot queries check VIIRS/MODIS active fires within a 5 km radius. Ingested data is cached in the `satellite_hotspots` table with a 6-hour TTL to prevent external API quota exhaustion.
 7. **Rule 7 — Zero PII Leakage & Coordinate Jittering on Public Routes:**  
@@ -109,8 +116,24 @@ Team members work on isolated feature slices (route + server function + colocate
     No decorative AI color gradients. Colors are solid, flat, and intentional. No duplicate status badges or echoing headers.
 14. **Rule 14 — Zero Emojis in System Copy & Strict Lucide Icons:**  
     Do not use emojis as icons or bullet points in UI text. Use official Lucide React icons (`*Icon`).
-15. **Rule 15 — Mandatory `bahasa-skills` Loading for UI Copy:**  
-    Before creating or modifying any user-facing text, button labels, form placeholders, error notices, or empty states, the agent **MUST** load and apply `bahasa-inti` (anti-slop, no em-dash styling, no "di era digital", no cliché tripels) and `bahasa-website` (accessible, human UX microcopy).
+15. **Rule 15 — Mandatory `bahasa-skills` Loading for UI Copy & Public Content:**  
+    Before creating or modifying any user-facing text, button labels, form placeholders, error notices, empty states, or public content, the agent **MUST** load and apply:
+    - **`bahasa-inti` (`.agents/skills/bahasa-inti/`):** Core anti-slop rules, no em-dash styling, no "di era digital", no cliché tripels, natural human-centered tone.
+    - **`bahasa-website` (`.agents/skills/bahasa-website/`):** Accessible UX microcopy, actionable button labels, clear form validation/error notices, and human empty states.
+    - **`bahasa-seo` (`.agents/skills/bahasa-seo/`):** Semantic heading hierarchy (H1, H2, H3), meta titles, meta descriptions, OpenGraph tags, and search intent alignment on public-facing routes (`/`, `/pantau`, `/lacak/$code`).
+16. **Rule 16 — Mandatory Shadcn Component Verification & Reuse (Anti-Hallucination):**  
+    Before planning, designing, or implementing any user interface, the agent **MUST** inspect local shadcn component documentation in `docs/shadcn/components/base/` and check currently installed primitives in `src/components/ui/`.
+    - **Explicit Component Manifest:** Every implementation plan and UI task must explicitly document the list of shadcn Base UI components to be utilized (e.g. `Button`, `Dialog`, `Drawer`, `Card`, `Badge`, `Alert`, `Select`, `Input`, `Tabs`, `Table`, `Tooltip`, `Separator`).
+    - **Zero Synthetic Primitives:** Never hallucinate or roll custom HTML/CSS modal dialogs, tooltips, dropdowns, or custom form controls. Always maximize reuse of shadcn Base UI primitives.
+    - **Concise Codebase:** New UI views must compose existing components to eliminate redundancy and keep the codebase lean and maintainable.
+17. **Rule 17 — Edge Runtime (`workerd`) Compatibility:**  
+    All server-side code in `src/server/` and server functions must execute cleanly in Cloudflare Workers runtime (`workerd`). Never import Node.js native packages (`fs`, `path`, `child_process`). Use Web Standards APIs (`fetch`, `crypto.subtle`, `Request`, `Response`, `URL`). Any third-party utility must be pure JavaScript/TypeScript without native binary dependencies.
+18. **Rule 18 — Strict Secret Isolation & Type-Safe Environment Variables:**  
+    Server secrets (`DATABASE_URL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `NASA_FIRMS_MAP_KEY`, `ADMIN_PASSCODE`) must NEVER be leaked or imported into client bundles. Only public configuration variables prefixed with `VITE_` are accessible on the browser. Validate all environment variables using a centralized Zod schema (`src/server/env.ts`).
+19. **Rule 19 — Route Resilience (Pending Skeletons & Human Error Boundaries):**  
+    Every route in `src/routes/` must declare an explicit `pendingComponent` (using Base UI skeletons) and `errorComponent` (resilient error UI with human-centered copy based on `bahasa-website` and an actionable "Coba Lagi" / retry button). Zero unhandled white screens or raw technical error stack traces.
+20. **Rule 20 — Client-Side Image Pre-Compression Standard:**  
+    To support low-bandwidth rural conditions and prevent storage exhaustion, the browser upload component must compress photos client-side (max dimension 1600px, WebP/JPEG, target size ~500 KB–1 MB, hard capped at 5 MB) via Canvas API or client compression helper before requesting presigned URLs and uploading to Cloudflare R2.
 
 ---
 
@@ -120,10 +143,10 @@ Team members work on isolated feature slices (route + server function + colocate
 [ Feature Requirement / PRD ]
               │
               ▼
-    1. /write-plan ───► Creates docs/plans/NN-<feature>.md
+    1. /write-plan ───► Verifies docs/shadcn/components/base/ & creates docs/plans/NN-<feature>.md
               │
               ▼
-    2. /audit-plan ───► Evaluates against AGENTS.md, PRD, DESIGN.md (Pass/Fail)
+    2. /audit-plan ───► Evaluates against AGENTS.md, PRD, DESIGN.md & shadcn mapping (Pass/Fail)
               │
               ▼ (Once Approved by Pilot)
     3. /execute-plan ──► Executes layer-by-layer (TDD: types -> db -> serverFn -> ui -> tests)
@@ -132,10 +155,10 @@ Team members work on isolated feature slices (route + server function + colocate
     4. Quality Gates ──► Tests -> ESLint -> Typecheck -> Build -> Commit / PR
 ```
 
-- **/write-plan:** Drafts implementation plans with Mermaid sequence diagrams, Zod schemas, PostGIS queries, server functions, and Bun tests.
-- **/audit-plan:** Read-only audit evaluating plans against PRD, AGENTS.md rules, DESIGN.md, and WIA competition rubric.
-- **/execute-plan:** Executes approved plans layer-by-layer, strictly following TDD and quality gates.
-- **`bahasa-skills` (`bahasa-inti` & `bahasa-website`):** Mandatorily loaded before drafting any UI copy to ensure professional, natural Indonesian without AI-slop.
+- **/write-plan:** Drafts implementation plans with Mermaid sequence diagrams, Zod schemas, PostGIS queries, server functions, explicit **shadcn Base UI component manifests** verified against `docs/shadcn/components/base/`, and Bun tests.
+- **/audit-plan:** Read-only audit evaluating plans against PRD, AGENTS.md rules (including Rule 16 shadcn reuse), DESIGN.md, and WIA competition rubric.
+- **/execute-plan:** Executes approved plans layer-by-layer, strictly verifying component manifests, utilizing existing `src/components/ui/` primitives, and following TDD & quality gates.
+- **`bahasa-skills` (`bahasa-inti`, `bahasa-website`, `bahasa-seo`):** Mandatorily loaded before drafting any UI copy, meta tags, or public content to ensure professional, natural Indonesian without AI-slop and optimized search semantics.
 - **/grill-me:** Interactive interview to stress-test ideas and resolve design decisions with the Pilot before implementation.
 
 ---
@@ -233,6 +256,7 @@ bun run generate-routes  # Generate TanStack Router route tree
 bun run db:generate      # Generate Drizzle migration files from schema
 bun run db:push          # Push schema directly to dev Neon DB (prototyping)
 bun run db:migrate       # Apply pending migrations
+bun run db:seed          # Seed realistic fire reports & hotspots for testing
 bun run db:studio        # Open Drizzle Studio visual GUI
 
 # Code Quality & Formatting (ESLint & Prettier)

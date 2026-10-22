@@ -31,13 +31,10 @@ Before touching any code:
    Open the target plan file and ensure it does not contain a blocking status.
 2. **Verify Dependencies:**
    Confirm all plans listed in the plan's `Dependencies` section are implemented.
-3. **Verify Git Branch:**
-   Ensure working directory is clean:
+3. **Verify Git Branch (MANDATORY Branching):**
+   Ensure working directory is clean and **never** work directly on `main`:
    ```bash
    git status
-   ```
-   Create and switch to feature branch if appropriate:
-   ```bash
    git checkout -b feat/<plan-name>
    ```
 
@@ -63,20 +60,24 @@ Execute the plan strictly in this layer order. Never skip layers or jump ahead t
 
 ### Layer 3: Server Functions & Services (`src/server/functions/`, `src/server/services/`)
 - Implement `createServerFn` with strict `.validator()` using Zod schemas.
+- Ensure Edge runtime compatibility (`workerd`): zero Node.js native APIs (`fs`, `path`, etc.), Web Standards only (Rule 17).
+- Isolate server secrets and validate via `src/server/env.ts`; never expose secrets to browser (Rule 18).
 - Implement PostGIS spatial deduplication queries (`ST_DWithin` within 2 km and 4 hours).
 - Implement Cloudflare R2 presigned URL generation.
 - Implement NASA FIRMS API ingestion with 6-hour cache in Neon PostGIS.
 - Write unit/integration tests for server functions using mock context.
 
 ### Layer 4: UI Components & Routes (`src/components/`, `src/routes/`)
-- **MANDATORY PRE-REQUISITE:** Load and review `bahasa-skills` (`.agents/skills/bahasa-inti/` and `bahasa-website/`) before drafting any user-facing text, button labels, form placeholders, error notices, or empty states. Ensure zero AI slop, no em-dash styling, and natural Indonesian phrasing.
-- Implement UI components using shadcn/ui with Base UI primitives (`@base-ui/react`) and `DESIGN.md` OKLCH tokens.
+- **MANDATORY PRE-REQUISITE 1 (Indonesian Copy & SEO):** Load and review `bahasa-skills` (`.agents/skills/bahasa-inti/`, `bahasa-website/`, and `bahasa-seo/`) before drafting any user-facing text, button labels, form placeholders, error notices, empty states, or public route copy/meta tags. Ensure zero AI slop, no em-dash styling, clear UX microcopy, and search-optimized semantics.
+- **MANDATORY PRE-REQUISITE 2 (Shadcn Component Verification - Rule 16):** Cross-check the plan's component manifest against `src/components/ui/`. If any required primitive is missing, check `docs/shadcn/components/base/<component>.md` and install it using `npx shadcn@latest add <component>` before writing domain UI.
+- Implement UI components strictly composing shadcn/ui with Base UI primitives (`@base-ui/react`) and `DESIGN.md` OKLCH tokens.
+- **Zero Synthetic Primitives & Maximize Reuse:** Never roll custom modal containers, select popovers, or custom buttons from scratch; maximize reuse of `src/components/ui/` to keep the codebase clean, robust, and concise.
 - Never use color gradients, emojis in system text, or native `<a>`/`<img>` elements.
-- Implement interactive forms using TanStack Form (photo upload is mandatory).
+- Implement interactive forms using TanStack Form with mandatory client-side photo pre-compression (Rule 20) and interactive manual map pin fallback for geolocation (Rule 5).
 - Implement map visualizers with MapLibre GL (dual-layer support).
 - Colocate domain components in `src/components/` and route files in `src/routes/`.
 - Ensure mobile-first responsive overlays (<768px Drawer / ≥768px Dialog).
-- Ensure loading skeletons, error boundaries, and empty states.
+- **Route Resilience (Rule 19):** Ensure every route defines an explicit `pendingComponent` (Base UI skeleton) and `errorComponent` (human-centered recovery UI with retry action). Zero white screens.
 
 ---
 
@@ -101,11 +102,26 @@ bun run build
 
 ---
 
-## Step 3 — Commit Changes
+## Step 3 — Commit, Push & Open Pull Request
 
-Commit cleanly using Conventional Commits:
+1. **Commit Cleanly (Conventional Commits):**
+   ```bash
+   git add .
+   git commit -m "feat(<scope>): <description of changes from plan>"
+   ```
 
-```bash
-git add .
-git commit -m "feat(<scope>): <description of changes from plan>"
-```
+2. **Rebase Against Main:**
+   ```bash
+   git pull --rebase origin main
+   ```
+
+3. **Push to Remote & Open Pull Request:**
+   ```bash
+   git push -u origin feat/<plan-name>
+   gh pr create --title "feat(<scope>): <description>" --body "<summary of changes and quality gates>"
+   ```
+
+> [!CAUTION]
+> **ZERO LOCAL MERGES TO MAIN:**  
+> Never run `git merge` or merge feature branches into `main` locally on your machine.  
+> Merging to `main` is strictly executed remotely via Pull Request review on GitHub.

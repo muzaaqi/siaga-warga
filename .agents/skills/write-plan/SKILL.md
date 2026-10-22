@@ -32,10 +32,11 @@ Create a detailed, actionable, and rigorously architected implementation plan fi
 Read all of the following core documents before writing any plan content:
 
 1. **`PRD.md`** → The source of truth for product requirements, validation layers, PostGIS schema, status state machine, and user flows.
-2. **`AGENTS.md`** → The technical operating manual for architecture rules (server functions, direct R2 presigned URLs, zero PII leakage, PostGIS spatial queries, Bun commands, code conventions, team anti-conflict rules).
+2. **`AGENTS.md`** → The technical operating manual for architecture rules (Rules 1-20: server functions, direct R2 presigned URLs, zero PII leakage, PostGIS spatial queries, Base UI, Edge runtime compatibility, secret isolation, route resilience, client photo pre-compression, Bun commands, code conventions, team anti-conflict rules).
 3. **`DESIGN.md`** → Design tokens (OKLCH, zero gradients, zero emojis), semantic color mappings, emergency visual hierarchy, mobile-first layouts, and typography.
-4. **`bahasa-skills` (`.agents/skills/bahasa-inti/` & `bahasa-website/`)** → **MANDATORY:** Must be loaded before writing any UI text, button labels, form placeholders, error notices, or empty states. All Indonesian copy must be free of AI slop and strictly follow natural, human phrasing.
+4. **`bahasa-skills` (`.agents/skills/bahasa-inti/`, `bahasa-website/`, `bahasa-seo/`)** → **MANDATORY:** Must be loaded before writing any UI text, button labels, form placeholders, error notices, empty states, or public landing content. Verify zero AI slop (`bahasa-inti`), clear UX microcopy (`bahasa-website`), and search/semantic heading optimization (`bahasa-seo`).
 5. **Existing Plans in `docs/plans/`** → Ensure sequence numbers and dependencies are properly resolved.
+6. **Shadcn Base UI Documentation (`docs/shadcn/components/base/`) & Existing Primitives (`src/components/ui/`)** → **MANDATORY:** Check local component documentation and installed UI primitives before designing any UI. Eliminates hallucination, prevents reinventing existing primitives, and keeps codebase concise.
 
 ---
 
@@ -107,6 +108,16 @@ Include exact error handling and rate-limiting behavior.
 ## 5. UI/UX Design & Microcopy Specification (DESIGN.md & bahasa-skills)
 - **Surface Mode:** Persuade (Landing) / Operate (Form & Admin) / Experience (Tracking)
 - **Key Components:** shadcn/ui Base UI primitives, responsive overlays (`responsive-overlay.tsx`), dual-layer map.
+
+### 5.1 Shadcn Component Mapping & Verification (Rule 16)
+> *Audit against `docs/shadcn/components/base/` and `src/components/ui/` to eliminate hallucination, maximize reuse, and keep the codebase lean.*
+
+| UI Feature / Element | Shadcn Component (`docs/shadcn/components/base/`) | Status in `src/components/ui/` | Variants / Modifiers / Props |
+| -------------------- | ------------------------------------------------- | ------------------------------ | ---------------------------- |
+| e.g. Action Button   | `button.md` (`Button`)                            | Available / Needs Add          | Variant `default`, Size `lg` |
+| e.g. Safety Alert    | `alert.md` (`Alert`, `AlertDescription`)          | Needs Add                      | Variant `destructive`        |
+| e.g. Photo Guidelines| `drawer.md` / `dialog.md` (`ResponsiveOverlay`)   | Available                      | Mobile Drawer, Desktop Dialog|
+
 - **States:** Loading skeletons, empty states, error boundaries, mobile responsiveness (<768px vs ≥768px).
 - **Safety Disclaimers:** Visible emergency 112/113 banners and photo safety warnings.
 - **Microcopy & UI Text (bahasa-skills verified):** List exact button labels, form placeholders, and status text. Verify zero AI-slop, no em-dash styling, zero emojis, and human phrasing.
@@ -134,4 +145,8 @@ Before saving the plan into `docs/plans/`:
 2. Check that direct uploads use Cloudflare R2 presigned URLs.
 3. Check that no client-side code directly queries the database or exposes secret tokens.
 4. Check that personal identifiable information (PII) of citizens is shielded on public endpoints.
-5. Check that all Indonesian copy has been audited against `bahasa-inti` and `bahasa-website`.
+5. Check that all Indonesian copy has been audited against `bahasa-inti`, `bahasa-website`, and `bahasa-seo` (for public pages, headings, and meta tags).
+6. Check that all planned UI elements map to verified shadcn Base UI components from `docs/shadcn/components/base/` and reuse existing primitives from `src/components/ui/` without hallucinating custom components.
+7. Check that all server functions are compatible with Cloudflare Workers Edge runtime (zero Node.js native `fs`/`path` APIs, pure JS/TS dependencies).
+8. Check that server secrets are isolated and validated via `src/server/env.ts` with zero leakage to the client bundle.
+9. Check that route files specify `pendingComponent` (skeleton) and `errorComponent` (resilient error UI with retry action), and photo uploads include client-side pre-compression.

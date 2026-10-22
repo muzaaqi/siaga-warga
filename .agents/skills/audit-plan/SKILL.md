@@ -31,9 +31,10 @@ Perform a thorough, objective audit of an implementation plan in `docs/plans/` b
 Read the target plan file and cross-reference:
 1. **Target Plan:** `docs/plans/NN-<feature-name>.md`
 2. **`PRD.md`:** Feature scope, status state machine, PostGIS spatial deduplication rules, NASA FIRMS logic.
-3. **`AGENTS.md`:** Architecture rules (Rules 1-15: ServerFn only, PostGIS spatial queries, direct R2 presigned URLs, mandatory photo, zero PII leakage, Bun commands, ESLint, team conflict rules).
+3. **`AGENTS.md`:** Architecture rules (Rules 1-20: ServerFn only, PostGIS spatial queries, direct R2 presigned URLs, mandatory photo, zero PII leakage, Bun commands, ESLint, shadcn component verification, Edge runtime, secret isolation, route resilience, client photo compression, team conflict rules).
 4. **`DESIGN.md`:** Design tokens (OKLCH, zero gradients, zero emojis), Base UI primitives, responsive drawer/dialog overlays, emergency disclaimers.
-5. **`bahasa-skills` (`.agents/skills/bahasa-inti/` & `bahasa-website/`):** Quality standards for Indonesian UX microcopy, anti-slop rules, no em-dash styling, and human-centered wording.
+5. **`bahasa-skills` (`.agents/skills/bahasa-inti/`, `bahasa-website/`, `bahasa-seo/`):** Quality standards for Indonesian UX microcopy, anti-slop rules, search intent, and human-centered wording.
+6. **`docs/shadcn/components/base/` & `src/components/ui/`:** Local shadcn documentation and installed UI primitives.
 
 ---
 
@@ -53,19 +54,23 @@ Evaluate the target plan across these 6 dimensions:
 - [ ] Database tables follow modular Drizzle schemas in `src/server/db/schema/` (avoiding mono-schema collisions).
 - [ ] `src/routeTree.gen.ts` is omitted from the implementation file list (strictly gitignored).
 - [ ] TanStack Query keys are cleanly declared with explicit invalidation rules on mutation.
+- [ ] **Edge Runtime Compatibility (Rule 17):** Server functions and services are pure JS/TS compatible with Cloudflare Workers runtime (`workerd`); zero imports of Node.js native packages (`fs`, `path`, etc.).
+- [ ] **Secret Isolation (Rule 18):** Server secrets are strictly accessed in `src/server/` and validated via `env.ts`. Zero server secrets imported in client code.
 
 ### Dimension 3 — UI/UX Design & shadcn Composition (DESIGN.md & bahasa-skills)
 - [ ] UI components strictly adhere to shadcn with **Base UI** primitives (not Radix UI).
+- [ ] **Shadcn Component Manifest & Reuse (Rule 16):** Plan provides an explicit mapping table of shadcn Base UI components verified against `docs/shadcn/components/base/`. Zero hallucinated synthetic primitives (no hand-rolled modal overlays, custom select dropdowns, or bespoke form controls). Codebase conciseness and component reuse are maximized.
 - [ ] Modal/Sheet surfaces use `responsive-overlay` (Drawer <768px, Dialog ≥768px).
 - [ ] Zero hardcoded hex colors; tokens from `DESIGN.md` use OKLCH and map to semantic variables.
 - [ ] Zero gradients and zero emojis in system UI text.
 - [ ] Prominent emergency disclaimer banner (112 / 113) and photo safety warning are included where appropriate.
-- [ ] Empty states, loading skeletons, and error boundaries are explicitly specified.
-- [ ] **Indonesian Language Audit (bahasa-skills):** All button copy, placeholders, status labels, and error messages comply with `bahasa-inti` and `bahasa-website` (zero AI slop like *hiruk pikuk* or *di era digital*, no decorative em dashes, and clear imperative action labels).
+- [ ] **Route Resilience (Rule 19):** Plan explicitly specifies `pendingComponent` (Base UI skeleton) and `errorComponent` (human-friendly recovery UI with retry action) for every route.
+- [ ] **Indonesian Language & SEO Audit (bahasa-skills):** All button copy, placeholders, status labels, error messages, and public headings/meta descriptions comply with `bahasa-inti`, `bahasa-website`, and `bahasa-seo` (zero AI slop like *hiruk pikuk* or *di era digital*, no decorative em dashes, clear imperative action labels, and optimized search semantics).
 
 ### Dimension 4 — Cybersecurity, Safety & PII Protection
 - [ ] **Zero PII Leakage:** Citizen reporter's phone number and exact residential GPS coordinates are never returned in public tracking endpoints (coordinates blurred/jittered to kelurahan level 500m–1km).
-- [ ] **File Upload Security:** Direct R2 uploads use presigned PUT URLs with content-type restriction and file size limits (max 5 MB).
+- [ ] **File Upload Security & Pre-Compression (Rule 20):** Direct R2 uploads use presigned PUT URLs with content-type restriction and client-side pre-compression (max 1600px, WebP/JPEG, ~500 KB–1 MB, hard capped at 5 MB).
+- [ ] **GPS Fallback (Rule 5):** Form includes manual map pin picker fallback if browser geolocation fails or returns coordinates outside Indonesian boundaries.
 - [ ] **Audit Trail Immutability:** Any moderator status modification logs into `report_status_history` with actor, timestamp, and mandatory `reason_note`.
 
 ### Dimension 5 — TDD Rigor & Testing Strategy
