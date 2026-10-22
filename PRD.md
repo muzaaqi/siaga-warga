@@ -1,4 +1,4 @@
-# 📄 Product Requirements Document (PRD): SiagaWarga
+# Product Requirements Document (PRD): SiagaWarga
 
 > **Status:** Active / Approved v1.1  
 > **Tema Kompetisi:** _From Visionaries to Architects of Change_  

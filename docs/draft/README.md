@@ -1,10 +1,10 @@
-# 🔥 SiagaWarga — Platform Public Service Tracking & Verifikasi Laporan Kebakaran Berbasis Partisipasi Publik
+# SiagaWarga — Platform Public Service Tracking & Verifikasi Laporan Kebakaran Berbasis Partisipasi Publik
 
 > **SiagaWarga** adalah platform pemantauan dan pelaporan kebakaran hutan, lahan (karhutla), serta permukiman secara transparan dengan sistem verifikasi berjenjang, deduplikasi spasial, dan validasi silang data satelit aktif (NASA FIRMS) untuk menjembatani komunikasi masyarakat dan instansi tanggap darurat di Indonesia.
 
 ---
 
-## 📌 Ringkasan Proyek
+## Ringkasan Proyek
 
 | Informasi         | Keterangan                                            |
 | ----------------- | ----------------------------------------------------- |
@@ -16,7 +16,7 @@
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 Dibangun dengan arsitektur modern berbasis Edge Computing, _type-safety_ end-to-end, dan performa tinggi:
 
@@ -34,7 +34,7 @@ Dibangun dengan arsitektur modern berbasis Edge Computing, _type-safety_ end-to-
 
 ---
 
-## 💡 Nilai Utama & Pendekatan Validasi (Validation Approach)
+## Nilai Utama & Pendekatan Validasi (Validation Approach)
 
 Berbeda dari aplikasi pelaporan konvensional yang mengklaim status sepihak, SiagaWarga menerapkan prinsip **kejujuran sistem (system honesty)** dan **validasi 3-lapisan**:
 
@@ -67,7 +67,7 @@ Berbeda dari aplikasi pelaporan konvensional yang mengklaim status sepihak, Siag
 
 ---
 
-## 🛠️ Cara Menjalankan Project
+## Cara Menjalankan Project
 
 Ikuti langkah-langkah berikut untuk menjalankan project di lingkungan lokal:
 
@@ -134,25 +134,25 @@ bunx wrangler deploy
 
 ---
 
-## 📊 Progress Saat Ini (WIA 2026 Milestone)
+## Progress Saat Ini (WIA 2026 Milestone)
 
-| Komponen / Fitur                     | Status          | Catatan                                                           |
-| ------------------------------------ | --------------- | ----------------------------------------------------------------- |
-| **Riset & Problem Framing**          | ✅ Selesai      | Analisis subtema _Public Service Tracking_ & studi kasus karhutla |
-| **Dokumen Perancangan & PRD**        | ✅ Selesai      | PRD, arsitektur data multi-status, etika pelaporan warga          |
-| **Setup Project & Tooling**          | 🔄 Dalam Proses | Inisialisasi TanStack Start, Tailwind v4, & konfigurasi Wrangler  |
-| **Landing Page & Edukasi Warga**     | 🔄 Dalam Proses | Antarmuka responsif, panduan keselamatan darurat                  |
-| **Formulir Pelaporan Spasial**       | ⏳ Terjadwal    | TanStack Form + Zod + Geolocation Picker                          |
-| **Spatial Deduplication & PostGIS**  | ⏳ Terjadwal    | Query pendeteksi laporan klaster & radius                         |
-| **Integrasi NASA FIRMS Hotspot**     | ⏳ Terjadwal    | Ingestion API titik panas satelit real-time                       |
-| **Moderator Triage Dashboard**       | ⏳ Terjadwal    | Antrean triase prioritas & panel peninjauan bukti                 |
-| **Public Tracking & Audit Timeline** | ⏳ Terjadwal    | Peta insiden publik + transparansi status penanganan              |
+| Komponen / Fitur                     | Status       | Catatan                                                           |
+| ------------------------------------ | ------------ | ----------------------------------------------------------------- |
+| **Riset & Problem Framing**          | Selesai      | Analisis subtema _Public Service Tracking_ & studi kasus karhutla |
+| **Dokumen Perancangan & PRD**        | Selesai      | PRD, arsitektur data multi-status, etika pelaporan warga          |
+| **Setup Project & Tooling**          | Dalam Proses | Inisialisasi TanStack Start, Tailwind v4, & konfigurasi Wrangler  |
+| **Landing Page & Edukasi Warga**     | Dalam Proses | Antarmuka responsif, panduan keselamatan darurat                  |
+| **Formulir Pelaporan Spasial**       | Terjadwal    | TanStack Form + Zod + Geolocation Picker                          |
+| **Spatial Deduplication & PostGIS**  | Terjadwal    | Query pendeteksi laporan klaster & radius                         |
+| **Integrasi NASA FIRMS Hotspot**     | Terjadwal    | Ingestion API titik panas satelit real-time                       |
+| **Moderator Triage Dashboard**       | Terjadwal    | Antrean triase prioritas & panel peninjauan bukti                 |
+| **Public Tracking & Audit Timeline** | Terjadwal    | Peta insiden publik + transparansi status penanganan              |
 
 > Target **First Draft Submission (01 November 2026):** Landing page, alur dasar form pelaporan, dan dokumen PDF progress tim siap dikumpulkan.
 
 ---
 
-## 📁 Struktur Direktori (Direncanakan)
+## Struktur Direktori (Direncanakan)
 
 ```
 ON-FIRE/
@@ -189,7 +189,7 @@ ON-FIRE/
 
 ---
 
-## 👥 Tim Pengembang
+## Tim Pengembang
 
 Disusun oleh Tim Peserta **Web In Action (WIA) — Multimedia In Action 2026**:
 

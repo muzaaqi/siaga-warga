@@ -62,7 +62,7 @@ Evaluate the target plan across these 6 dimensions:
 - [ ] **Shadcn Component Manifest & Reuse (Rule 16):** Plan provides an explicit mapping table of shadcn Base UI components verified against `docs/shadcn/components/base/`. Zero hallucinated synthetic primitives (no hand-rolled modal overlays, custom select dropdowns, or bespoke form controls). Codebase conciseness and component reuse are maximized.
 - [ ] Modal/Sheet surfaces use `responsive-overlay` (Drawer <768px, Dialog ≥768px).
 - [ ] Zero hardcoded hex colors; tokens from `DESIGN.md` use OKLCH and map to semantic variables.
-- [ ] Zero gradients and zero emojis in system UI text.
+- [ ] Zero gradients, universal zero emoji policy across documentation and UI (Rule 14), and mandatory Lucide React icons (`*Icon`) in UI.
 - [ ] Prominent emergency disclaimer banner (112 / 113) and photo safety warning are included where appropriate.
 - [ ] **Route Resilience (Rule 19):** Plan explicitly specifies `pendingComponent` (Base UI skeleton) and `errorComponent` (human-friendly recovery UI with retry action) for every route.
 - [ ] **Indonesian Language & SEO Audit (bahasa-skills):** All button copy, placeholders, status labels, error messages, and public headings/meta descriptions comply with `bahasa-inti`, `bahasa-website`, and `bahasa-seo` (zero AI slop like *hiruk pikuk* or *di era digital*, no decorative em dashes, clear imperative action labels, and optimized search semantics).

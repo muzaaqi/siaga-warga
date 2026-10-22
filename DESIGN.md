@@ -20,8 +20,8 @@ SiagaWarga adopts a **Tactical Mission Control** design language: a high-density
    No decorative AI gradients (no purple-to-cyan or orange-to-magenta fades). All surfaces, borders, and accents use solid, deliberate, flat colors.
 3. **Zero Information Redundancy:**  
    Never repeat status labels or echo headers in subtitles. A status chip is not accompanied by a redundant text sentence repeating the same status.
-4. **Zero Emojis in System UI:**  
-   No emojis used as icons, bullet points, or badges in the interface. Visual meaning is communicated strictly via official Lucide React icons (`*Icon`) and semantic color tokens.
+4. **Universal Zero Emoji Policy & Strict Lucide Icons:**  
+   Emojis are strictly forbidden across the entire project, including all documentation (`README.md`, `PRD.md`, `docs/**/*.md`), code comments, and web interfaces. In the UI, visual meaning is communicated strictly via official Lucide React icons (`*Icon`) and semantic color tokens.
 5. **Tactical Precision Geometry:**  
    Corner radius scale is compact (`0.375rem` / 6px) to maximize screen estate for map layers, triage queues, and telemetry data tables.
 

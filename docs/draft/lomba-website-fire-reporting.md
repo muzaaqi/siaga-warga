@@ -1,4 +1,4 @@
-# 🏆 Panduan WIA — Web In Action, Multimedia In Action 2026
+# Panduan WIA — Web In Action, Multimedia In Action 2026
 
 > **Penyelenggara:** KSM Multimedia UPN Veteran Jakarta
 > **Tema:** _"From Visionaries to Architects of Change"_
@@ -35,22 +35,22 @@
 
 ## 2. Timeline Resmi yang Harus Dipatuhi
 
-| Fase                              | Tanggal              | Yang Harus Dilakukan Tim                         |
-| --------------------------------- | -------------------- | ------------------------------------------------ |
-| ~~Pendaftaran~~                   | ~~24 Sep – 16 Okt~~  | ✅ Sudah lewat                                   |
-| **Technical Meeting**             | 17 Oktober 2026      | Pastikan hadir, catat semua arahan               |
-| **Learn It: Mentoring**           | 18 Oktober 2026      | Hadir, catat feedback mentor, siapkan pertanyaan |
-| **🔨 Build It (Mulai hari ini!)** | **19 Okt – 01 Nov**  | Periode pengerjaan karya                         |
-| **First Draft Submission**        | **01 November 2026** | Kumpulkan draft + dokumen PDF (maks 10 hal)      |
-| **Review It: Feedback Mentor**    | 03 – 06 November     | Mentor evaluasi karya                            |
-| **Laporan Evaluasi**              | 07 November          | Terima feedback mentor                           |
-| **Consultation Session**          | 08 November          | Konsultasi terbatas — manfaatkan!                |
-| **Fix It: Revisi**                | 08 – 10 November     | Perbaikan berdasarkan feedback                   |
-| **Final Submission**              | **11 November 2026** | Kumpulkan karya final + video pitch YouTube      |
-| **Seleksi Finalis**               | 12 – 20 November     | Juri menilai, tim istirahat/prepare              |
-| **Pengumuman Finalis**            | 21 November          | 10 tim terbaik diumumkan                         |
-| **Mentoring Public Speaking**     | 22 November          | Wajib hadir jika lolos final                     |
-| **Final & Acara Puncak**          | **28 November 2026** | Pitching _onsite_, max 10 menit + 5 menit Q&A    |
+| Fase                           | Tanggal              | Yang Harus Dilakukan Tim                         |
+| ------------------------------ | -------------------- | ------------------------------------------------ |
+| ~~Pendaftaran~~                | ~~24 Sep – 16 Okt~~  | Sudah lewat                                      |
+| **Technical Meeting**          | 17 Oktober 2026      | Pastikan hadir, catat semua arahan               |
+| **Learn It: Mentoring**        | 18 Oktober 2026      | Hadir, catat feedback mentor, siapkan pertanyaan |
+| **Build It (Mulai hari ini!)** | **19 Okt – 01 Nov**  | Periode pengerjaan karya                         |
+| **First Draft Submission**     | **01 November 2026** | Kumpulkan draft + dokumen PDF (maks 10 hal)      |
+| **Review It: Feedback Mentor** | 03 – 06 November     | Mentor evaluasi karya                            |
+| **Laporan Evaluasi**           | 07 November          | Terima feedback mentor                           |
+| **Consultation Session**       | 08 November          | Konsultasi terbatas — manfaatkan!                |
+| **Fix It: Revisi**             | 08 – 10 November     | Perbaikan berdasarkan feedback                   |
+| **Final Submission**           | **11 November 2026** | Kumpulkan karya final + video pitch YouTube      |
+| **Seleksi Finalis**            | 12 – 20 November     | Juri menilai, tim istirahat/prepare              |
+| **Pengumuman Finalis**         | 21 November          | 10 tim terbaik diumumkan                         |
+| **Mentoring Public Speaking**  | 22 November          | Wajib hadir jika lolos final                     |
+| **Final & Acara Puncak**       | **28 November 2026** | Pitching _onsite_, max 10 menit + 5 menit Q&A    |
 
 > [!WARNING]
 > Saat ini **19 Oktober** — Build It baru mulai hari ini. Hanya ada **13 hari** hingga First Draft Submission (1 November). Bagi waktu dengan ketat!
@@ -129,24 +129,24 @@ Konten wajib:
 Fitur yang **WAJIB berjalan sempurna** saat demo:
 
 ```
-✅ 1. Form Pelaporan Kebakaran
+1. Form Pelaporan Kebakaran
    ├── Input lokasi (manual/GPS)
    ├── Upload foto
    ├── Pilihan tingkat keparahan
    └── Nomor kontak pelapor
 
-✅ 2. Tracking Status Laporan
+2. Tracking Status Laporan
    └── Laporan Masuk → Diverifikasi → Petugas Dikirim → Selesai
 
-✅ 3. Halaman Publik / Dashboard
+3. Halaman Publik / Dashboard
    ├── Daftar laporan aktif
    └── Status masing-masing laporan
 
-✅ 4. Admin Panel (Operator Damkar)
+4. Admin Panel (Operator Damkar)
    ├── Lihat laporan masuk
    └── Update status laporan
 
-✅ 5. Responsif Mobile + Desktop
+5. Responsif Mobile + Desktop
    └── Test di Chrome DevTools minimal 375px & 1440px
 ```
 
@@ -163,11 +163,11 @@ Fitur yang **WAJIB berjalan sempurna** saat demo:
 ### Konten & Informasi (20%) — Jangan Sepelekan
 
 ```
-📝 Semua teks dalam Bahasa Indonesia yang baik dan benar
-📝 Data statistik kebakaran nyata (dari BPS/BNPB)
-📝 Foto tidak lorem ipsum — gunakan foto relevan (Unsplash)
-📝 FAQ / Panduan penggunaan website
-📝 Halaman "Tentang" yang menjelaskan misi platform
+Semua teks dalam Bahasa Indonesia yang baik dan benar
+Data statistik kebakaran nyata (dari BPS/BNPB)
+Foto tidak lorem ipsum — gunakan foto relevan (Unsplash)
+FAQ / Panduan penggunaan website
+Halaman "Tentang" yang menjelaskan misi platform
 ```
 
 ### Kesesuaian Tema — Public Service Tracking (15%)
@@ -184,11 +184,11 @@ Pastikan website secara eksplisit menunjukkan:
 
 ```mermaid
 flowchart LR
-    A["19-20 Okt\n🎨 Desain\nWireframe UI\nSetup project & DB"] --> B["21-23 Okt\n🔨 Core Features\nForm laporan\nTracking status\nHalaman publik"]
-    B --> C["24-26 Okt\n🗺️ Peta & Admin\nAdmin panel\nPeta interaktif\nDashboard statistik"]
-    C --> D["27-28 Okt\n💄 Polish UI\nResponsif mobile\nData dummy realistis"]
-    D --> E["29-31 Okt\n🐛 Testing & Fix\nCross-browser\nBug fixing"]
-    E --> F["01 Nov\n📦 Submit\nFirst Draft\n+ Dokumen PDF"]
+    A["19-20 Okt\nDesain\nWireframe UI\nSetup project & DB"] --> B["21-23 Okt\nCore Features\nForm laporan\nTracking status\nHalaman publik"]
+    B --> C["24-26 Okt\nPeta & Admin\nAdmin panel\nPeta interaktif\nDashboard statistik"]
+    C --> D["27-28 Okt\nPolish UI\nResponsif mobile\nData dummy realistis"]
+    D --> E["29-31 Okt\nTesting & Fix\nCross-browser\nBug fixing"]
+    E --> F["01 Nov\nSubmit\nFirst Draft\n+ Dokumen PDF"]
 ```
 
 ---

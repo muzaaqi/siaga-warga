@@ -1,4 +1,4 @@
-# 📄 Product Requirements Document (PRD): SiagaWarga
+# Product Requirements Document (PRD): SiagaWarga
 
 > **Status:** Draft v1.0 (Untuk Pengembangan Web In Action 2026)  
 > **Tema Kompetisi:** _From Visionaries to Architects of Change_  

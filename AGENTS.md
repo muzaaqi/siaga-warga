@@ -114,8 +114,8 @@ Team members work on isolated feature slices (route + server function + colocate
     All modal dialogs must use `src/components/ui/responsive-overlay.tsx` (Drawer <768px, Dialog ≥768px).
 13. **Rule 13 — Zero Gradients & Zero Information Redundancy:**  
     No decorative AI color gradients. Colors are solid, flat, and intentional. No duplicate status badges or echoing headers.
-14. **Rule 14 — Zero Emojis in System Copy & Strict Lucide Icons:**  
-    Do not use emojis as icons or bullet points in UI text. Use official Lucide React icons (`*Icon`).
+14. **Rule 14 — Universal Zero Emoji Policy & Strict Lucide Icons:**  
+    Emojis are strictly prohibited anywhere across the entire repository — including all documentation (`README.md`, `PRD.md`, `DESIGN.md`, `docs/**/*.md`), code comments, commit messages, and PR templates. In the web UI, never use emojis as icons, bullet points, or status indicators; **always use official Lucide React icons (`*Icon`)**.
 15. **Rule 15 — Mandatory `bahasa-skills` Loading for UI Copy & Public Content:**  
     Before creating or modifying any user-facing text, button labels, form placeholders, error notices, empty states, or public content, the agent **MUST** load and apply:
     - **`bahasa-inti` (`.agents/skills/bahasa-inti/`):** Core anti-slop rules, no em-dash styling, no "di era digital", no cliché tripels, natural human-centered tone.

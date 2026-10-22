@@ -72,7 +72,7 @@ Execute the plan strictly in this layer order. Never skip layers or jump ahead t
 - **MANDATORY PRE-REQUISITE 2 (Shadcn Component Verification - Rule 16):** Cross-check the plan's component manifest against `src/components/ui/`. If any required primitive is missing, check `docs/shadcn/components/base/<component>.md` and install it using `npx shadcn@latest add <component>` before writing domain UI.
 - Implement UI components strictly composing shadcn/ui with Base UI primitives (`@base-ui/react`) and `DESIGN.md` OKLCH tokens.
 - **Zero Synthetic Primitives & Maximize Reuse:** Never roll custom modal containers, select popovers, or custom buttons from scratch; maximize reuse of `src/components/ui/` to keep the codebase clean, robust, and concise.
-- Never use color gradients, emojis in system text, or native `<a>`/`<img>` elements.
+- Never use color gradients, zero emojis anywhere (Rule 14, mandatory Lucide React icons in UI), and no native `<a>`/`<img>` elements.
 - Implement interactive forms using TanStack Form with mandatory client-side photo pre-compression (Rule 20) and interactive manual map pin fallback for geolocation (Rule 5).
 - Implement map visualizers with MapLibre GL (dual-layer support).
 - Colocate domain components in `src/components/` and route files in `src/routes/`.

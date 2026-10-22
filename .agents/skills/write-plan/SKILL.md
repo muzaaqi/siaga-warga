@@ -120,7 +120,7 @@ Include exact error handling and rate-limiting behavior.
 
 - **States:** Loading skeletons, empty states, error boundaries, mobile responsiveness (<768px vs ≥768px).
 - **Safety Disclaimers:** Visible emergency 112/113 banners and photo safety warnings.
-- **Microcopy & UI Text (bahasa-skills verified):** List exact button labels, form placeholders, and status text. Verify zero AI-slop, no em-dash styling, zero emojis, and human phrasing.
+- **Microcopy & UI Text (bahasa-skills verified):** List exact button labels, form placeholders, and status text. Verify zero AI-slop, no em-dash styling, universal zero emoji policy (Rule 14), mandatory Lucide React icons in UI, and human phrasing.
 
 ## 6. Implementation File List
 - **New Files:** Path and purpose (respecting modular Drizzle schemas and vertical slicing)

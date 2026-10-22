@@ -24,7 +24,7 @@
 - [ ] Seluruh modifikasi komponen dilakukan di `src/components/ui/` (@shadcn/lint enforced, Rule 11).
 - [ ] Modal/Sheet menggunakan `responsive-overlay.tsx` (Drawer <768px, Dialog ≥768px, Rule 12).
 - [ ] Warna solid flat OKLCH dari `DESIGN.md`; zero gradients (Rule 13).
-- [ ] Zero emojis di UI; hanya menggunakan Lucide React icons `*Icon` (Rule 14).
+- [ ] **Universal Zero Emoji Policy (Rule 14):** Bebas dari emoji di seluruh dokumentasi, kode, dan UI. UI wajib menggunakan Lucide React icons (`*Icon`).
 - [ ] **Manifest Komponen Shadcn Terverifikasi (Rule 16):** Komponen diperiksa dari `docs/shadcn/components/base/` dan `src/components/ui/`. Tidak ada primitif buatan sendiri (synthetic primitives).
 
 ### 3. Mutu Bahasa & UX Copy (Rule 15)
