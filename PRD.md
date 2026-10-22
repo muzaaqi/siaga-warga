@@ -74,7 +74,7 @@ mindmap
 
 ### 4.2 User Journey Ringkas
 
-1. **Warga Saksi:** Mengakses web $\rightarrow$ Membaca instruksi keselamatan $\rightarrow$ Menandai lokasi di peta $\rightarrow$ Mengunggah foto (opsional via R2 Signed URL) $\rightarrow$ Submit $\rightarrow$ Memperoleh ID Laporan & Link Tracking.
+1. **Warga Saksi:** Mengakses web $\rightarrow$ Membaca instruksi keselamatan $\rightarrow$ Menandai lokasi di peta $\rightarrow$ Mengunggah minimal 1 foto bukti (wajib, via R2 Signed URL, dari jarak aman) $\rightarrow$ Submit $\rightarrow$ Memperoleh ID Laporan & Link Tracking.
 2. **Mesin Triase Otomatis:** Memeriksa batasan wilayah Indonesia $\rightarrow$ Cek duplikat spasial (PostGIS) $\rightarrow$ Cek hotspot satelit NASA FIRMS $\rightarrow$ Menentukan prioritas antrean.
 3. **Moderator:** Membuka antrean prioritas tinggi $\rightarrow$ Meninjau konsistensi foto & data satelit $\rightarrow$ Memberikan status verifikasi beserta catatan alasan.
 4. **Publik & Warga Sekitar:** Membuka peta interaktif publik $\rightarrow$ Melihat klaster insiden aktif $\rightarrow$ Membaca linimasa tindak lanjut resmi.
@@ -112,7 +112,7 @@ flowchart LR
   - `observed_at` tidak boleh berada di masa depan dan tidak lebih lampau dari 7 hari.
   - Deskripsi minimal 15 karakter, sanitasi terhadap tag berbahaya (XSS-safe).
 - **Integritas Bukti Media & Direct Upload:**
-  - Foto bersifat **opsional** (tidak memaksa warga mendekat ke api demi mengambil foto).
+  - Foto bersifat **wajib** (minimal 1 berkas) untuk menekan spam. Warga mengambil foto dari jarak aman dan lokasi terlindung; sistem tidak meminta warga mendekati titik api. Kompresi client-side maks 5 MB (WebP/JPEG). Zona upload menampilkan peringatan: _"Ambil foto dari jarak aman dan lokasi terlindung! Dilarang mendekati titik api aktif demi mengambil dokumentasi."_ (selaras dengan AGENTS.md Rule 4 dan DESIGN.md).
   - **Direct Presigned URL ke Cloudflare R2:** Browser meminta signed PUT URL ke server function TanStack Start, lalu mengunggah berkas langsung ke R2. Ini menghemat memori dan batas CPU waktu eksekusi Cloudflare Workers saat memproses foto berukuran besar.
   - Pemeriksaan hashing (SHA-256) pada file gambar untuk mendeteksi _re-upload_ foto identik dari akun berbeda.
   - Ekstraksi metadata waktu (`DateTimeOriginal` via `exifr` di sisi client sebelum upload) untuk membandingkan timestamp kamera dengan waktu pengamatan yang diklaim.
