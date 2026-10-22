@@ -1,6 +1,6 @@
 ---
 name: execute-plan
-description: Execute an approved implementation plan file in docs/plans/ for SiagaWarga. Enforces strict layer-by-layer TDD execution (Zod schemas -> PostGIS Drizzle models -> Server functions -> UI components -> Tests), commits per layer, and enforces all 4 quality gates (Tests, Biome, Typecheck, Build).
+description: Execute an approved implementation plan file in docs/plans/ for SiagaWarga. Enforces strict layer-by-layer TDD execution (Zod schemas -> PostGIS Drizzle models -> Server functions -> UI components -> Tests), commits per layer, and enforces all 4 quality gates (Tests, ESLint, Typecheck, Build).
 argument-hint: "<path to plan file, e.g. docs/plans/02-report-form-and-r2.md>"
 ---
 

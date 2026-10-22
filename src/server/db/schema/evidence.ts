@@ -1,5 +1,5 @@
 import {
-  doublePrecision,
+  integer,
   pgTable,
   text,
   timestamp,
@@ -8,21 +8,21 @@ import {
 } from 'drizzle-orm/pg-core'
 import { reports } from './reports'
 
-export const evidence = pgTable('evidence', {
+export const reportEvidence = pgTable('report_evidence', {
   id: uuid('id').defaultRandom().primaryKey(),
   reportId: uuid('report_id')
     .notNull()
     .references(() => reports.id, { onDelete: 'cascade' }),
-  mediaType: varchar('media_type', { length: 20 }).notNull().default('photo'), // 'photo' | 'video'
-  storageKey: text('storage_key').notNull(),
-  sha256Hash: varchar('sha256_hash', { length: 64 }),
-  exifTimestamp: timestamp('exif_timestamp', { withTimezone: true }),
-  exifLat: doublePrecision('exif_lat'),
-  exifLng: doublePrecision('exif_lng'),
+  r2ObjectKey: text('r2_object_key').notNull(),
+  mediaUrl: text('media_url').notNull(),
+  fileHashSha256: varchar('file_hash_sha256', { length: 64 }).notNull(),
+  exifCaptureTime: timestamp('exif_capture_time', { withTimezone: true }),
+  fileSizeBytes: integer('file_size_bytes').notNull(),
+  mimeType: varchar('mime_type', { length: 50 }).notNull(), // 'image/jpeg' | 'image/png' | 'image/webp'
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
 })
 
-export type Evidence = typeof evidence.$inferSelect
-export type NewEvidence = typeof evidence.$inferInsert
+export type ReportEvidence = typeof reportEvidence.$inferSelect
+export type NewReportEvidence = typeof reportEvidence.$inferInsert

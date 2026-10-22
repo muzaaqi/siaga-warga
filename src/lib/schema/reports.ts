@@ -1,57 +1,70 @@
 import { z } from 'zod'
 
-export const fireTypeEnum = z.enum([
+export const incidentTypeEnum = z.enum([
   'karhutla',
-  'residential',
-  'waste',
-  'industrial',
+  'permukiman',
+  'industri',
+  'lainnya',
 ])
 
 export const verificationStatusEnum = z.enum([
-  'unverified',
+  'pending',
   'needs_review',
   'verified',
+  'insufficient_evidence',
   'rejected',
 ])
 
-export const priorityEnum = z.enum(['low', 'medium', 'high', 'critical'])
+export const priorityEnum = z.enum(['high', 'normal', 'low'])
 
 export const handlingStatusEnum = z.enum([
-  'reported',
-  'assigned',
+  'not_forwarded',
+  'forwarded',
+  'acknowledged',
   'in_progress',
   'resolved',
-  'monitoring',
+  'unknown',
 ])
 
 export const createReportInputSchema = z.object({
-  fireType: fireTypeEnum,
+  incidentType: incidentTypeEnum,
   description: z
     .string()
-    .min(10, 'Deskripsi kejadian minimal 10 karakter')
+    .min(15, 'Deskripsi kejadian minimal 15 karakter agar informatif')
     .max(1000, 'Deskripsi kejadian maksimal 1000 karakter'),
-  landmarkNotes: z.string().max(255).optional(),
+  observedAt: z.string().datetime({
+    message: 'Waktu kejadian harus berupa format ISO datetime yang valid',
+  }),
+  latitude: z
+    .number()
+    .min(-11, 'Koordinat lintang di luar batas wilayah Indonesia')
+    .max(6, 'Koordinat lintang di luar batas wilayah Indonesia'),
+  longitude: z
+    .number()
+    .min(95, 'Koordinat bujur di luar batas wilayah Indonesia')
+    .max(141, 'Koordinat bujur di luar batas wilayah Indonesia'),
+  addressDisplay: z.string().max(255).optional(),
+
+  // Mandatory photo proof (Rule 4 & PRD 5.1)
+  r2ObjectKey: z.string().min(1, 'Foto bukti wajib diunggah'),
+  fileHashSha256: z
+    .string()
+    .length(64, 'Hash bukti foto tidak valid')
+    .optional(),
+  exifCaptureTime: z.string().optional(),
+
+  // Reporter info (Optional)
   reporterName: z.string().max(100).optional(),
   reporterPhone: z
     .string()
     .regex(/^(\+62|62|0)8[1-9][0-9]{6,10}$/, 'Nomor telepon tidak valid')
     .optional()
     .or(z.literal('')),
-  latitude: z
-    .number()
-    .min(-11, 'Koordinat lintang di luar wilayah Indonesia')
-    .max(6, 'Koordinat lintang di luar wilayah Indonesia'),
-  longitude: z
-    .number()
-    .min(95, 'Koordinat bujur di luar wilayah Indonesia')
-    .max(141, 'Koordinat bujur di luar wilayah Indonesia'),
-  storageKey: z.string().min(1, 'Foto bukti wajib diunggah'),
-  photoHash: z.string().length(64).optional(),
-  exifTimestamp: z.string().optional(),
+  isAnonymous: z.boolean().default(false),
 })
 
 export type CreateReportInput = z.infer<typeof createReportInputSchema>
-export type FireType = z.infer<typeof fireTypeEnum>
+export type IncidentType = z.infer<typeof incidentTypeEnum>
 export type VerificationStatus = z.infer<typeof verificationStatusEnum>
 export type Priority = z.infer<typeof priorityEnum>
 export type HandlingStatus = z.infer<typeof handlingStatusEnum>

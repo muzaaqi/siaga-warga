@@ -1,24 +1,30 @@
 import {
   doublePrecision,
+  geometry,
+  index,
   pgTable,
-  serial,
   timestamp,
+  uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
 
-export const hotspots = pgTable('satellite_hotspots', {
-  id: serial('id').primaryKey(),
-  latitude: doublePrecision('latitude').notNull(),
-  longitude: doublePrecision('longitude').notNull(),
-  brightness: doublePrecision('brightness'),
-  confidence: varchar('confidence', { length: 20 }),
-  satellite: varchar('satellite', { length: 20 }).notNull(), // 'VIIRS' | 'MODIS'
-  acqDate: varchar('acq_date', { length: 20 }).notNull(),
-  acqTime: varchar('acq_time', { length: 10 }).notNull(),
-  fetchedAt: timestamp('fetched_at', { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-})
+export const satelliteHotspots = pgTable(
+  'satellite_hotspots',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    source: varchar('source', { length: 20 }).notNull(), // 'VIIRS_SNPP', 'MODIS'
+    latitude: doublePrecision('latitude').notNull(),
+    longitude: doublePrecision('longitude').notNull(),
+    geom: geometry('geom', { type: 'point', srid: 4326 }),
+    brightness: doublePrecision('brightness'),
+    confidence: varchar('confidence', { length: 20 }),
+    acquiredAt: timestamp('acquired_at', { withTimezone: true }).notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index('idx_hotspots_geom').using('gist', table.geom)],
+)
 
-export type Hotspot = typeof hotspots.$inferSelect
-export type NewHotspot = typeof hotspots.$inferInsert
+export type SatelliteHotspot = typeof satelliteHotspots.$inferSelect
+export type NewSatelliteHotspot = typeof satelliteHotspots.$inferInsert

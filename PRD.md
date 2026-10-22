@@ -327,7 +327,7 @@ CREATE INDEX idx_hotspots_geom ON satellite_hotspots USING GIST (geom);
    - Deployed di Cloudflare Workers dengan SSR rendering TanStack Start. Target respons time awal < 100ms di wilayah Indonesia.
 2. **Keamanan & Validasi Input:**
    - Perlindungan CSRF pada mutasi formulir.
-   - Pembatasan ukuran file bukti (maksimal 5 MB per foto, hanya menerima `image/jpeg` dan `image/png`).
+   - Pembatasan ukuran file bukti (maksimal 5 MB per foto, format foto yang didukung: `image/jpeg`, `image/png`, dan `image/webp`).
    - Rate limiting pengiriman laporan per IP di level Cloudflare.
 3. **Aksesibilitas & Tampilan:**
    - Desain responsif (Mobile First, breakpoint 375px s/d 1440px).
