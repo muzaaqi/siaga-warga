@@ -143,36 +143,79 @@ Aplikasi akan berjalan di `http://localhost:3000`.
 
 ### 7. Deployment & Scripts
 
-#### Opsi A: Cloudflare Workers (Edge)
+SiagaWarga mendukung dua metode deployment produksi. Panduan langkah demi langkah yang lebih mendalam dapat dibaca pada [Panduan Deployment Lengkap](docs/guides/deployment.md).
 
-```bash
-bun run build        # Build produksi untuk Cloudflare Workers
-bun run deploy       # Deploy ke Cloudflare Workers via Wrangler
-```
+#### Opsi A: Cloudflare Workers (Edge Serverless)
+
+Deployment ke jaringan Edge Cloudflare Workers dengan latensi rendah dan auto-scaling global.
+
+1. **Autentikasi Wrangler**:
+
+   ```bash
+   bunx wrangler login
+   ```
+
+2. **Daftarkan Environment Secrets ke Cloudflare Workers**:
+
+   ```bash
+   bunx wrangler secret put DATABASE_URL
+   bunx wrangler secret put R2_ACCOUNT_ID
+   bunx wrangler secret put R2_ACCESS_KEY_ID
+   bunx wrangler secret put R2_SECRET_ACCESS_KEY
+   bunx wrangler secret put R2_BUCKET_NAME
+   bunx wrangler secret put R2_PUBLIC_URL
+   bunx wrangler secret put NASA_FIRMS_MAP_KEY
+   bunx wrangler secret put ADMIN_PASSCODE
+   bunx wrangler secret put SESSION_SECRET
+   ```
+
+3. **Build dan Deploy**:
+
+   ```bash
+   bun run build        # Build produksi untuk Cloudflare Workers
+   bun run deploy       # Deploy ke Cloudflare Workers via Wrangler
+   ```
+
+4. **Pantau Log Produksi**:
+   ```bash
+   bunx wrangler tail
+   ```
 
 #### Opsi B: Docker Container (Runtime Bun)
 
-SiagaWarga mendukung opsi deployment kontainer berbasis runtime **Bun** (`oven/bun:1-alpine`) dengan static asset preloading otomatis dan SSR handler:
+Deployment menggunakan kontainer Linux berbasis runtime native **Bun** (`oven/bun:1-alpine`) dengan static asset preloader otomatis, ETag, kompresi Gzip, dan penanganan graceful shutdown.
 
-```bash
-# Build Docker image
-docker build -t siagawarga .
+1. **Jalankan dengan Docker Compose (Direkomendasikan)**:
 
-# Jalankan kontainer
-docker run -p 3000:3000 --env-file .env siagawarga
+   ```bash
+   # Pastikan file .env telah diisi dengan benar
+   docker compose up -d --build
+   ```
 
-# Atau jalankan menggunakan Docker Compose
-docker compose up -d --build
-```
+2. **Pantau Status dan Log Kontainer**:
 
-Untuk menjalankan server produksi Bun secara langsung di mesin lokal:
+   ```bash
+   docker compose ps
+   docker compose logs -f app
+   ```
 
-```bash
-bun run build
-bun run start
-```
+3. **Atau Build dan Jalankan via Docker CLI**:
 
-#### Scripts Lainnya
+   ```bash
+   # Build image kontainer
+   docker build -t siagawarga .
+
+   # Jalankan kontainer
+   docker run -d --name siagawarga -p 3000:3000 --env-file .env --restart unless-stopped siagawarga
+   ```
+
+4. **Menjalankan Server Bun Produksi secara Lokal / Bare-Metal**:
+   ```bash
+   bun run build
+   bun run start       # Menjalankan server.ts pada port 3000
+   ```
+
+#### Scripts Utilitas Pengujian & Kualitas Kode
 
 ```bash
 bun run lint         # Jalankan ESLint & @shadcn/lint
@@ -229,7 +272,7 @@ ON-FIRE/
 │   └── styles.css                  # Tailwind CSS v4 styling & OKLCH tokens
 ├── drizzle/                        # Drizzle migrations generated via drizzle-kit
 ├── docs/                           # Dokumentasi & implementation plans
-│   ├── guides/                     # Guidebook resmi lomba
+│   ├── guides/                     # Guidebook resmi lomba & panduan deployment (deployment.md)
 │   └── plans/                      # Plan fitur terstruktur (NN-<feature>.md)
 ├── server.ts                       # Server HTTP produksi native Bun dengan asset preloader
 ├── Dockerfile                      # Multi-stage Docker build berbasis Alpine Bun

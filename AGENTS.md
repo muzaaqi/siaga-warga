@@ -177,9 +177,12 @@ ON-FIRE/
 ├── tsr.config.json                 # TanStack Router generator config
 ├── vite.config.ts                  # Vite config with TanStack Start & Cloudflare plugin
 ├── wrangler.jsonc                  # Cloudflare Workers & R2 deployment config
+├── server.ts                       # Native Bun production HTTP server with asset preloader
+├── Dockerfile                      # Multi-stage Docker build with Bun Alpine runtime
+├── docker-compose.yml              # Local and production Docker Compose orchestration
 │
 ├── docs/
-│   ├── guides/                     # WIA MIA 2026 Guidebook & Subtheme
+│   ├── guides/                     # WIA MIA 2026 Guidebook, Subtheme & Deployment Guide
 │   └── plans/                      # Feature implementation plans (NN-<name>.md)
 │
 ├── src/
