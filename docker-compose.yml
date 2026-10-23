@@ -1,0 +1,28 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: siagawarga:latest
+    container_name: siagawarga
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - R2_ACCOUNT_ID=${R2_ACCOUNT_ID}
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_BUCKET_NAME=${R2_BUCKET_NAME}
+      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
+      - NASA_FIRMS_MAP_KEY=${NASA_FIRMS_MAP_KEY}
+      - ADMIN_PASSCODE=${ADMIN_PASSCODE}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - VITE_PUBLIC_URL=${VITE_PUBLIC_URL}
+    env_file:
+      - path: .env
+        required: false
+      - path: .env.local
+        required: false

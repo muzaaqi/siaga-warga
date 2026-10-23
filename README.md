@@ -141,14 +141,44 @@ bun run dev
 
 Aplikasi akan berjalan di `http://localhost:3000`.
 
-### 7. Scripts Lainnya
+### 7. Deployment & Scripts
+
+#### Opsi A: Cloudflare Workers (Edge)
 
 ```bash
-bun run lint         # Jalankan ESLint
+bun run build        # Build produksi untuk Cloudflare Workers
+bun run deploy       # Deploy ke Cloudflare Workers via Wrangler
+```
+
+#### Opsi B: Docker Container (Runtime Bun)
+
+SiagaWarga mendukung opsi deployment kontainer berbasis runtime **Bun** (`oven/bun:1-alpine`) dengan static asset preloading otomatis dan SSR handler:
+
+```bash
+# Build Docker image
+docker build -t siagawarga .
+
+# Jalankan kontainer
+docker run -p 3000:3000 --env-file .env siagawarga
+
+# Atau jalankan menggunakan Docker Compose
+docker compose up -d --build
+```
+
+Untuk menjalankan server produksi Bun secara langsung di mesin lokal:
+
+```bash
+bun run build
+bun run start
+```
+
+#### Scripts Lainnya
+
+```bash
+bun run lint         # Jalankan ESLint & @shadcn/lint
 bun run typecheck    # Jalankan TypeScript strict check
 bun test             # Jalankan Bun test runner
-bun run build        # Build produksi untuk Cloudflare Workers
-bun run deploy       # Deploy ke Cloudflare Workers
+bun run format       # Format kode via Prettier & ESLint fix
 ```
 
 ---

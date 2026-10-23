@@ -33,7 +33,7 @@
 | **Database**           | **Neon PostgreSQL**                          | Serverless Postgres enabled with **PostGIS** extension                                                            |
 | **ORM & Migrations**   | **Drizzle ORM**                              | `drizzle-orm` + `drizzle-kit` via `@neondatabase/serverless`                                                      |
 | **Object Storage**     | **Cloudflare R2**                            | S3 API — Direct browser upload via **Presigned PUT URLs**                                                         |
-| **Hosting & Edge**     | **Cloudflare Workers**                       | `@cloudflare/vite-plugin` — Low latency Edge compute in Indonesia                                                 |
+| **Hosting & Edge**     | **Cloudflare Workers** & **Docker (Bun)**    | Cloudflare Workers (`@cloudflare/vite-plugin`) or Docker container (`oven/bun:1-alpine`)                          |
 | **Maps & Spatial**     | **MapLibre GL JS**                           | CARTO Positron vector tiles, GeoJSON clustering, dual-layer view                                                  |
 | **Satellite Hotspots** | **NASA FIRMS API**                           | Active fire data (VIIRS 375m & MODIS) with 6-hour PostGIS cache                                                   |
 | **Linter & Formatter** | **ESLint** + **@shadcn/lint** + **Prettier** | ESLint (TypeScript/React) + `@shadcn/lint` (design system enforcement) + Prettier (`prettier-plugin-tailwindcss`) |
@@ -274,7 +274,13 @@ bun test --watch         # Run tests in watch mode
 # Build & Deployment
 bun run build            # Production Vite build
 bun run preview          # Preview production build locally
+bun run start            # Run production Bun server (bun run server.ts)
 bun run deploy           # Deploy to Cloudflare Workers via Wrangler
+
+# Docker Deployment (Bun runtime)
+docker build -t siagawarga .                       # Build Docker image
+docker run -p 3000:3000 --env-file .env siagawarga # Run container
+docker compose up -d --build                       # Run via Docker Compose
 ```
 
 ---

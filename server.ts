@@ -1,0 +1,422 @@
+/**
+ * TanStack Start Production Server with Bun
+ *
+ * A high-performance production server for TanStack Start applications that
+ * implements intelligent static asset loading with configurable memory management.
+ *
+ * Features:
+ * - Hybrid loading strategy (preload small files, serve large files on-demand)
+ * - Configurable file filtering with include/exclude patterns
+ * - Memory-efficient response generation
+ * - Production-ready caching headers
+ * - Web standard fetch delegation to TanStack Start SSR handler
+ */
+
+import path from 'node:path'
+
+// Configuration
+const SERVER_PORT = Number(process.env.PORT ?? 3000)
+const CLIENT_DIRECTORY = './dist/client'
+
+// Logging utilities for clean standard output
+const log = {
+  info: (message: string) => {
+    console.log(`[INFO] ${message}`)
+  },
+  success: (message: string) => {
+    console.log(`[SUCCESS] ${message}`)
+  },
+  warning: (message: string) => {
+    console.log(`[WARNING] ${message}`)
+  },
+  error: (message: string) => {
+    console.log(`[ERROR] ${message}`)
+  },
+  header: (message: string) => {
+    console.log(`\n${message}\n`)
+  },
+}
+
+// Preloading configuration from environment variables
+const MAX_PRELOAD_BYTES = Number(
+  process.env.ASSET_PRELOAD_MAX_SIZE ?? 5 * 1024 * 1024, // 5MB default
+)
+
+// Helper: Convert glob to RegExp
+function convertGlobToRegExp(globPattern: string): RegExp {
+  const escapedPattern = globPattern
+    .replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&')
+    .replace(/\*/g, '.*')
+  return new RegExp(`^${escapedPattern}$`, 'i')
+}
+
+// Parse comma-separated include patterns (no defaults)
+const INCLUDE_PATTERNS = (process.env.ASSET_PRELOAD_INCLUDE_PATTERNS ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+  .map((pattern: string) => convertGlobToRegExp(pattern))
+
+// Parse comma-separated exclude patterns (no defaults)
+const EXCLUDE_PATTERNS = (process.env.ASSET_PRELOAD_EXCLUDE_PATTERNS ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+  .map((pattern: string) => convertGlobToRegExp(pattern))
+
+// Verbose logging flag
+const VERBOSE = process.env.ASSET_PRELOAD_VERBOSE_LOGGING === 'true'
+
+// Optional ETag feature
+const ENABLE_ETAG = (process.env.ASSET_PRELOAD_ENABLE_ETAG ?? 'true') === 'true'
+
+// Optional Gzip feature
+const ENABLE_GZIP = (process.env.ASSET_PRELOAD_ENABLE_GZIP ?? 'true') === 'true'
+const GZIP_MIN_BYTES = Number(process.env.ASSET_PRELOAD_GZIP_MIN_SIZE ?? 1024) // 1KB
+const GZIP_TYPES = (
+  process.env.ASSET_PRELOAD_GZIP_MIME_TYPES ??
+  'text/,application/javascript,application/json,application/xml,image/svg+xml'
+)
+  .split(',')
+  .map((v) => v.trim())
+  .filter(Boolean)
+
+/**
+ * Compute ETag for a given data buffer
+ */
+function computeEtag(data: Uint8Array): string {
+  const hash = Bun.hash(data)
+  return `W/"${hash.toString(16)}-${data.byteLength.toString()}"`
+}
+
+/**
+ * Metadata for preloaded static assets
+ */
+interface AssetMetadata {
+  route: string
+  size: number
+  type: string
+}
+
+/**
+ * In-memory asset with ETag and Gzip support
+ */
+interface InMemoryAsset {
+  raw: Uint8Array
+  gz?: Uint8Array
+  etag?: string
+  type: string
+  immutable: boolean
+  size: number
+}
+
+/**
+ * Result of static asset preloading process
+ */
+interface PreloadResult {
+  routes: Record<string, (req: Request) => Response | Promise<Response>>
+  loaded: AssetMetadata[]
+  skipped: AssetMetadata[]
+}
+
+/**
+ * Check if a file is eligible for preloading based on configured patterns
+ */
+function isFileEligibleForPreloading(relativePath: string): boolean {
+  const fileName = relativePath.split(/[/\\]/).pop() ?? relativePath
+
+  if (INCLUDE_PATTERNS.length > 0) {
+    if (!INCLUDE_PATTERNS.some((pattern) => pattern.test(fileName))) {
+      return false
+    }
+  }
+
+  if (EXCLUDE_PATTERNS.some((pattern) => pattern.test(fileName))) {
+    return false
+  }
+
+  return true
+}
+
+/**
+ * Check if a MIME type is compressible
+ */
+function isMimeTypeCompressible(mimeType: string): boolean {
+  return GZIP_TYPES.some((type) =>
+    type.endsWith('/') ? mimeType.startsWith(type) : mimeType === type,
+  )
+}
+
+/**
+ * Conditionally compress data based on size and MIME type
+ */
+function compressDataIfAppropriate(
+  data: Uint8Array,
+  mimeType: string,
+): Uint8Array | undefined {
+  if (!ENABLE_GZIP) return undefined
+  if (data.byteLength < GZIP_MIN_BYTES) return undefined
+  if (!isMimeTypeCompressible(mimeType)) return undefined
+  try {
+    return Bun.gzipSync(data.buffer as ArrayBuffer)
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Create response handler function with ETag and Gzip support
+ */
+function createResponseHandler(
+  asset: InMemoryAsset,
+): (req: Request) => Response {
+  return (req: Request) => {
+    const headers: Record<string, string> = {
+      'Content-Type': asset.type,
+      'Cache-Control': asset.immutable
+        ? 'public, max-age=31536000, immutable'
+        : 'public, max-age=3600',
+    }
+
+    if (ENABLE_ETAG && asset.etag) {
+      const ifNone = req.headers.get('if-none-match')
+      if (ifNone && ifNone === asset.etag) {
+        return new Response(null, {
+          status: 304,
+          headers: { ETag: asset.etag },
+        })
+      }
+      headers.ETag = asset.etag
+    }
+
+    if (
+      ENABLE_GZIP &&
+      asset.gz &&
+      req.headers.get('accept-encoding')?.includes('gzip')
+    ) {
+      headers['Content-Encoding'] = 'gzip'
+      headers['Content-Length'] = String(asset.gz.byteLength)
+      const gzCopy = new Uint8Array(asset.gz)
+      return new Response(gzCopy, { status: 200, headers })
+    }
+
+    headers['Content-Length'] = String(asset.raw.byteLength)
+    const rawCopy = new Uint8Array(asset.raw)
+    return new Response(rawCopy, { status: 200, headers })
+  }
+}
+
+/**
+ * Create composite glob pattern from include patterns
+ */
+function createCompositeGlobPattern(): Bun.Glob {
+  const raw = (process.env.ASSET_PRELOAD_INCLUDE_PATTERNS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (raw.length === 0) return new Bun.Glob('**/*')
+  if (raw.length === 1) return new Bun.Glob(raw[0])
+  return new Bun.Glob(`{${raw.join(',')}}`)
+}
+
+/**
+ * Initialize static routes with intelligent preloading strategy
+ */
+async function initializeStaticRoutes(
+  clientDirectory: string,
+): Promise<PreloadResult> {
+  const routes: Record<string, (req: Request) => Response | Promise<Response>> =
+    {}
+  const loaded: AssetMetadata[] = []
+  const skipped: AssetMetadata[] = []
+
+  log.info(`Loading static assets from ${clientDirectory}...`)
+  if (VERBOSE) {
+    console.log(
+      `Max preload size: ${(MAX_PRELOAD_BYTES / 1024 / 1024).toFixed(2)} MB`,
+    )
+    if (INCLUDE_PATTERNS.length > 0) {
+      console.log(
+        `Include patterns: ${process.env.ASSET_PRELOAD_INCLUDE_PATTERNS ?? ''}`,
+      )
+    }
+    if (EXCLUDE_PATTERNS.length > 0) {
+      console.log(
+        `Exclude patterns: ${process.env.ASSET_PRELOAD_EXCLUDE_PATTERNS ?? ''}`,
+      )
+    }
+  }
+
+  let totalPreloadedBytes = 0
+
+  try {
+    const glob = createCompositeGlobPattern()
+    for await (const relativePath of glob.scan({ cwd: clientDirectory })) {
+      const filepath = path.join(clientDirectory, relativePath)
+      const route = `/${relativePath.split(path.sep).join(path.posix.sep)}`
+
+      try {
+        const file = Bun.file(filepath)
+
+        if (!(await file.exists()) || file.size === 0) {
+          continue
+        }
+
+        const metadata: AssetMetadata = {
+          route,
+          size: file.size,
+          type: file.type || 'application/octet-stream',
+        }
+
+        const matchesPattern = isFileEligibleForPreloading(relativePath)
+        const withinSizeLimit = file.size <= MAX_PRELOAD_BYTES
+        const isImmutable =
+          relativePath.startsWith('assets/') ||
+          relativePath.startsWith('assets\\')
+
+        if (matchesPattern && withinSizeLimit) {
+          const bytes = new Uint8Array(await file.arrayBuffer())
+          const gz = compressDataIfAppropriate(bytes, metadata.type)
+          const etag = ENABLE_ETAG ? computeEtag(bytes) : undefined
+          const asset: InMemoryAsset = {
+            raw: bytes,
+            gz,
+            etag,
+            type: metadata.type,
+            immutable: isImmutable,
+            size: bytes.byteLength,
+          }
+          routes[route] = createResponseHandler(asset)
+
+          loaded.push({ ...metadata, size: bytes.byteLength })
+          totalPreloadedBytes += bytes.byteLength
+        } else {
+          routes[route] = () => {
+            const fileOnDemand = Bun.file(filepath)
+            return new Response(fileOnDemand, {
+              headers: {
+                'Content-Type': metadata.type,
+                'Cache-Control': isImmutable
+                  ? 'public, max-age=31536000, immutable'
+                  : 'public, max-age=3600',
+              },
+            })
+          }
+
+          skipped.push(metadata)
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name !== 'EISDIR') {
+          log.error(`Failed to load ${filepath}: ${error.message}`)
+        }
+      }
+    }
+
+    if (loaded.length > 0) {
+      log.success(
+        `Preloaded ${String(loaded.length)} files (${(totalPreloadedBytes / 1024 / 1024).toFixed(2)} MB) into memory`,
+      )
+    } else {
+      log.info('No files preloaded into memory')
+    }
+
+    if (skipped.length > 0) {
+      const tooLarge = skipped.filter((f) => f.size > MAX_PRELOAD_BYTES).length
+      const filtered = skipped.length - tooLarge
+      log.info(
+        `${String(skipped.length)} files will be served on-demand (${String(tooLarge)} too large, ${String(filtered)} filtered)`,
+      )
+    }
+  } catch (error) {
+    log.error(
+      `Failed to load static files from ${clientDirectory}: ${String(error)}`,
+    )
+  }
+
+  return { routes, loaded, skipped }
+}
+
+/**
+ * Locate server entry point
+ */
+async function resolveServerEntryPoint(): Promise<string> {
+  const candidatePaths = ['./dist/server/index.js', './dist/server/server.js']
+  for (const candidate of candidatePaths) {
+    if (await Bun.file(candidate).exists()) {
+      return candidate
+    }
+  }
+  return candidatePaths[0]
+}
+
+/**
+ * Initialize the server
+ */
+async function initializeServer() {
+  log.header('Starting SiagaWarga Production Server (Bun Runtime)')
+
+  const serverEntryPoint = await resolveServerEntryPoint()
+  log.info(`Using server entry point: ${serverEntryPoint}`)
+
+  // Load TanStack Start server handler
+  let handler: { fetch: (request: Request) => Response | Promise<Response> }
+  try {
+    const serverModule = (await import(serverEntryPoint)) as {
+      default: { fetch: (request: Request) => Response | Promise<Response> }
+    }
+    handler = serverModule.default
+    log.success('TanStack Start application handler initialized')
+  } catch (error) {
+    log.error(`Failed to load server handler: ${String(error)}`)
+    process.exit(1)
+  }
+
+  // Build static routes with intelligent preloading
+  const { routes } = await initializeStaticRoutes(CLIENT_DIRECTORY)
+
+  // Create Bun server
+  const server = Bun.serve({
+    port: SERVER_PORT,
+
+    routes: {
+      // Serve static assets (preloaded or on-demand)
+      ...routes,
+
+      // Fallback to TanStack Start handler for SSR and API requests
+      '/*': (req: Request) => {
+        try {
+          return handler.fetch(req)
+        } catch (error) {
+          log.error(`Server handler error: ${String(error)}`)
+          return new Response('Internal Server Error', { status: 500 })
+        }
+      },
+    },
+
+    // Global error handler
+    error(error) {
+      log.error(
+        `Uncaught server error: ${error instanceof Error ? error.message : String(error)}`,
+      )
+      return new Response('Internal Server Error', { status: 500 })
+    },
+  })
+
+  log.success(`Server listening on http://localhost:${String(server.port)}`)
+
+  // Graceful shutdown handlers
+  const shutdown = () => {
+    log.info('Received shutdown signal, stopping server...')
+    server.stop()
+    process.exit(0)
+  }
+
+  process.on('SIGTERM', shutdown)
+  process.on('SIGINT', shutdown)
+}
+
+// Initialize the server
+initializeServer().catch((error: unknown) => {
+  log.error(`Failed to start server: ${String(error)}`)
+  process.exit(1)
+})

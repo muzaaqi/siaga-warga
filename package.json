@@ -10,6 +10,7 @@
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
+    "start": "bun run server.ts",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "lint:design": "eslint --rule 'shadcn/no-restyle: error'",
