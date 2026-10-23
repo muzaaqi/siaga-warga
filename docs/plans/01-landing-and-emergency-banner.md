@@ -20,8 +20,8 @@
 - **PRD Section:** Bagian 4.3 (Sitemap & Hierarki Rute), Bagian 5.1 (FR-1: Portal Edukasi & Pengaduan Cepat), dan Bagian 6 (Arsitektur Keamanan Data).
 - **Preceding Plan Dependencies:** Tidak ada (*workspace setup*, skema basis data, dan *deployment harness* telah selesai).
 - **Target Route(s):**
-  - `/` (`src/routes/index.tsx`) — Halaman utama portal publik.
-  - Shell Rute Induk (`src/routes/__root.tsx`) — Pengaturan metadata SEO Bahasa Indonesia, tag HTML `lang="id"`, serta tata letak global.
+  - `/` (`src/routes/index.tsx`) — Halaman utama portal publik dengan *SSR loader*, *pending skeleton*, dan *error boundary*.
+  - Shell Rute Induk (`src/routes/__root.tsx`) — Pengaturan metadata SEO Bahasa Indonesia, tag HTML `lang="id"`, tata letak global, serta *inline script* hidrasi tema bebas FOUC.
 
 ---
 
@@ -40,7 +40,7 @@ sequenceDiagram
   participant DB as Neon PostgreSQL (PostGIS)
 
   Warga->>Browser: Akses rute "/"
-  Browser->>ServerFn: Eksekusi getLandingStats() via SSR
+  Browser->>ServerFn: Eksekusi getLandingStats() via SSR Loader
   ServerFn->>DB: Kueri agregasi laporan 24 jam & hotspot aktif
   DB-->>ServerFn: Data statistik (insiden aktif, verifikasi, hotspot)
   ServerFn-->>Browser: Respon JSON data telemetri
@@ -49,7 +49,7 @@ sequenceDiagram
 
 ### Use Case 2: Warga Melakukan Pelacakan Cepat Tiket Laporan
 
-Warga yang telah memiliki kode tiket (misal: `SW-2026-X89B`) memasukkan kode pada bilah pelacakan cepat di halaman utama.
+Warga yang telah memiliki kode tiket (misal: `SW-2026-X89B` atau mengetik huruf kecil `sw-2026-x89b`) memasukkan kode pada bilah pelacakan cepat di halaman utama.
 
 ```mermaid
 sequenceDiagram
@@ -59,12 +59,12 @@ sequenceDiagram
   participant Router as TanStack Router
 
   Warga->>Page: Ketik Kode Tracking & Klik "Lacak Status"
-  Page->>Page: Validasi format kode via Zod (quickTrackingSchema)
+  Page->>Page: Normalisasi huruf besar & validasi format via Zod (quickTrackingSchema)
   alt Format Valid (SW-2026-XXXX)
     Page->>Router: Navigasi ke "/lacak/SW-2026-XXXX"
     Router-->>Warga: Menampilkan halaman detail status & linimasa
   else Format Tidak Sesuai
-    Page-->>Warga: Tampilkan pesan bantuan: "Format kode harus diawali SW-2026-"
+    Page-->>Warga: Tampilkan pesan bantuan: "Format kode tidak valid. Contoh: SW-2026-X89B"
   end
 ```
 
@@ -74,23 +74,27 @@ sequenceDiagram
 
 ### 4.1 Zod Schemas (`src/lib/schema/reports.ts` & `src/lib/schema/index.ts`)
 
-Menambahkan skema validasi untuk kode tiket cepat dan respons statistik beranda:
+Menambahkan skema validasi untuk kode tiket cepat dengan normalisasi otomatis huruf besar dan kontrak data telemetri beranda:
 
 ```ts
 import { z } from 'zod'
 
 /**
  * Validasi pencarian cepat kode pelacakan dari Landing Page.
- * Format standar: SW-2026-XXXX (alfanumerik huruf besar)
+ * Format standar: SW-2026-XXXX (alfanumerik huruf besar).
+ * Menggunakan .transform() agar input huruf kecil dari ponsel warga dinormalisasi otomatis.
  */
 export const quickTrackingSchema = z.object({
   trackingCode: z
     .string()
     .trim()
     .min(1, 'Masukkan kode pelacakan laporan Anda')
-    .regex(/^SW-\d{4}-[A-Z0-9]{4}$/, {
-      message: 'Format kode tidak valid. Contoh: SW-2026-X89B',
-    }),
+    .transform((val) => val.toUpperCase())
+    .pipe(
+      z.string().regex(/^SW-\d{4}-[A-Z0-9]{4}$/, {
+        message: 'Format kode tidak valid. Contoh: SW-2026-X89B',
+      }),
+    ),
 })
 
 export type QuickTrackingInput = z.infer<typeof quickTrackingSchema>
@@ -129,7 +133,7 @@ SELECT COUNT(*) FROM reports WHERE handling_status IN ('in_progress', 'resolved'
 
 ### 4.3 Server Function Kontrak (`src/server/functions/reports.ts`)
 
-Menggunakan `createServerFn` dari `@tanstack/react-start`:
+Menggunakan `createServerFn` dari `@tanstack/react-start` tanpa parameter (parameterless GET) dengan penanganan *fallback* aman:
 
 ```ts
 import { createServerFn } from '@tanstack/react-start'
@@ -137,15 +141,14 @@ import { db } from '@/server/db'
 import { reports } from '@/server/db/schema/reports'
 import { satelliteHotspots } from '@/server/db/schema/hotspots'
 import { gte, eq, inArray, sql } from 'drizzle-orm'
-import { landingStatsSchema, type LandingStats } from '@/lib/schema'
+import { type LandingStats } from '@/lib/schema'
 
 /**
  * Mengambil ringkasan statistik telemetri untuk Landing Page.
  * Kompatibel dengan Cloudflare Workers Edge runtime & Docker Bun.
  */
-export const getLandingStats = createServerFn({ method: 'GET' })
-  .validator((d: unknown) => d)
-  .handler(async (): Promise<LandingStats> => {
+export const getLandingStats = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<LandingStats> => {
     try {
       const past24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000)
 
@@ -187,7 +190,55 @@ export const getLandingStats = createServerFn({ method: 'GET' })
         lastUpdatedIso: new Date().toISOString(),
       }
     }
-  })
+  },
+)
+```
+
+### 4.4 Deklarasi Rute & Ketahanan Komponen (`src/routes/index.tsx`)
+
+Menerapkan **Rule 19 (Route Resilience)** dengan deklarasi `loader`, `pendingComponent`, dan `errorComponent`:
+
+```tsx
+import { createFileRoute } from '@tanstack/react-router'
+import { getLandingStats } from '@/server/functions/reports'
+import { LandingSkeleton } from '@/components/report/landing-skeleton'
+import { LandingErrorBoundary } from '@/components/report/landing-error-boundary'
+import { LandingView } from '@/components/report/landing-view'
+
+export const Route = createFileRoute('/')({
+  loader: async () => await getLandingStats(),
+  component: LandingPage,
+  pendingComponent: LandingSkeleton,
+  errorComponent: LandingErrorBoundary,
+  head: () => ({
+    meta: [
+      {
+        title:
+          'SiagaWarga - Platform Pelaporan & Tracking Kebakaran Terbuka',
+      },
+      {
+        name: 'description',
+        content:
+          'Platform pemantauan dan verifikasi pelaporan kebakaran hutan, lahan, dan permukiman di Indonesia dengan validasi silang data satelit aktif NASA FIRMS.',
+      },
+      {
+        property: 'og:title',
+        content:
+          'SiagaWarga - Platform Pelaporan & Tracking Kebakaran Terbuka',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Sistem pemantauan kebakaran transparan dengan validasi bertingkat, deduplikasi spasial PostGIS, dan perlindungan privasi pelapor.',
+      },
+    ],
+  }),
+})
+
+function LandingPage() {
+  const stats = Route.useLoaderData()
+  return <LandingView stats={stats} />
+}
 ```
 
 ---
@@ -203,9 +254,9 @@ export const getLandingStats = createServerFn({ method: 'GET' })
   - Nol gradien warna, sudut taktis konsisten 6px (`rounded-md`).
   - Nol emoji di seluruh teks dan komponen, mutlak menggunakan ikon resmi **Lucide React (`*Icon`)**.
 
-### 5.1 Manifest Komponen Shadcn Base UI (Rule 16)
+### 5.1 Manifest Komponen Shadcn Base UI (Rule 10 & Rule 16)
 
-Diverifikasi terhadap dokumentasi lokal `docs/shadcn/components/base/` dan komponen terpasang di `src/components/ui/`:
+Diverifikasi terhadap dokumentasi lokal `docs/shadcn/components/base/` dan primitif `@base-ui/react`:
 
 | Elemen Antarmuka | Komponen Shadcn (`docs/shadcn/components/base/`) | Berkas Target `src/components/ui/` | Varian / Properti yang Digunakan |
 | ---------------- | ------------------------------------------------ | ---------------------------------- | -------------------------------- |
@@ -220,15 +271,23 @@ Diverifikasi terhadap dokumentasi lokal `docs/shadcn/components/base/` dan kompo
 ### 5.2 Rincian Seksi Halaman Beranda (`src/routes/index.tsx`)
 
 1. **Sticky Emergency Hotline Banner (`EmergencyBanner`)**:
-   - Menempel di bagian paling atas viewport.
+   - Menempel di bagian paling atas viewport (`sticky top-0 z-50`).
    - Panggilan cepat telepon darurat: `113` (Pemadam Kebakaran) dan `112` (Panggilan Darurat Bebas Pulsa Nasional).
    - Teks instruksi: *"Peringatan Keselamatan: Jika kebakaran mengancam keselamatan jiwa, segera hubungi 113 atau 112 sebelum membuat laporan daring."*
    - Ikon Lucide: `PhoneCallIcon`, `ShieldAlertIcon`.
 
-2. **Header Navigasi Utama (`HeaderNav`)**:
-   - Brand SiagaWarga dengan indikator status sistem aktif (*live telemetry heartbeat*).
+2. **Header Navigasi Utama (`HeaderNav`) & Hidrasi Tema Bebas FOUC**:
+   - Brand SiagaWarga dengan indikator status sistem aktif (*live telemetry pulse dot* menggunakan warna solid tanpa animasi sintesis AI).
    - Tautan navigasi: Beranda, Form Lapor, Pantau Peta, Cek Laporan.
-   - Tombol pengalih tema (Light / Dark) yang mematuhi preferensi sistem secara otomatis.
+   - **ThemeToggle:** Mengubah tema antara terang dan gelap, menyimpan preferensi di `localStorage.theme`, serta memicu pengalihan kelas `.dark` pada dokumen.
+   - **Skrip Inisialisasi Tema di `src/routes/__root.tsx`:**
+     ```html
+     <script
+       dangerouslySetInnerHTML={{
+         __html: `(function(){try{var t=localStorage.getItem('theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');if(t==='dark')document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark')}catch(e){}})()`,
+       }}
+     />
+     ```
 
 3. **Hero Section (Civic Mission Control)**:
    - Judul H1 Semantik: *"Platform Pemantauan & Verifikasi Laporan Kebakaran Terbuka"*
@@ -236,7 +295,7 @@ Diverifikasi terhadap dokumentasi lokal `docs/shadcn/components/base/` dan kompo
    - Dua Tombol Aksi Utama:
      - `Button` varian `default` (Emergency Crimson): *"Laporkan Kebakaran"* (mengarahkan ke `/lapor`).
      - `Button` varian `outline`: *"Pantau Peta Insiden"* (mengarahkan ke `/pantau`).
-   - Kartu Bilah Pelacakan Cepat (*Quick Tracking Search*): Kolom input kode tiket berfont monospace dengan tombol *"Lacak Status"*.
+   - Kartu Bilah Pelacakan Cepat (*Quick Tracking Search*): Kolom input kode tiket berfont monospace dengan tombol *"Lacak Status"* yang menavigasi ke `/lacak/$code`.
 
 4. **Telemetry Strip (Ringkasan Data Riil 24 Jam)**:
    - 4 Kartu Bento Metrik:
@@ -247,7 +306,7 @@ Diverifikasi terhadap dokumentasi lokal `docs/shadcn/components/base/` dan kompo
    - Dilengkapi *timestamp* sinkronisasi terakhir dalam zona waktu WIB.
 
 5. **Prinsip Kejujuran Sistem (System Honesty & 4-Layer Verification)**:
-   - Menjelaskan secara gamblang alur verifikasi tanpa hiperbola:
+   - Menjelaskan secara gamblang alur verifikasi tanpa klaim sepihak:
      - **Tahap 1: Validasi Bukti Media** (Unggah langsung ke R2, deteksi waktu kamera EXIF).
      - **Tahap 2: Deduplikasi Spasial** (PostGIS ST_DWithin mendeteksi laporan ganda dalam radius 2 km).
      - **Tahap 3: Korelasi Satelit** (Validasi silang titik panas satelit NASA dalam radius 5 km).
@@ -290,30 +349,36 @@ Diverifikasi terhadap dokumentasi lokal `docs/shadcn/components/base/` dan kompo
 6. `src/components/ui/skeleton.tsx` — Primitives Skeleton shadcn Base UI.
 7. `src/components/ui/input.tsx` — Primitives Input shadcn Base UI.
 8. `src/components/shared/emergency-banner.tsx` — Banner darurat 112/113 sticky atas.
-9. `src/components/shared/header-nav.tsx` — Navigasi atas dengan logo, status live, dan tema.
-10. `src/components/shared/footer.tsx` — Footer informasi publik WIA 2026.
-11. `src/server/functions/reports.ts` — Server Function `getLandingStats`.
-12. `tests/landing.test.ts` — Uji unit validasi kode tracking & kueri landing stats.
+9. `src/components/shared/header-nav.tsx` — Navigasi atas dengan logo, status live, dan tombol tema.
+10. `src/components/shared/theme-toggle.tsx` — Komponen tombol pengalih tema dengan ikon `SunIcon` & `MoonIcon`.
+11. `src/components/shared/footer.tsx` — Footer informasi publik WIA 2026.
+12. `src/components/report/landing-skeleton.tsx` — Pending component skeleton beranda.
+13. `src/components/report/landing-error-boundary.tsx` — Error component tangguh dengan aksi coba lagi.
+14. `src/components/report/landing-view.tsx` — Tampilan utama beranda terpisah dari logika rute.
+15. `src/server/functions/reports.ts` — Server Function `getLandingStats`.
+16. `tests/landing.test.ts` — Uji unit validasi kode tracking & kueri landing stats.
 
 ### Berkas Dimodifikasi (Modified Files)
 1. `src/lib/schema/reports.ts` — Ekspor `quickTrackingSchema` & `landingStatsSchema`.
 2. `src/lib/schema/index.ts` — Re-ekspor skema laporan dan statistik beranda.
-3. `src/routes/__root.tsx` — Pembaruan metadata dokumen HTML (`lang="id"`, title resmi SiagaWarga, meta deskripsi SEO).
-4. `src/routes/index.tsx` — Implementasi utuh Landing Page menggantikan template starter bawaan dengan `pendingComponent` dan `errorComponent`.
+3. `src/routes/__root.tsx` — Pembaruan metadata dokumen HTML (`lang="id"`, title resmi SiagaWarga, meta deskripsi SEO, inline theme script).
+4. `src/routes/index.tsx` — Implementasi utuh Landing Page menggantikan template starter bawaan dengan `loader`, `pendingComponent`, dan `errorComponent`.
 
 ---
 
 ## 7. Testing & Quality Gates (TDD with Bun)
 
 ### 7.1 Cakupan Kasus Uji Unit (`tests/landing.test.ts`)
-1. **Validasi Kode Tracking:**
-   - Memastikan format `SW-2026-X89B` lolos validasi `quickTrackingSchema`.
-   - Menolak kode dengan format salah (misal huruf kecil `sw-2026-x89b` atau tanpa tanda hubung).
+1. **Validasi Kode Tracking (`quickTrackingSchema`):**
+   - Memastikan format `SW-2026-X89B` lolos validasi.
+   - Memastikan input huruf kecil (misal: `sw-2026-x89b`) secara otomatis ditransformasi menjadi huruf besar `SW-2026-X89B` dan lolos validasi.
+   - Menolak kode dengan format salah (misal: tanpa tanda hubung `SW2026X89B` atau pola tidak cocok `SW-ABC-1234`).
    - Menolak masukan string kosong dengan pesan kesalahan yang jelas dan ramah pengguna.
-2. **Validasi Kontrak Data Telemetri:**
+2. **Validasi Kontrak Data Telemetri (`landingStatsSchema`):**
    - Memastikan struktur `landingStatsSchema` memvalidasi angka bilangan bulat non-negatif dan timestamp ISO.
+   - Menolak nilai negatif atau format timestamp yang rusak.
 3. **Uji Server Function `getLandingStats`:**
-   - Menguji bahwa fungsi mengembalikan objek berstruktur valid bahkan ketika basis data memiliki rekaman nol.
+   - Menguji bahwa fungsi mengembalikan objek berstruktur valid bahkan ketika basis data memiliki rekaman nol atau terjadi kegagalan jaringan (*fallback resiliency*).
 
 ### 7.2 Verifikasi Gerbang Kualitas (Quality Gates)
 Seluruh perintah wajib lolos 100% tanpa kompromi sebelum commit:
