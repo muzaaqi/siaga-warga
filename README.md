@@ -28,7 +28,7 @@ Dibangun dengan arsitektur modern berbasis Edge Computing, _type-safety_ end-to-
 - **Database & Spatial Engine:** [Neon](https://neon.tech/) Serverless PostgreSQL dengan ekstensi [PostGIS](https://postgis.net/) (koneksi via `@neondatabase/serverless`)
 - **ORM & Migrasi:** [Drizzle ORM](https://orm.drizzle.team/) + `drizzle-kit` (Type-safe schema & zero-overhead queries)
 - **Object Storage (Bukti Laporan):** [Cloudflare R2](https://www.cloudflare.com/developer-platform/r2/) (Zero Egress S3-compatible storage dengan direct upload via **Presigned/Signed URL**)
-- **Deployment & Edge Runtime:** [Cloudflare Workers](https://workers.cloudflare.com/)
+- **Deployment & Edge Runtime:** [Cloudflare Workers](https://workers.cloudflare.com/) (Edge Serverless) & Docker ([Bun](https://bun.sh/) Alpine Container)
 - **Visualisasi Peta & Spasial:** [MapLibre GL JS](https://maplibre.org/) + CARTO Positron Vector Tiles
 - **Data Eksternal / Validasi Silang:** NASA FIRMS API (Active Fire Data / Satelit VIIRS & MODIS)
 - **Linter & Formatter:** [ESLint](https://eslint.org/) (Strict TypeScript & React Rules)
@@ -231,6 +231,9 @@ ON-FIRE/
 ├── docs/                           # Dokumentasi & implementation plans
 │   ├── guides/                     # Guidebook resmi lomba
 │   └── plans/                      # Plan fitur terstruktur (NN-<feature>.md)
+├── server.ts                       # Server HTTP produksi native Bun dengan asset preloader
+├── Dockerfile                      # Multi-stage Docker build berbasis Alpine Bun
+├── docker-compose.yml              # Konfigurasi orkestrasi kontainer Docker
 ├── wrangler.jsonc                  # Konfigurasi deploy Cloudflare Workers
 ├── package.json
 └── README.md
