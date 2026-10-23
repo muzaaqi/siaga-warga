@@ -68,3 +68,36 @@ export type IncidentType = z.infer<typeof incidentTypeEnum>
 export type VerificationStatus = z.infer<typeof verificationStatusEnum>
 export type Priority = z.infer<typeof priorityEnum>
 export type HandlingStatus = z.infer<typeof handlingStatusEnum>
+
+/**
+ * Validasi pencarian cepat kode pelacakan dari Landing Page.
+ * Format standar: SW-2026-XXXX (alfanumerik huruf besar).
+ * Menggunakan .transform() agar input huruf kecil dari ponsel dinormalisasi otomatis.
+ */
+export const quickTrackingSchema = z.object({
+  trackingCode: z
+    .string()
+    .trim()
+    .min(1, 'Masukkan kode pelacakan laporan Anda')
+    .transform((val) => val.toUpperCase())
+    .pipe(
+      z.string().regex(/^SW-\d{4}-[A-Z0-9]{4}$/, {
+        message: 'Format kode tidak valid. Contoh: SW-2026-X89B',
+      }),
+    ),
+})
+
+export type QuickTrackingInput = z.infer<typeof quickTrackingSchema>
+
+/**
+ * Kontrak data statistik telemetri Landing Page (24 jam terakhir)
+ */
+export const landingStatsSchema = z.object({
+  activeReports24h: z.number().int().nonnegative(),
+  verifiedReports: z.number().int().nonnegative(),
+  activeHotspots: z.number().int().nonnegative(),
+  handledIncidents: z.number().int().nonnegative(),
+  lastUpdatedIso: z.string().datetime(),
+})
+
+export type LandingStats = z.infer<typeof landingStatsSchema>
