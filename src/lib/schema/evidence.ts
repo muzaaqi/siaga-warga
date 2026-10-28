@@ -14,4 +14,11 @@ export const getUploadUrlInputSchema = z.object({
     .max(5 * 1024 * 1024, 'Ukuran foto maksimal 5 MB setelah kompresi'),
 })
 
+export const getUploadUrlOutputSchema = z.object({
+  uploadUrl: z.string().url(),
+  r2ObjectKey: z.string(),
+  publicUrl: z.string().url().optional(),
+})
+
 export type GetUploadUrlInput = z.infer<typeof getUploadUrlInputSchema>
+export type GetUploadUrlOutput = z.infer<typeof getUploadUrlOutputSchema>

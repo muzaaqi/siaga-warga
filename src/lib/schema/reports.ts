@@ -70,6 +70,19 @@ export type Priority = z.infer<typeof priorityEnum>
 export type HandlingStatus = z.infer<typeof handlingStatusEnum>
 
 /**
+ * Respon hasil pengiriman laporan warga (Plan 03).
+ */
+export const submitReportResponseSchema = z.object({
+  reportId: z.string().uuid(),
+  trackingCode: z.string(),
+  clusterId: z.string().uuid(),
+  isPotentialDuplicate: z.boolean(),
+  submittedAtIso: z.string().datetime(),
+})
+
+export type SubmitReportResponse = z.infer<typeof submitReportResponseSchema>
+
+/**
  * Validasi pencarian cepat kode pelacakan dari Landing Page.
  * Format standar: SW-2026-XXXX (alfanumerik huruf besar).
  * Menggunakan .transform() agar input huruf kecil dari ponsel dinormalisasi otomatis.
