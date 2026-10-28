@@ -1,19 +1,14 @@
 import * as React from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import {
-  FlameIcon,
-  MapPinIcon,
-  SearchIcon,
+  ArrowRightIcon,
   ShieldCheckIcon,
   SatelliteIcon,
   CheckCircle2Icon,
-  CompassIcon,
-  WindIcon,
-  EyeIcon,
-  RadioIcon,
   ClockIcon,
+  SearchIcon,
 } from 'lucide-react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import {
   Card,
   CardHeader,
@@ -22,40 +17,17 @@ import {
   CardAction,
   CardContent,
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { quickTrackingSchema } from '@/lib/schema'
 import type { LandingStats } from '@/lib/schema'
 import { cn } from '@/lib/utils'
+import { FloatingQuickTracking } from './floating-quick-tracking'
+import { SafetyGuidelines } from './safety-guidelines'
 
 interface LandingViewProps {
   stats: LandingStats
 }
 
 export function LandingView({ stats }: LandingViewProps) {
-  const navigate = useNavigate()
-  const [trackingCode, setTrackingCode] = React.useState('')
-  const [trackingError, setTrackingError] = React.useState<string | null>(null)
-
-  const handleQuickTrackingSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setTrackingError(null)
-
-    const result = quickTrackingSchema.safeParse({ trackingCode })
-    if (!result.success) {
-      setTrackingError(
-        result.error.issues[0]?.message ??
-          'Format kode tidak valid. Contoh: SW-2026-X89B',
-      )
-      return
-    }
-
-    navigate({
-      to: '/lacak/$code',
-      params: { code: result.data.trackingCode },
-    })
-  }
-
   // Format timestamp WIB
   const formattedTime = React.useMemo(() => {
     try {
@@ -71,105 +43,62 @@ export function LandingView({ stats }: LandingViewProps) {
   }, [stats.lastUpdatedIso])
 
   return (
-    <div className="mx-auto max-w-7xl space-y-16 px-4 py-8 sm:px-6 md:py-12">
-      {/* 1. Hero Section */}
-      <section className="max-w-4xl space-y-6">
-        <div className="inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-          <RadioIcon className="size-3.5" aria-hidden="true" />
-          <span>Sistem Informasi Tanggap Bencana Terbuka</span>
+    <div className="mx-auto max-w-7xl space-y-20 px-4 py-8 sm:px-6 md:py-12">
+      {/* 1. Hero Section (Asymmetric Editorial Layout) */}
+      <section className="relative grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-8">
+        <div className="space-y-6 lg:col-span-7">
+          <h1 className="text-3xl leading-[1.15] font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl lg:text-[3.25rem]">
+            Pantau dan Verifikasi Laporan{' '}
+            <span className="text-primary">Kebakaran</span>
+          </h1>
+
+          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            Laporkan kebakaran hutan, lahan, atau permukiman dengan mudah dan
+            aman. SiagaWarga membantu memeriksa laporan melalui validasi lokasi,
+            data hotspot satelit, dan verifikasi moderator, serta menyediakan
+            pelacakan status laporan secara transparan.
+          </p>
+
+          <div className="pt-2">
+            <Link
+              to="/lapor"
+              className={cn(
+                buttonVariants({ variant: 'default', size: 'lg' }),
+                'group h-12 rounded-xl px-7 text-base font-semibold shadow-md',
+              )}
+            >
+              <span>Lapor Kebakaran</span>
+              <ArrowRightIcon
+                className="size-4.5 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
+            </Link>
+          </div>
         </div>
 
-        <h1 className="text-3xl leading-tight font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-          Platform Pemantauan & Verifikasi Laporan Kebakaran Terbuka
-        </h1>
+        {/* Hero Photo with Organic Asymmetric Curve */}
+        <div className="relative lg:col-span-5">
+          <div className="relative mx-auto aspect-4/3 w-full max-w-lg overflow-hidden rounded-3xl border border-border/60 shadow-2xl lg:aspect-square lg:rounded-[2.5rem]">
+            <img
+              src="/images/hero-fire.webp"
+              alt="Petugas menangani kobaran api kebakaran hutan"
+              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+            />
+            {/* Subtle Gradient Overlay for Depth */}
+            <div className="absolute inset-0 bg-linear-to-tr from-black/40 via-transparent to-transparent" />
 
-        <p className="max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Melaporkan kebakaran hutan, lahan, dan permukiman secara transparan
-          dengan validasi silang data satelit aktif NASA FIRMS serta
-          perlindungan privasi pelapor demi percepatan penanganan darurat di
-          Indonesia.
-        </p>
-
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <Link
-            to="/lapor"
-            className={cn(buttonVariants({ variant: 'default', size: 'lg' }))}
-          >
-            <FlameIcon className="size-4" aria-hidden="true" />
-            <span>Laporkan Kebakaran</span>
-          </Link>
-
-          <Link
-            to="/pantau"
-            className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}
-          >
-            <MapPinIcon className="size-4" aria-hidden="true" />
-            <span>Pantau Peta Insiden</span>
-          </Link>
-        </div>
-
-        {/* Quick Tracking Search Card */}
-        <div className="max-w-xl pt-4">
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>
-                <span className="flex items-center gap-2">
-                  <SearchIcon
-                    className="size-4 text-primary"
-                    aria-hidden="true"
-                  />
-                  <span>Cek Status Laporan Cepat</span>
-                </span>
-              </CardTitle>
-              <CardDescription>
-                Lacak perkembangan penanganan insiden kebakaran menggunakan kode
-                tiket unik Anda.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form
-                onSubmit={handleQuickTrackingSubmit}
-                className="flex flex-col gap-2 sm:flex-row"
-              >
-                <div className="flex-1">
-                  <label htmlFor="tracking-code-input" className="sr-only">
-                    Kode Tiket Pelacakan
-                  </label>
-                  <Input
-                    id="tracking-code-input"
-                    variant="mono"
-                    placeholder="Contoh: SW-2026-X89B"
-                    value={trackingCode}
-                    onChange={(e) => {
-                      setTrackingCode(e.target.value)
-                      if (trackingError) setTrackingError(null)
-                    }}
-                    aria-invalid={!!trackingError}
-                    aria-describedby={
-                      trackingError ? 'tracking-code-error' : undefined
-                    }
-                  />
-                  {trackingError && (
-                    <p
-                      id="tracking-code-error"
-                      className="mt-1.5 text-xs text-destructive"
-                      role="alert"
-                    >
-                      {trackingError}
-                    </p>
-                  )}
-                </div>
-                <Button type="submit" variant="default" className="shrink-0">
-                  <SearchIcon className="size-4" aria-hidden="true" />
-                  <span>Lacak Status</span>
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+            {/* Lens Inspection Badge */}
+            <div className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white shadow-lg backdrop-blur-md">
+              <SearchIcon className="size-5" aria-hidden="true" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* 2. Telemetry Strip (24-Hour Real-Time Snapshot) */}
+      {/* 2. Floating Quick Tracking Card (Overlapping Bridge) */}
+      <FloatingQuickTracking />
+
+      {/* 3. Telemetry Strip (24-Hour Real-Time Snapshot) */}
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -270,7 +199,10 @@ export function LandingView({ stats }: LandingViewProps) {
         </div>
       </section>
 
-      {/* 3. Prinsip Kejujuran Sistem (4-Layer Verification) */}
+      {/* 4. Seksi Panduan Keselamatan Warga di Lokasi Kebakaran */}
+      <SafetyGuidelines />
+
+      {/* 5. Prinsip Kejujuran Sistem (4-Layer Verification) */}
       <section className="space-y-6">
         <div className="max-w-2xl">
           <Badge variant="outline" className="mb-2">
@@ -369,7 +301,7 @@ export function LandingView({ stats }: LandingViewProps) {
         </div>
       </section>
 
-      {/* 4. Fitur Utama Platform */}
+      {/* 6. Fitur Utama Platform */}
       <section className="space-y-6">
         <div className="max-w-2xl">
           <Badge variant="outline" className="mb-2">
@@ -430,78 +362,6 @@ export function LandingView({ stats }: LandingViewProps) {
                 Setiap laporan memiliki halaman pelacakan publik yang memuat
                 riwayat status lengkap beserta catatan alasan dari moderator,
                 menciptakan akuntabilitas layanan publik.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* 5. Panduan Keselamatan Tanggap Api */}
-      <section className="space-y-6">
-        <div className="max-w-2xl">
-          <Badge variant="destructive" className="mb-2">
-            Protokol Keselamatan
-          </Badge>
-          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-            Panduan Keselamatan Warga di Lokasi Kebakaran
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Keselamatan jiwa adalah prioritas utama. Patuhi pedoman berikut saat
-            berada di sekitar wilayah kebakaran.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-md bg-destructive/10 text-destructive">
-                  <CompassIcon className="size-5" aria-hidden="true" />
-                </span>
-                <CardTitle>Jaga Jarak Aman</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Jaga jarak minimal 100 meter dari pusat api atau kobaran lahan
-                gambut. Hindari berada di jalur rambatan api aktif yang mudah
-                dipicu semak kering.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-md bg-destructive/10 text-destructive">
-                  <WindIcon className="size-5" aria-hidden="true" />
-                </span>
-                <CardTitle>Perhatikan Arah Angin</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Evakuasikan diri ke arah berlawanan atau menyilang dari hembusan
-                asap pekat. Gunakan masker basah atau kain penutup hidung untuk
-                mencegah inhalasi asap beracun.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-md bg-destructive/10 text-destructive">
-                  <EyeIcon className="size-5" aria-hidden="true" />
-                </span>
-                <CardTitle>Dokumentasi Terlindung</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Ambil foto bukti hanya dari lokasi yang stabil, tidak terancam
-                api, dan memiliki jalur evakuasi terbuka. Jangan membahayakan
-                diri demi mengambil gambar.
               </p>
             </CardContent>
           </Card>
