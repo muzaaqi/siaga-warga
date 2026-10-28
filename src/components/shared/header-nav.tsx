@@ -114,7 +114,7 @@ export function HeaderNav() {
               to="/lapor"
               className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
             >
-              <span>Lapor Insiden</span>
+              <span>Lapor</span>
               <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
             </Link>
 
@@ -143,22 +143,24 @@ export function HeaderNav() {
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col gap-0.5">
-                      <p className="text-sm leading-none font-semibold text-foreground">
-                        {user.name ?? 'Pengguna'}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {user.email ?? ''}
-                      </p>
-                      {isModerator && (
-                        <span className="mt-1.5 inline-flex items-center gap-1 rounded bg-[var(--color-pine)]/10 px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-pine)]">
-                          <ShieldCheckIcon className="size-3" />
-                          Petugas
-                        </span>
-                      )}
-                    </div>
-                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-sm leading-none font-semibold text-foreground">
+                          {user.name ?? 'Pengguna'}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {user.email ?? ''}
+                        </p>
+                        {isModerator && (
+                          <span className="mt-1.5 inline-flex items-center gap-1 rounded bg-[var(--color-pine)]/10 px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-pine)]">
+                            <ShieldCheckIcon className="size-3" />
+                            Petugas
+                          </span>
+                        )}
+                      </div>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem render={<Link to="/lapor" />}>
@@ -176,13 +178,15 @@ export function HeaderNav() {
                     )}
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={handleSignOut}
-                  >
-                    <LogOutIcon />
-                    <span>Keluar</span>
-                  </DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={handleSignOut}
+                    >
+                      <LogOutIcon />
+                      <span>Keluar</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -191,6 +195,7 @@ export function HeaderNav() {
                 size="sm"
                 onClick={handleSignIn}
                 aria-label="Masuk dengan Google"
+                className="hidden md:inline-flex"
               >
                 <GoogleIcon className="size-4 text-white" />
                 <span>Masuk</span>
@@ -233,6 +238,19 @@ export function HeaderNav() {
             </MenuDockIcon>
             <MenuDockLabel>News</MenuDockLabel>
           </MenuDockItem>
+
+          {!user && (
+            <MenuDockItem
+              value="masuk"
+              onClick={handleSignIn}
+              aria-label="Masuk dengan Google"
+            >
+              <MenuDockIcon>
+                <GoogleIcon className="size-4" />
+              </MenuDockIcon>
+              <MenuDockLabel>Masuk</MenuDockLabel>
+            </MenuDockItem>
+          )}
         </MenuDock>
       </div>
     </>

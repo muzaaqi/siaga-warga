@@ -44,7 +44,12 @@ function DropdownMenuContent({
 }: DropdownMenuContentProps) {
   return (
     <Menu.Portal>
-      <Menu.Positioner align={align} side={side} sideOffset={sideOffset}>
+      <Menu.Positioner
+        className="z-50"
+        align={align}
+        side={side}
+        sideOffset={sideOffset}
+      >
         <Menu.Popup
           data-slot="dropdown-menu-content"
           className={cn(
@@ -110,9 +115,9 @@ function DropdownMenuGroup(props: React.ComponentProps<typeof Menu.Group>) {
 function DropdownMenuLabel({
   className,
   ...props
-}: React.ComponentProps<typeof Menu.GroupLabel>) {
+}: React.ComponentProps<'div'>) {
   return (
-    <Menu.GroupLabel
+    <div
       data-slot="dropdown-menu-label"
       className={cn(
         'px-2.5 py-1.5 text-xs font-medium text-muted-foreground',

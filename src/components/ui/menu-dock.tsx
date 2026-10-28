@@ -243,12 +243,13 @@ export interface MenuDockItemProps extends React.ComponentProps<
 }
 
 export const MenuDockItem = (props: MenuDockItemProps) => {
-  const { value, className, onClick, ...rest } = props
+  const { value, className, onClick, nativeButton, ...rest } = props
   const { animated, select, value: current } = useContext(MenuDockContext)
   const active = current === value
 
   return (
     <BaseButton
+      nativeButton={nativeButton ?? (rest.render ? false : true)}
       aria-current={active ? 'page' : undefined}
       className={cn(
         'group/menu-dock-item',
