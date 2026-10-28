@@ -105,20 +105,20 @@ Displayed prominently at the top of `/` and `/lapor`:
 
 > **Darurat Segera?** Jika kebakaran mengancam keselamatan jiwa atau permukiman, segera hubungi **112** atau **113**. Layanan ini adalah instrumen pelacakan publik terverifikasi dan bukan pengganti kontak cepat tanggap darurat resmi.
 
-### 4.5 MenuDock Tactical Navigation Standard (`src/components/ui/menu-dock.tsx`)
+### 4.5 Responsive Navigation Standard & MenuDock (`src/components/ui/menu-dock.tsx`)
 
-Header navigasi dan aksi pengguna menggunakan komponen **`MenuDock`** berbasis **Base UI (`@base-ui/react`)**:
+Aplikasi mengadopsi pemisahan navigasi responsif adaptif antara tablet/desktop dan smartphone:
 
-1. **Polymorphism via `render` Prop:**  
-   Menghindari `asChild` Radix. Komponen `MenuDockItem` membungkus primitif `BaseButton` dengan `render={<Link to="..." />}` untuk TanStack Router.
-2. **Dynamic Sliding Indicator:**  
-   Garis bawah aktif bergeser mulus (`cubic-bezier(0.22, 1, 0.36, 1)`) menggunakan warna Safety Ember (`var(--color-ember)`), dengan lebar presisi mengikuti panjang teks label.
-3. **Hop Micro-Interaction:**  
-   Saat item menu diklik, ikon melompat ke atas secara tactile (`[translate:0_-30%]`) selama 180 ms (`HOP_MS`) sebelum mendarat kembali. Dikecualikan saat pengguna mengaktifkan mode _prefers-reduced-motion_.
+1. **Tablet & Desktop Navigation (≥ 768px / `md:flex`):**  
+   Menggunakan navigasi atas klasik pada `HeaderNav` dengan tautan teks datar (_Beranda_, _Lapor Insiden_, _News_) dan garis indikator aktif tipis berwarna Forest Green (`#173b32` / `var(--color-forest)`).
+2. **Mobile Smartphone Navigation (< 768px / `md:hidden`):**  
+   Menggunakan komponen **`MenuDock`** taktis melayang di bagian bawah layar (`fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden`) yang ramah jangkauan jempol (_thumb-zone accessibility_). Memiliki _sliding indicator_ dinamis Safety Ember (`var(--color-ember)`) dan efek _tactile hopping_ ikon (180 ms).
+3. **Polymorphism via `render` Prop:**  
+   Menghindari `asChild` Radix. Komponen `MenuDockItem` membungkus primitif `BaseButton` (`@base-ui/react`) dengan `render={<Link to="..." />}` untuk TanStack Router.
 4. **Zero-Friction 1-Click "Masuk" Action:**  
    Navbar menghapus tombol "Sign In" dan menggantikan "Sign Up" dengan satu tombol aksi: **"Masuk"**. Mengklik "Masuk" langsung mengarahkan pengguna ke Google OAuth tanpa form atau modal perantara.
 5. **Authenticated State Elevation:**  
-   Setelah terotentikasi, tombol aksi beralih menjadi foto profil (`Avatar` Base UI). Mengklik foto membuka `DropdownMenu` taktis yang menyediakan opsi _"Laporan Saya"_, _"Dasbor Triase"_ (khusus moderator/superadmin), dan _"Keluar"_.
+   Setelah terotentikasi, tombol aksi di navbar beralih menjadi foto profil (`Avatar` Base UI). Mengklik foto membuka `DropdownMenu` taktis yang menyediakan opsi _"Laporan Saya"_, _"Dasbor Triase"_ (khusus moderator/superadmin), dan _"Keluar"_.
 
 ---
 

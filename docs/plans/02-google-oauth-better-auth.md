@@ -374,15 +374,12 @@ export const requireModeratorSession = createServerFn({ method: 'GET' })
 
 ### 5.2 Alur Komponen Navigasi ([`src/components/shared/header-nav.tsx`](src/components/shared/header-nav.tsx))
 
-1. **Integrasi Komponen MenuDock:**
-   - Navigasi tengah memanfaatkan `MenuDock` dengan item:
-     - `Beranda` (`value="home"`, `render={<Link to="/" />}`)
-     - `Lapor Insiden` (`value="lapor"`, `render={<Link to="/lapor" />}`)
-     - `News` (`value="news"`, `render={<a href="#news" />}`)
-   - Indikator sliding aktif berwarna Safety Ember (`var(--color-ember)`) dengan animasi hop saat berpindah tab.
+1. **Pemisahan Navigasi Tablet/Desktop vs Smartphone:**
+   - **Tablet & Desktop (`md:flex`):** Mengembalikan navigasi navbar atas klasik dengan tautan teks datar (*Beranda*, *Lapor Insiden*, *News*) dan garis indikator aktif di bawahnya (berwarna `#173b32` / *Forest Green*).
+   - **Smartphone Mobile (`md:hidden`):** Menggunakan komponen `MenuDock` Base UI yang mengambang di bawah layar (*bottom floating dock*) dengan Safety Ember active indicator dan icon hop animation agar mudah dijangkau satu tangan.
 2. **Pembersihan Tombol Sign In / Sign Up:**
    - Menghapus tombol "Sign In".
-   - Menggantikan "Sign Up" dengan satu tombol aksi utama: **"Masuk"** (`Button variant="ember"` atau item terintegrasi).
+   - Menggantikan "Sign Up" dengan satu tombol aksi utama di kanan atas: **"Masuk"** (`Button variant="ember"`).
 3. **Kondisi Belum Masuk (*Unauthenticated State*):**
    - Menampilkan tombol **"Masuk"** dengan ikon `LogInIcon`.
    - Ketika diklik, langsung memanggil:

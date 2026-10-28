@@ -232,7 +232,7 @@ ON-FIRE/
 │   │
 │   ├── components/
 │   │   ├── ui/                     # shadcn/ui components (Base UI primitives: MenuDock, Button, etc.)
-│   │   ├── shared/                 # Emergency banner (112/113), header nav (MenuDock + Masuk), theme toggle
+│   │   ├── shared/                 # Emergency banner (112/113), header nav (Desktop Nav + Mobile MenuDock), theme toggle
 │   │   ├── report/                 # Report form & photo upload components
 │   │   ├── map/                    # MapLibre GL map visualizer & dual-layer controls
 │   │   ├── timeline/               # 4-Phase audit status timeline for /lacak/$code
