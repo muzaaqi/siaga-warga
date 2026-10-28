@@ -29,7 +29,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
-import { useSession } from '@/lib/auth-client'
 import type { IncidentType } from '@/lib/schema'
 import { cn } from '@/lib/utils'
 import { submitCitizenReport } from '@/server/functions/reports'
@@ -46,14 +45,11 @@ interface ReportFormValues {
   latitude: number
   longitude: number
   addressDisplay: string
-  reporterName: string
-  reporterPhone: string
-  isAnonymous: boolean
+  agreement: boolean
 }
 
 export function ReportForm() {
   const navigate = useNavigate()
-  const { data: session } = useSession()
 
   const [gpsLocked, setGpsLocked] = React.useState(false)
   const [gpsLoading, setGpsLoading] = React.useState(false)
@@ -70,9 +66,7 @@ export function ReportForm() {
     latitude: -0.5021, // Default Riau
     longitude: 101.4478,
     addressDisplay: '',
-    reporterName: '',
-    reporterPhone: '',
-    isAnonymous: false,
+    agreement: false,
   }
 
   const form = useForm({
@@ -106,12 +100,9 @@ export function ReportForm() {
         return
       }
 
-      if (
-        value.reporterPhone &&
-        !/^(\+62|62|0)8[1-9][0-9]{6,10}$/.test(value.reporterPhone)
-      ) {
+      if (!value.agreement) {
         setSubmitError(
-          'Nomor telepon tidak valid. Gunakan format Indonesia yang benar (contoh: 081234567890).',
+          'Anda wajib mencentang persetujuan kebenaran informasi sebelum mengirim laporan.',
         )
         return
       }
@@ -129,13 +120,7 @@ export function ReportForm() {
           r2ObjectKey: value.photoData.r2ObjectKey,
           fileHashSha256: value.photoData.fileHashSha256,
           exifCaptureTime: value.photoData.exifCaptureTime,
-          reporterName: value.isAnonymous
-            ? undefined
-            : value.reporterName.trim() || undefined,
-          reporterPhone: value.isAnonymous
-            ? undefined
-            : value.reporterPhone.trim() || undefined,
-          isAnonymous: value.isAnonymous,
+          isAnonymous: false,
         }
 
         const result = await submitCitizenReport({ data: payload })
@@ -155,13 +140,6 @@ export function ReportForm() {
       }
     },
   })
-
-  // Prefill nama pengguna bila login
-  React.useEffect(() => {
-    if (session?.user.name && !form.getFieldValue('reporterName')) {
-      form.setFieldValue('reporterName', session.user.name)
-    }
-  }, [session, form])
 
   // Deteksi Lokasi Browser (GPS)
   const handleDetectGps = () => {
@@ -554,82 +532,63 @@ export function ReportForm() {
         </CardContent>
       </Card>
 
-      {/* CARD 4: DATA PELAPOR (OPSIONAL & PRIVASI) */}
+      {/* CARD 4: PERNYATAAN & PERSETUJUAN */}
       <Card>
         <CardHeader>
-          <CardTitle>4. Identitas Pelapor & Jaminan Privasi</CardTitle>
+          <CardTitle>4. Pernyataan & Persetujuan Pelaporan</CardTitle>
           <CardDescription>
-            Data pribadi Anda dilindungi secara ketat dan tidak pernah
-            dipublikasikan ke umum (Rule 7).
+            Pernyataan komitmen pelapor untuk menjamin pertanggungjawaban
+            kebenaran informasi kedaruratan.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <form.Field name="reporterName">
-                {(field) => (
-                  <Field>
-                    <FieldLabel htmlFor="reporter-name">
-                      Nama Anda (Opsional)
-                    </FieldLabel>
-                    <Input
-                      id="reporter-name"
-                      placeholder="Nama panggilan Anda"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      disabled={form.getFieldValue('isAnonymous')}
-                    />
-                  </Field>
-                )}
-              </form.Field>
-
-              <form.Field
-                name="reporterPhone"
-                validators={{
-                  onChange: ({ value }) =>
-                    value && !/^(\+62|62|0)8[1-9][0-9]{6,10}$/.test(value)
-                      ? 'Nomor telepon tidak valid. Gunakan format Indonesia yang benar (contoh: 081234567890).'
-                      : undefined,
-                }}
-              >
-                {(field) => (
-                  <Field data-invalid={field.state.meta.errors.length > 0}>
-                    <FieldLabel htmlFor="reporter-phone">
-                      Nomor Telepon / WhatsApp (Opsional)
-                    </FieldLabel>
-                    <Input
-                      id="reporter-phone"
-                      placeholder="08xxxxxxxxxx"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      disabled={form.getFieldValue('isAnonymous')}
-                    />
-                    {field.state.meta.errors.length > 0 && (
-                      <FieldError>{field.state.meta.errors[0]}</FieldError>
-                    )}
-                  </Field>
-                )}
-              </form.Field>
-            </div>
-
-            {/* Opsi Kirim Sebagai Anonim */}
-            <form.Field name="isAnonymous">
-              {(field) => (
-                <label className="flex cursor-pointer items-center gap-2.5 pt-1 text-xs text-muted-foreground hover:text-foreground">
+          <form.Field
+            name="agreement"
+            validators={{
+              onChange: ({ value }) =>
+                !value
+                  ? 'Anda wajib menyetujui pernyataan kebenaran informasi sebelum mengirim laporan.'
+                  : undefined,
+            }}
+          >
+            {(field) => (
+              <Field data-invalid={field.state.meta.errors.length > 0}>
+                <label
+                  htmlFor="report-agreement"
+                  className={cn(
+                    'flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all',
+                    field.state.value
+                      ? 'border-[var(--color-ember)] bg-[var(--color-ember)]/5 shadow-xs'
+                      : 'border-border bg-card hover:bg-muted/30',
+                  )}
+                >
                   <input
                     type="checkbox"
+                    id="report-agreement"
                     checked={field.state.value}
                     onChange={(e) => field.handleChange(e.target.checked)}
-                    className="size-4 rounded border-input text-[var(--color-ember)] focus:ring-[var(--color-ember)]"
+                    disabled={isSubmitting}
+                    className="mt-0.5 size-4 cursor-pointer rounded border-input text-[var(--color-ember)] focus:ring-[var(--color-ember)]"
                   />
-                  <span>
-                    Kirim laporan ini sebagai <strong>Anonim</strong> (tidak
-                    menautkan nama atau profil akun Anda ke laporan publik).
-                  </span>
+                  <div className="flex flex-col gap-1 text-sm">
+                    <span className="font-semibold text-foreground">
+                      Saya menyatakan informasi dan bukti foto yang dilaporkan
+                      adalah benar
+                    </span>
+                    <span className="text-xs leading-relaxed text-muted-foreground">
+                      Laporan dibuat berdasarkan pengamatan langsung di lokasi
+                      kejadian untuk kepentingan keselamatan warga dan
+                      penanganan darurat kebakaran, bukan laporan palsu atau
+                      rekayasa.
+                    </span>
+                  </div>
                 </label>
-              )}
-            </form.Field>
-          </div>
+                {field.state.meta.errors.length > 0 && (
+                  <FieldError>{field.state.meta.errors[0]}</FieldError>
+                )}
+              </Field>
+            )}
+          </form.Field>
         </CardContent>
       </Card>
 

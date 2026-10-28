@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "mapcn": {
+      "source": "AnmolSaini16/mapcn",
+      "sourceType": "github",
+      "skillPath": "skills/mapcn/SKILL.md",
+      "computedHash": "97809643b4cb2a52f2ce153f9a8f9f09e30f7593afd583140cbfa868b978aad9"
+    },
     "neon": {
       "source": "neondatabase/agent-skills",
       "sourceType": "github",
