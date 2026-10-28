@@ -23,17 +23,15 @@ function RadioGroupItem({
     <Radio.Root
       data-slot="radio-group-item"
       className={cn(
-        'aspect-square size-4 shrink-0 rounded-full border border-input shadow-xs transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground',
+        'relative flex size-4 shrink-0 items-center justify-center rounded-full border border-input shadow-xs transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground',
         className,
       )}
       {...props}
     >
       <Radio.Indicator
         data-slot="radio-group-indicator"
-        className="flex items-center justify-center text-current"
-      >
-        <span className="size-2 rounded-full bg-current" />
-      </Radio.Indicator>
+        className="size-2 rounded-full bg-current"
+      />
     </Radio.Root>
   )
 }
