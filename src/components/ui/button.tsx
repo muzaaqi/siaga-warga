@@ -52,12 +52,14 @@ interface ButtonProps
     React.ComponentProps<typeof BaseButton>,
     VariantProps<typeof buttonVariants> {
   className?: string
+  shape?: 'default' | 'circle'
 }
 
 function Button({
   className,
   variant = 'default',
   size = 'default',
+  shape = 'default',
   nativeButton,
   ...props
 }: ButtonProps) {
@@ -67,7 +69,11 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      data-shape={shape}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        shape === 'circle' && 'rounded-full',
+      )}
       {...props}
     />
   )
