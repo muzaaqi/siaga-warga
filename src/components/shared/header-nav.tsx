@@ -101,12 +101,13 @@ export function HeaderNav() {
               <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
             </Link>
 
-            <a
-              href="#news"
+            <Link
+              to="/"
+              hash="news"
               className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <span>News</span>
-            </a>
+            </Link>
           </nav>
 
           {/* Tombol Aksi Kanan: 1-Click Masuk OAuth / Profil Avatar & ThemeToggle */}
@@ -150,7 +151,7 @@ export function HeaderNav() {
                     {isModerator && (
                       <DropdownMenuItem
                         variant="primary"
-                        render={<a href="/admin/triase" />}
+                        render={<Link to="/admin/triase" />}
                       >
                         <ShieldCheckIcon />
                         <span>Dasbor Triase</span>
@@ -209,7 +210,7 @@ export function HeaderNav() {
             <MenuDockLabel>Lapor</MenuDockLabel>
           </MenuDockItem>
 
-          <MenuDockItem value="news" render={<a href="#news" />}>
+          <MenuDockItem value="news" render={<Link to="/" hash="news" />}>
             <MenuDockIcon>
               <NewspaperIcon />
             </MenuDockIcon>
