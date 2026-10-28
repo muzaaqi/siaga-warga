@@ -240,10 +240,19 @@ export interface MenuDockItemProps extends React.ComponentProps<
 > {
   /** The item's value: the dock's `value` when it's active. */
   value: string
+  /** Visual variant: default neutral or ember highlighted CTA */
+  variant?: 'default' | 'ember'
 }
 
 export const MenuDockItem = (props: MenuDockItemProps) => {
-  const { value, className, onClick, nativeButton, ...rest } = props
+  const {
+    value,
+    className,
+    onClick,
+    nativeButton,
+    variant = 'default',
+    ...rest
+  } = props
   const { animated, select, value: current } = useContext(MenuDockContext)
   const active = current === value
 
@@ -254,20 +263,28 @@ export const MenuDockItem = (props: MenuDockItemProps) => {
       className={cn(
         'group/menu-dock-item',
         'relative flex min-w-14 flex-col items-center justify-center gap-1 p-2',
-        'rounded-lg text-muted-foreground',
-        'cursor-pointer transition-colors outline-none select-none',
-        'hover:bg-muted/60 hover:text-foreground',
+        'cursor-pointer rounded-lg transition-colors outline-none select-none',
         'focus-visible:ring-[2px] focus-visible:ring-ring/50',
-        'data-active:font-semibold data-active:text-[var(--color-forest)] dark:data-active:text-foreground',
         'disabled:pointer-events-none disabled:opacity-50',
         'group-data-[size=sm]/menu-dock:min-w-12 group-data-[size=sm]/menu-dock:p-1.5',
         'group-data-[size=lg]/menu-dock:min-w-16 group-data-[size=lg]/menu-dock:p-3',
         'motion-reduce:transition-none',
+        variant === 'default' && [
+          'text-muted-foreground',
+          'hover:bg-muted/60 hover:text-foreground',
+          'data-active:font-semibold data-active:text-[var(--color-forest)] dark:data-active:text-foreground',
+        ],
+        variant === 'ember' && [
+          'bg-[var(--color-ember)] font-semibold text-white shadow-xs',
+          'hover:bg-[oklch(0.48_0.19_45)] active:bg-[oklch(0.42_0.19_45)]',
+          'dark:text-white',
+        ],
         className,
       )}
       data-active={active ? '' : undefined}
       data-slot="menu-dock-item"
       data-value={value}
+      data-variant={variant}
       onClick={(event) => {
         onClick?.(event)
         select(value)

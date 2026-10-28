@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import {
   FlameIcon,
@@ -42,6 +43,68 @@ function GoogleIcon(props: React.ComponentProps<'svg'>) {
       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
     </svg>
+  )
+}
+
+interface UserDropdownMenuContentProps {
+  user: {
+    name?: string | null
+    email?: string | null
+    role?: string | null
+  }
+  isModerator: boolean
+  onSignOut: () => Promise<void>
+}
+
+function UserDropdownMenuContent({
+  user,
+  isModerator,
+  onSignOut,
+}: UserDropdownMenuContentProps) {
+  return (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-sm leading-none font-semibold text-foreground">
+              {user.name ?? 'Pengguna'}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user.email ?? ''}
+            </p>
+            {isModerator && (
+              <span className="mt-1.5 inline-flex items-center gap-1 rounded bg-[var(--color-pine)]/10 px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-pine)]">
+                <ShieldCheckIcon className="size-3" />
+                Petugas
+              </span>
+            )}
+          </div>
+        </DropdownMenuLabel>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuItem render={<Link to="/lapor" />}>
+          <FileTextIcon />
+          <span>Laporan Saya</span>
+        </DropdownMenuItem>
+        {isModerator && (
+          <DropdownMenuItem
+            variant="primary"
+            render={<Link to="/admin/triase" />}
+          >
+            <ShieldCheckIcon />
+            <span>Dasbor Triase</span>
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuItem variant="destructive" onClick={onSignOut}>
+          <LogOutIcon />
+          <span>Keluar</span>
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </>
   )
 }
 
@@ -127,68 +190,36 @@ export function HeaderNav() {
             </Link>
           </nav>
 
-          {/* Tombol Aksi Kanan: 1-Click Masuk OAuth / Profil Avatar & ThemeToggle */}
+          {/* Tombol Aksi Kanan (Desktop: Avatar/Masuk + ThemeToggle) */}
           <div className="flex items-center gap-2.5 sm:gap-3">
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger aria-label="Menu Akun Pengguna">
-                  <Avatar className="size-9">
-                    {user.image && (
-                      <AvatarImage
-                        src={user.image}
-                        alt={user.name ?? 'Foto Profil'}
-                      />
-                    )}
-                    <AvatarFallback>{userInitial}</AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col gap-0.5">
-                        <p className="text-sm leading-none font-semibold text-foreground">
-                          {user.name ?? 'Pengguna'}
-                        </p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {user.email ?? ''}
-                        </p>
-                        {isModerator && (
-                          <span className="mt-1.5 inline-flex items-center gap-1 rounded bg-[var(--color-pine)]/10 px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-pine)]">
-                            <ShieldCheckIcon className="size-3" />
-                            Petugas
-                          </span>
-                        )}
-                      </div>
-                    </DropdownMenuLabel>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem render={<Link to="/lapor" />}>
-                      <FileTextIcon />
-                      <span>Laporan Saya</span>
-                    </DropdownMenuItem>
-                    {isModerator && (
-                      <DropdownMenuItem
-                        variant="primary"
-                        render={<Link to="/admin/triase" />}
-                      >
-                        <ShieldCheckIcon />
-                        <span>Dasbor Triase</span>
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={handleSignOut}
-                    >
-                      <LogOutIcon />
-                      <span>Keluar</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="hidden md:flex md:items-center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger aria-label="Menu Akun Pengguna">
+                    <Avatar size="default">
+                      {user.image && (
+                        <AvatarImage
+                          src={user.image}
+                          alt={user.name ?? 'Foto Profil'}
+                        />
+                      )}
+                      <AvatarFallback>{userInitial}</AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    side="bottom"
+                    sideOffset={8}
+                    className="w-56"
+                  >
+                    <UserDropdownMenuContent
+                      user={user}
+                      isModerator={isModerator}
+                      onSignOut={handleSignOut}
+                    />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
               <Button
                 variant="ember"
@@ -239,14 +270,51 @@ export function HeaderNav() {
             <MenuDockLabel>News</MenuDockLabel>
           </MenuDockItem>
 
-          {!user && (
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <MenuDockItem
+                    value="profile"
+                    aria-label="Menu Akun Pengguna"
+                  />
+                }
+              >
+                <MenuDockIcon>
+                  <Avatar size="sm">
+                    {user.image && (
+                      <AvatarImage
+                        src={user.image}
+                        alt={user.name ?? 'Foto Profil'}
+                      />
+                    )}
+                    <AvatarFallback>{userInitial}</AvatarFallback>
+                  </Avatar>
+                </MenuDockIcon>
+                <MenuDockLabel>Profil</MenuDockLabel>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                side="top"
+                sideOffset={14}
+                className="w-56"
+              >
+                <UserDropdownMenuContent
+                  user={user}
+                  isModerator={isModerator}
+                  onSignOut={handleSignOut}
+                />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
             <MenuDockItem
               value="masuk"
+              variant="ember"
               onClick={handleSignIn}
               aria-label="Masuk dengan Google"
             >
               <MenuDockIcon>
-                <GoogleIcon className="size-4" />
+                <GoogleIcon className="size-4 text-white" />
               </MenuDockIcon>
               <MenuDockLabel>Masuk</MenuDockLabel>
             </MenuDockItem>
