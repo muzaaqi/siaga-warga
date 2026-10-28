@@ -222,7 +222,7 @@ export const MenuDock = (props: MenuDockProps) => {
         <span
           aria-hidden="true"
           className={cn(
-            'pointer-events-none absolute top-0 left-0 rounded-full bg-[var(--color-ember)]',
+            'pointer-events-none absolute top-0 left-0 rounded-lg bg-[var(--color-ember)]',
             'h-(--menu-dock-height) w-(--menu-dock-width) [translate:var(--menu-dock-x)_var(--menu-dock-y)]',
             'opacity-0 data-placed:opacity-100',
             'data-placed:transition-[translate,width,height,opacity] data-placed:duration-300 data-placed:ease-[cubic-bezier(0.22,1,0.36,1)]',

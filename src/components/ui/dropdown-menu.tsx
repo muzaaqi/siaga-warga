@@ -6,15 +6,24 @@ function DropdownMenu(props: React.ComponentProps<typeof Menu.Root>) {
   return <Menu.Root data-slot="dropdown-menu" {...props} />
 }
 
+interface DropdownMenuTriggerProps extends React.ComponentProps<
+  typeof Menu.Trigger
+> {
+  shape?: 'default' | 'circle'
+}
+
 function DropdownMenuTrigger({
   className,
+  shape = 'default',
   ...props
-}: React.ComponentProps<typeof Menu.Trigger>) {
+}: DropdownMenuTriggerProps) {
   return (
     <Menu.Trigger
       data-slot="dropdown-menu-trigger"
+      data-shape={shape}
       className={cn(
-        'cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+        'cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+        shape === 'circle' && 'rounded-full',
         className,
       )}
       {...props}
@@ -138,4 +147,4 @@ export {
   DropdownMenuGroup,
   DropdownMenuLabel,
 }
-export type { DropdownMenuItemProps }
+export type { DropdownMenuItemProps, DropdownMenuTriggerProps }

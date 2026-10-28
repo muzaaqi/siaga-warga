@@ -195,7 +195,10 @@ export function HeaderNav() {
             {user ? (
               <div className="hidden md:flex md:items-center">
                 <DropdownMenu>
-                  <DropdownMenuTrigger aria-label="Menu Akun Pengguna">
+                  <DropdownMenuTrigger
+                    shape="circle"
+                    aria-label="Menu Akun Pengguna"
+                  >
                     <Avatar size="default">
                       {user.image && (
                         <AvatarImage
@@ -233,7 +236,7 @@ export function HeaderNav() {
               </Button>
             )}
 
-            <div className="ml-1 flex items-center border-l border-border pl-2">
+            <div className="flex items-center md:ml-1 md:border-l md:border-border md:pl-2">
               <ThemeToggle />
             </div>
           </div>
