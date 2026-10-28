@@ -13,6 +13,12 @@ const buttonVariants = cva(
           'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/95',
         destructive:
           'bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90 active:bg-destructive/95',
+        ember:
+          'bg-[var(--color-ember)] text-white shadow-xs hover:bg-[oklch(0.48_0.19_45)] active:bg-[oklch(0.42_0.19_45)]',
+        'outline-ember':
+          'border border-[var(--color-ember)] bg-transparent text-[var(--color-ember)] shadow-xs hover:bg-[var(--color-ember)]/10 active:bg-[var(--color-ember)]/15',
+        'outline-danger':
+          'border border-[var(--color-danger)] bg-transparent text-[var(--color-danger)] shadow-xs hover:bg-[var(--color-danger)]/10 active:bg-[var(--color-danger)]/15',
         outline:
           'border border-border bg-background shadow-xs hover:bg-muted hover:text-foreground active:bg-muted/80',
         secondary:
@@ -25,6 +31,9 @@ const buttonVariants = cva(
         xs: 'h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*="size-"])]:size-3',
         sm: 'h-8 gap-1.5 rounded-md px-3 text-xs has-[>svg]:px-2.5',
         lg: 'h-10 rounded-md px-6 text-base has-[>svg]:px-4',
+        xl: 'h-12 rounded-xl px-6 text-base font-semibold has-[>svg]:px-4',
+        pill: 'h-7 gap-1.5 rounded-full px-3 text-xs has-[>svg]:px-2.5',
+        'pill-sm': 'h-6 gap-1 rounded-full px-2.5 text-[11px] has-[>svg]:px-2',
         icon: 'size-9',
         'icon-xs': 'size-6 rounded-md [&_svg:not([class*="size-"])]:size-3',
         'icon-sm': 'size-8',

@@ -1,53 +1,74 @@
 import { Link } from '@tanstack/react-router'
-import { FlameIcon } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
+import { buttonVariants } from '@/components/ui/button'
 
 export function HeaderNav() {
   return (
-    <header className="w-full border-b border-border bg-background/95 backdrop-blur-xs supports-backdrop-filter:bg-background/80">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-        {/* Brand Logo & Telemetry Indicator */}
-        <div className="flex items-center gap-3">
-          <Link
-            to="/"
-            className="flex items-center gap-2 font-bold text-foreground transition-opacity hover:opacity-90"
-          >
-            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-xs">
-              <FlameIcon className="size-4" aria-hidden="true" />
-            </span>
-            <span className="text-base tracking-tight">SiagaWarga</span>
-          </Link>
-          <span className="hidden items-center gap-1.5 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground sm:inline-flex">
-            <span className="size-1.5 rounded-full bg-[var(--success)]" />
-            <span>Telemetri Aktif</span>
-          </span>
-        </div>
+    <header className="sticky top-0 z-40 w-full border-b border-[#f2f4f7] bg-card/95 backdrop-blur-xs transition-colors dark:border-border dark:bg-card/90">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Brand Logo Resmi SiagaWarga */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 transition-opacity hover:opacity-90"
+          aria-label="SiagaWarga - Beranda"
+        >
+          <img
+            src="/logo.png"
+            alt="SiagaWarga"
+            className="h-8 w-auto object-contain sm:h-9"
+          />
+        </Link>
 
-        {/* Navigation Links */}
-        <nav className="flex items-center gap-1 sm:gap-2">
+        {/* Menu Navigasi Tengah (1:1 dengan landing.jpg) */}
+        <nav
+          className="hidden items-center gap-8 md:flex"
+          aria-label="Navigasi Utama"
+        >
           <Link
             to="/"
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:text-sm [&.active]:bg-muted [&.active]:text-foreground"
+            activeOptions={{ exact: true }}
+            className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
           >
-            Beranda
+            <span>Beranda</span>
+            <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
           </Link>
+
           <Link
             to="/lapor"
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:text-sm [&.active]:bg-muted [&.active]:text-foreground"
+            className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
           >
-            Lapor Insiden
-          </Link>
-          <Link
-            to="/pantau"
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:text-sm [&.active]:bg-muted [&.active]:text-foreground"
-          >
-            Pantau Peta
+            <span>Lapor Insiden</span>
+            <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
           </Link>
 
-          <div className="ml-2 flex items-center border-l border-border pl-2">
+          <a
+            href="#news"
+            className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <span>News</span>
+          </a>
+        </nav>
+
+        {/* Tombol Aksi Kanan (1:1 dengan landing.jpg: Sign In & Sign Up) */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <Link
+            to="/lapor"
+            className={buttonVariants({ variant: 'outline-ember', size: 'sm' })}
+          >
+            Sign In
+          </Link>
+
+          <Link
+            to="/lapor"
+            className={buttonVariants({ variant: 'ember', size: 'sm' })}
+          >
+            Sign Up
+          </Link>
+
+          <div className="ml-1 flex items-center border-l border-border pl-2">
             <ThemeToggle />
           </div>
-        </nav>
+        </div>
       </div>
     </header>
   )
