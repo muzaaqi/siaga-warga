@@ -1,16 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import type { ErrorComponentProps } from '@tanstack/react-router'
-import {
-  ChevronRightIcon,
-  FlameIcon,
-  PhoneCallIcon,
-  RotateCcwIcon,
-  ShieldAlertIcon,
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { RotateCcwIcon, ShieldAlertIcon } from 'lucide-react'
 import { ReportForm } from '@/components/report/report-form'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const Route = createFileRoute('/lapor')({
   head: () => ({
@@ -33,24 +26,8 @@ export const Route = createFileRoute('/lapor')({
 function LaporPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
-      {/* Breadcrumb Navigasi */}
-      <nav
-        aria-label="Breadcrumb"
-        className="mb-6 flex items-center gap-1.5 text-xs text-muted-foreground"
-      >
-        <Link to="/" className="transition-colors hover:text-foreground">
-          Beranda
-        </Link>
-        <ChevronRightIcon className="size-3.5 text-muted-foreground/60" />
-        <span className="font-medium text-foreground">Laporkan Insiden</span>
-      </nav>
-
       {/* Header Halaman Utama (Rule 15 & DESIGN.md) */}
       <header className="mb-8 flex flex-col gap-2">
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--color-ember)]/30 bg-[var(--color-ember)]/10 px-3 py-1 text-xs font-semibold text-[var(--color-ember)]">
-          <FlameIcon className="size-3.5" />
-          <span>Formulir Pelaporan Terbuka</span>
-        </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
           Laporkan Kebakaran Hutan atau Permukiman
         </h1>
@@ -60,42 +37,6 @@ function LaporPage() {
           transparan untuk mempercepat koordinasi pemadaman di lapangan.
         </p>
       </header>
-
-      {/* Hotline Cepat Tanggap jika Mengancam Jiwa */}
-      <Card variant="canvas" className="mb-8">
-        <CardContent>
-          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
-                <PhoneCallIcon className="size-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-foreground">
-                  Kondisi Mengancam Keselamatan Jiwa?
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Jika api aktif telah menjalar dekat pemukiman, segera telepon
-                  langsung saluran darurat bebas pulsa.
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href="tel:112"
-                className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-card px-3 text-xs font-bold text-foreground transition-colors hover:bg-muted"
-              >
-                112 (Darurat)
-              </a>
-              <a
-                href="tel:113"
-                className="inline-flex h-8 items-center justify-center rounded-md border border-border bg-card px-3 text-xs font-bold text-[var(--color-danger)] transition-colors hover:bg-muted"
-              >
-                113 (Damkar)
-              </a>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Formulir Pelaporan Inti */}
       <ReportForm />
