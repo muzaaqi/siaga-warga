@@ -3,7 +3,7 @@ import { SafetyGuideCard } from './safety-guide-card'
 
 export function SafetyGuideSection() {
   return (
-    <section className="px-4 py-8 sm:px-6 lg:px-8">
+    <section id="news" className="scroll-mt-20 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Outer Container Card */}
         <div className="rounded-3xl border border-[#ebe8e2] bg-[#f9f0eb] p-6 transition-colors sm:p-10 lg:p-12 dark:border-border dark:bg-card/40">

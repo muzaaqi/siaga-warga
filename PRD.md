@@ -83,14 +83,17 @@ mindmap
 
 ```mermaid
 flowchart TD
-    Root["/ (__root.tsx)"] --> Home["/ (index.tsx)\nLanding Page & Emergency Hotline"]
+    Root["/ (__root.tsx)\nShell Navigasi: MenuDock + 1-Click Masuk"] --> Home["/ (index.tsx)\nLanding Page & Emergency Hotline"]
     Root --> Lapor["/lapor (lapor.tsx)\nFormulir Pelaporan Warga"]
     Root --> Pantau["/pantau (pantau.tsx)\nPeta Interaktif Publik & Filter Klaster"]
     Root --> Lacak["/lacak/$code (lacak.$code.tsx)\nDetail Status Laporan & Linimasa Audit"]
-    Root --> Admin["/admin/login (admin/login.tsx)\nAutentikasi Moderator Passcode"]
-    Admin --> Triase["/admin/triase (admin/triase.tsx)\nAntrean Triase Berdasarkan Urgensi"]
+    Root --> AuthApi["/api/auth/$ (api/auth.$.ts)\nEndpoint Better Auth & Callback Google OAuth"]
+    Root --> Triase["/admin/triase (admin/triase.tsx)\nAntrean Triase Berdasarkan Urgensi (RBAC Moderator)"]
     Triase --> Review["/admin/laporan/$id (admin/laporan.$id.tsx)\nPeninjauan Bukti & Pengubah Status"]
 ```
+
+> **Catatan Arsitektur Autentikasi (Zero Dedicated Login Pages):**  
+> SiagaWarga tidak menyediakan halaman `/admin/login` terpisah atau modal auth rumit. Seluruh proses masuk disederhanakan menjadi **1-Click Direct Google OAuth** melalui tombol tunggal _"Masuk"_ di komponen navigasi `MenuDock` navbar. Hak akses dikendalikan oleh sistem peran (RBAC) pada tingkat basis data dan diverifikasi secara _hybrid_ di Cloudflare Edge.
 
 ---
 
@@ -152,11 +155,19 @@ Menggambarkan tindak lanjut fisik:
 - `in_progress`: Tindak lanjut pemadaman/pengecekan lapangan sedang berlangsung.
 - `resolved`: Operasi pemadaman/pendinginan dinyatakan tuntas.
 
-### 5.5 Autentikasi & Keamanan Moderator
+### 5.5 Autentikasi Hybrid, Google OAuth & Otorisasi RBAC
 
-- Moderator masuk melalui rute `/admin/login` dengan memasukkan `ADMIN_PASSCODE`.
-- Server Function memverifikasi passcode menggunakan _timing-safe equality_ dan menerbitkan **HMAC-signed session cookie** (`siaga_mod_session`).
-- Rute-rute admin memvalidasi cookie ini di `loader` TanStack Router sebelum merender halaman.
+- **Single Sign-On (1-Click Google OAuth):**  
+  Autentikasi diintegrasikan menggunakan **Better Auth** dengan penyedia tunggal **Google OAuth 2.0**. Tidak ada formulir pendaftaran atau login manual dengan email/password. Seluruh warga dan petugas masuk dengan akun Google yang terverifikasi.
+- **Arsitektur Sesi Hybrid:**
+  1. _Source of Truth_: Seluruh data profil akun (`users`), tautan penyedia (`accounts`), dan status sesi (`sessions`) disimpan di database **Neon PostgreSQL** via Drizzle ORM.
+  2. _Edge Cookie Cache_: Pemeriksaan status masuk di Cloudflare Edge memanfaatkan token bertanda tangan kriptografi (_compact cookie cache_ dengan TTL 5 menit), sehingga navigasi umum warga dan perenderan SSR rute publik berlangsung instan (0 ms latensi database).
+- **Role-Based Access Control (RBAC):**
+  - `citizen`: Peran default untuk setiap warga yang masuk via Google. Memungkinkan pelacakan _"Laporan Saya"_ dan pengaitan akun ke laporan insiden (`reporter_user_id`).
+  - `moderator`: Petugas verifikasi resmi (diberikan melalui penetapan role di basis data). Memiliki hak akses membuka `/admin/triase` dan mengubah status laporan insiden.
+  - `superadmin`: Pengelola sistem utama dengan izin penuh mengelola peran moderator dan audit sistem.
+- **Penegakan Hak Akses Moderator:**  
+  Rute `/admin/triase` dan `/admin/laporan/$id` memvalidasi sesi secara ketat di tingkat Server Function (`requireModeratorSession`). Pengguna tanpa hak akses ditolak dengan galat 403 Forbidden atau diarahkan ke alur masuk.
 
 ### 5.6 Strategi Ingestion & Caching NASA FIRMS
 
@@ -182,10 +193,59 @@ CREATE TYPE verification_status_enum AS ENUM ('pending', 'needs_review', 'verifi
 CREATE TYPE priority_enum AS ENUM ('high', 'normal', 'low');
 CREATE TYPE handling_status_enum AS ENUM ('not_forwarded', 'forwarded', 'acknowledged', 'in_progress', 'resolved', 'unknown');
 
+-- Tabel Pengguna & Autentikasi (Better Auth)
+CREATE TABLE users (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    image TEXT,
+    role VARCHAR(20) NOT NULL DEFAULT 'citizen', -- 'citizen', 'moderator', 'superadmin'
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE sessions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    ip_address TEXT,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE accounts (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    account_id TEXT NOT NULL,
+    provider_id TEXT NOT NULL, -- 'google'
+    access_token TEXT,
+    refresh_token TEXT,
+    id_token TEXT,
+    access_token_expires_at TIMESTAMPTZ,
+    refresh_token_expires_at TIMESTAMPTZ,
+    scope TEXT,
+    password TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE verifications (
+    id TEXT PRIMARY KEY,
+    identifier TEXT NOT NULL,
+    value TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Tabel Utama: reports
 CREATE TABLE reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tracking_code VARCHAR(12) UNIQUE NOT NULL, -- Contoh: SW-2026-X89B
+    reporter_user_id TEXT REFERENCES users(id) ON DELETE SET NULL, -- Tautan akun opsional
     incident_type incident_type_enum NOT NULL,
     description TEXT NOT NULL,
     observed_at TIMESTAMPTZ NOT NULL,

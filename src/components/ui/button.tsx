@@ -58,10 +58,12 @@ function Button({
   className,
   variant = 'default',
   size = 'default',
+  nativeButton,
   ...props
 }: ButtonProps) {
   return (
     <BaseButton
+      nativeButton={nativeButton ?? (props.render ? false : true)}
       data-slot="button"
       data-variant={variant}
       data-size={size}

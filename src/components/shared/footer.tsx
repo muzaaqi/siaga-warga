@@ -94,7 +94,13 @@ export function Footer() {
                   <PhoneCallIcon className="size-4" aria-hidden="true" />
                 </span>
                 <div>
-                  <div className="font-bold text-white">113</div>
+                  <a
+                    href="tel:113"
+                    className="font-bold text-white transition-opacity hover:underline hover:opacity-90"
+                    aria-label="Panggil Dinas Pemadam Kebakaran 113"
+                  >
+                    113
+                  </a>
                   <div className="text-xs text-white/75">
                     Dinas Pemadam Kebakaran dan Penyelamatan
                   </div>
@@ -105,7 +111,13 @@ export function Footer() {
                   <PhoneCallIcon className="size-4" aria-hidden="true" />
                 </span>
                 <div>
-                  <div className="font-bold text-white">112</div>
+                  <a
+                    href="tel:112"
+                    className="font-bold text-white transition-opacity hover:underline hover:opacity-90"
+                    aria-label="Panggil Layanan Panggilan Darurat Nasional 112"
+                  >
+                    112
+                  </a>
                   <div className="text-xs text-white/75">
                     Layanan Panggilan Darurat Nasional (Bebas pulsa)
                   </div>
