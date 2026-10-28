@@ -10,6 +10,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
+import { user } from './auth'
 
 export const incidentTypeEnum = pgEnum('incident_type_enum', [
   'karhutla',
@@ -42,6 +43,9 @@ export const reports = pgTable(
   {
     id: uuid('id').defaultRandom().primaryKey(),
     trackingCode: varchar('tracking_code', { length: 12 }).notNull().unique(), // Contoh: SW-2026-X89B
+    reporterUserId: text('reporter_user_id').references(() => user.id, {
+      onDelete: 'set null',
+    }),
     incidentType: incidentTypeEnum('incident_type').notNull(),
     description: text('description').notNull(),
     observedAt: timestamp('observed_at', { withTimezone: true }).notNull(),

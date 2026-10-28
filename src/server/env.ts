@@ -14,6 +14,13 @@ const serverEnvSchema = z.object({
   NASA_FIRMS_MAP_KEY: z.string().min(1).optional(),
   ADMIN_PASSCODE: z.string().min(6).optional(),
   SESSION_SECRET: z.string().min(16).optional(),
+  BETTER_AUTH_SECRET: z
+    .string()
+    .min(16)
+    .default('siagawarga-super-secret-dev-key-must-be-32-chars'),
+  BETTER_AUTH_URL: z.string().url().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 })
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>
