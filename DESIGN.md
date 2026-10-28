@@ -33,22 +33,26 @@ All colors are formulated in the **OKLCH** color space to guarantee mathematical
 
 ### 2.1 Canvas & Surface Tokens
 
-| Token             | Light Mode (OKLCH)       | Dark Mode (OKLCH)       | shadcn Variable       | Usage                                   |
-| ----------------- | ------------------------ | ----------------------- | --------------------- | --------------------------------------- |
-| `--background`    | `oklch(0.985 0.005 260)` | `oklch(0.14 0.015 260)` | `--background`        | Default application canvas              |
-| `--surface-card`  | `oklch(1.0 0 0)`         | `oklch(0.18 0.02 260)`  | `--card`              | Bento cards, report list rows, dialogs  |
-| `--surface-muted` | `oklch(0.95 0.008 260)`  | `oklch(0.22 0.02 260)`  | `--muted`             | Input backgrounds, telemetry panel bars |
-| `--border`        | `oklch(0.88 0.01 260)`   | `oklch(0.28 0.025 260)` | `--border`, `--input` | 1px clean tactical element dividers     |
-| `--popover`       | `oklch(1.0 0 0)`         | `oklch(0.20 0.02 260)`  | `--popover`           | Popover shells, select dropdowns        |
+| Token             | Light Mode (OKLCH)         | Dark Mode (OKLCH)       | shadcn Variable       | Usage                                    |
+| ----------------- | -------------------------- | ----------------------- | --------------------- | ---------------------------------------- |
+| `--background`    | `oklch(1.0 0 0)` (#ffffff) | `oklch(0.14 0.015 260)` | `--background`        | Pure white application canvas            |
+| `--color-canvas`  | `oklch(0.98 0.005 100)`    | `oklch(0.18 0.02 260)`  | `--color-canvas`      | Warm tactile canvas & neutral containers |
+| `--surface-card`  | `oklch(1.0 0 0)`           | `oklch(0.18 0.02 260)`  | `--card`              | Bento cards, telemetry cards, dialogs    |
+| `--surface-muted` | `oklch(0.95 0.008 100)`    | `oklch(0.22 0.02 260)`  | `--muted`             | Input backgrounds, telemetry panel bars  |
+| `--border`        | `oklch(0.91 0.005 100)`    | `oklch(0.28 0.025 260)` | `--border`, `--input` | 1px clean tactical element dividers      |
+| `--popover`       | `oklch(1.0 0 0)`           | `oklch(0.20 0.02 260)`  | `--popover`           | Popover shells, select dropdowns         |
 
 ### 2.2 Semantic & Emergency Accent Tokens
 
-| Token                      | OKLCH Value            | shadcn Variable              | Semantic Role                                                               |
-| -------------------------- | ---------------------- | ---------------------------- | --------------------------------------------------------------------------- |
-| **Emergency Crimson**      | `oklch(0.62 0.22 25)`  | `--primary`, `--destructive` | Primary emergency CTA ("Laporkan Kebakaran"), high severity, critical fires |
-| **Safety Ember**           | `oklch(0.78 0.18 70)`  | `--warning`                  | NASA FIRMS satellite hotspots, active verification, unconfirmed alerts      |
-| **Field Verified Emerald** | `oklch(0.72 0.17 150)` | `--success`                  | Confirmed incident by moderator, official extinguishing completion          |
-| **Dispatch Sky**           | `oklch(0.68 0.16 230)` | `--info`                     | Agency forwarded notification ("Diteruskan ke Damkar"), en-route status     |
+| Token                      | OKLCH Value            | CSS Variable                      | Semantic Role                                                             |
+| -------------------------- | ---------------------- | --------------------------------- | ------------------------------------------------------------------------- |
+| **Forest Nightfall**       | `oklch(0.33 0.05 165)` | `--color-forest`, `--foreground`  | Authoritative brand green, deep headings, active tactical state text      |
+| **Pine Needle**            | `oklch(0.44 0.07 165)` | `--color-pine`                    | Secondary forest tone, active card borders, telemetry sub-sections        |
+| **Safety Ember**           | `oklch(0.55 0.19 45)`  | `--color-ember`, `--primary`      | Primary tactical CTA ("Laporkan Insiden", "Masuk"), active dock indicator |
+| **Emergency Crimson**      | `oklch(0.51 0.20 28)`  | `--color-danger`, `--destructive` | High severity incidents, hot emergency alerts, destructive actions        |
+| **Field Verified Emerald** | `oklch(0.72 0.17 150)` | `--success`                       | Confirmed incident by moderator, official extinguishing completion        |
+| **Dispatch Sky**           | `oklch(0.68 0.16 230)` | `--info`                          | Agency forwarded notification ("Diteruskan ke Damkar"), en-route status   |
+| **Caution Gold**           | `oklch(0.78 0.18 70)`  | `--warning`                       | NASA FIRMS satellite hotspots, unconfirmed alerts, pending validation     |
 
 ### 2.3 Typography & Text Roles
 
@@ -100,6 +104,21 @@ The file input component must integrate:
 Displayed prominently at the top of `/` and `/lapor`:
 
 > **Darurat Segera?** Jika kebakaran mengancam keselamatan jiwa atau permukiman, segera hubungi **112** atau **113**. Layanan ini adalah instrumen pelacakan publik terverifikasi dan bukan pengganti kontak cepat tanggap darurat resmi.
+
+### 4.5 MenuDock Tactical Navigation Standard (`src/components/ui/menu-dock.tsx`)
+
+Header navigasi dan aksi pengguna menggunakan komponen **`MenuDock`** berbasis **Base UI (`@base-ui/react`)**:
+
+1. **Polymorphism via `render` Prop:**  
+   Menghindari `asChild` Radix. Komponen `MenuDockItem` membungkus primitif `BaseButton` dengan `render={<Link to="..." />}` untuk TanStack Router.
+2. **Dynamic Sliding Indicator:**  
+   Garis bawah aktif bergeser mulus (`cubic-bezier(0.22, 1, 0.36, 1)`) menggunakan warna Safety Ember (`var(--color-ember)`), dengan lebar presisi mengikuti panjang teks label.
+3. **Hop Micro-Interaction:**  
+   Saat item menu diklik, ikon melompat ke atas secara tactile (`[translate:0_-30%]`) selama 180 ms (`HOP_MS`) sebelum mendarat kembali. Dikecualikan saat pengguna mengaktifkan mode _prefers-reduced-motion_.
+4. **Zero-Friction 1-Click "Masuk" Action:**  
+   Navbar menghapus tombol "Sign In" dan menggantikan "Sign Up" dengan satu tombol aksi: **"Masuk"**. Mengklik "Masuk" langsung mengarahkan pengguna ke Google OAuth tanpa form atau modal perantara.
+5. **Authenticated State Elevation:**  
+   Setelah terotentikasi, tombol aksi beralih menjadi foto profil (`Avatar` Base UI). Mengklik foto membuka `DropdownMenu` taktis yang menyediakan opsi _"Laporan Saya"_, _"Dasbor Triase"_ (khusus moderator/superadmin), dan _"Keluar"_.
 
 ---
 
