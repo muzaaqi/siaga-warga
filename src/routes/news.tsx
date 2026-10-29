@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import type { ErrorComponentProps } from '@tanstack/react-router'
-import { AlertCircleIcon, PlusIcon, RotateCcwIcon } from 'lucide-react'
+import { AlertCircleIcon, RotateCcwIcon } from 'lucide-react'
 import { NewsFeedList } from '@/components/news/news-feed-list'
 import { NewsFeedSkeleton } from '@/components/news/news-feed-skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -39,31 +39,14 @@ function NewsPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
       {/* Header Halaman Utama (Mengikuti standar src/routes/lapor.tsx) */}
-      <header className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
-            Kabar Warga
-          </h1>
-          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Pantau laporan kebakaran langsung dari warga dan perkembangan
-            penanganan di lapangan secara transparan.
-          </p>
-        </div>
-
-        <Button
-          variant="ember"
-          size="sm"
-          className="shrink-0"
-          render={
-            <Link
-              to="/lapor"
-              aria-label="Kirim laporan kejadian kebakaran baru"
-            />
-          }
-        >
-          <PlusIcon className="size-4" aria-hidden="true" />
-          <span>Lapor</span>
-        </Button>
+      <header className="mb-8 flex flex-col gap-2">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
+          Kabar Warga
+        </h1>
+        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          Pantau laporan kebakaran langsung dari warga dan perkembangan
+          penanganan di lapangan secara transparan.
+        </p>
       </header>
 
       {/* Kontainer Stream Feed Kartu */}
