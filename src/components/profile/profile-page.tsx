@@ -8,17 +8,17 @@ export function ProfilePage() {
   const { user, reports } = Route.useLoaderData()
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      {/* Header Halaman */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8 sm:px-6 lg:py-12">
+      {/* Header Halaman (Mengikuti standar src/routes/lapor.tsx) */}
+      <header className="mb-8 flex flex-col gap-2">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
           Profil Saya
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
           Kelola informasi identitas akun dan pantau seluruh riwayat laporan
           kebakaran Anda
         </p>
-      </div>
+      </header>
 
       {/* Card Profil & Form Edit In-Place */}
       <ProfileHeaderCard

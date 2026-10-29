@@ -94,7 +94,7 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
   }, [data.pages])
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       {/* Search Bar Pengganti Tab Filter */}
       <div className="relative w-full">
         <InputGroup className="h-10">
@@ -105,7 +105,7 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
             type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Cari lokasi, alamat, atau kata kunci laporan..."
+            placeholder="Cari berita kebakaran"
             className="h-10"
             aria-label="Cari laporan kebakaran"
           />

@@ -3,10 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export function NewsFeedSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div
-      className="mx-auto flex w-full max-w-xl flex-col gap-6"
-      aria-busy="true"
-    >
+    <div className="flex w-full flex-col gap-6" aria-busy="true">
       {Array.from({ length: count }).map((_, index) => (
         <Card
           // biome-ignore lint/suspicious/noArrayIndexKey: skeleton loading items

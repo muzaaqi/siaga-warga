@@ -33,18 +33,56 @@ export const Route = createFileRoute('/news')({
   component: NewsPage,
 })
 
+function NewsPage() {
+  const data = Route.useLoaderData()
+
+  return (
+    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
+      {/* Header Halaman Utama (Mengikuti standar src/routes/lapor.tsx) */}
+      <header className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
+            Kabar Warga
+          </h1>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Pantau laporan kebakaran langsung dari warga dan perkembangan
+            penanganan di lapangan secara transparan.
+          </p>
+        </div>
+
+        <Button
+          variant="ember"
+          size="sm"
+          className="shrink-0"
+          render={
+            <Link
+              to="/lapor"
+              aria-label="Kirim laporan kejadian kebakaran baru"
+            />
+          }
+        >
+          <PlusIcon className="size-4" aria-hidden="true" />
+          <span>Lapor</span>
+        </Button>
+      </header>
+
+      {/* Kontainer Stream Feed Kartu */}
+      <NewsFeedList initialData={data} />
+    </div>
+  )
+}
+
 function NewsPending() {
   return (
-    <main className="min-h-screen bg-background px-4 pt-6 pb-24 sm:px-6 sm:pt-8 lg:px-8">
-      <div className="mx-auto max-w-xl space-y-6">
-        <div className="space-y-2 text-center sm:text-left">
-          <Skeleton className="mx-auto h-8 w-44 sm:mx-0 sm:h-9 sm:w-52" />
-          <Skeleton className="mx-auto h-4 w-full max-w-md sm:mx-0" />
-        </div>
+    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
+      <Skeleton className="mb-4 h-5 w-32" />
+      <Skeleton className="mb-2 h-10 w-3/4 max-w-md" />
+      <Skeleton className="mb-8 h-4 w-1/2 max-w-sm" />
+      <div className="mb-6">
         <Skeleton className="h-10 w-full" />
-        <NewsFeedSkeleton count={3} />
       </div>
-    </main>
+      <NewsFeedSkeleton count={3} />
+    </div>
   )
 }
 
@@ -52,72 +90,29 @@ function NewsError({ error }: ErrorComponentProps) {
   const router = useRouter()
 
   return (
-    <main className="min-h-screen bg-background px-4 pt-12 pb-24 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-xl">
-        <Alert variant="destructive">
-          <AlertCircleIcon className="size-4" />
-          <AlertTitle>Gagal Memuat Kabar Warga</AlertTitle>
-          <AlertDescription>
-            <div className="space-y-4 pt-2">
-              <p>
-                {error instanceof Error
-                  ? error.message
-                  : 'Terjadi kendala saat mengambil data laporan publik.'}
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => router.invalidate()}
-              >
-                <RotateCcwIcon className="size-4" />
-                <span>Muat Ulang Halaman</span>
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      </div>
-    </main>
-  )
-}
-
-function NewsPage() {
-  const data = Route.useLoaderData()
-
-  return (
-    <main className="min-h-screen bg-background px-4 pt-6 pb-24 sm:px-6 sm:pt-8 lg:px-8">
-      <div className="mx-auto max-w-xl space-y-6">
-        {/* Header Seksi Kabar Warga */}
-        <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-              Kabar Warga
-            </h1>
-            <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
-              Pantau laporan kebakaran langsung dari warga dan perkembangan
-              penanganan di lapangan secara transparan.
+    <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
+      <Alert variant="destructive">
+        <AlertCircleIcon className="size-4" />
+        <AlertTitle>Gagal Memuat Kabar Warga</AlertTitle>
+        <AlertDescription>
+          <div className="space-y-4 pt-2">
+            <p>
+              {error instanceof Error
+                ? error.message
+                : 'Terjadi kendala saat mengambil data laporan publik.'}
             </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => router.invalidate()}
+            >
+              <RotateCcwIcon className="size-4" />
+              <span>Muat Ulang Halaman</span>
+            </Button>
           </div>
-
-          <Button
-            variant="ember"
-            size="sm"
-            className="shrink-0"
-            render={
-              <Link
-                to="/lapor"
-                aria-label="Kirim laporan kejadian kebakaran baru"
-              />
-            }
-          >
-            <PlusIcon className="size-4" aria-hidden="true" />
-            <span>Lapor</span>
-          </Button>
-        </div>
-
-        {/* Kontainer Stream Feed Kartu */}
-        <NewsFeedList initialData={data} />
-      </div>
-    </main>
+        </AlertDescription>
+      </Alert>
+    </div>
   )
 }
