@@ -17,7 +17,7 @@ import {
   MenuDockIcon,
   MenuDockLabel,
 } from '@/components/ui/menu-dock'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { UserAvatar } from '@/components/shared/user-avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -144,7 +144,6 @@ export function HeaderNav() {
     await signOut()
   }
 
-  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U'
   const isModerator = user?.role === 'moderator' || user?.role === 'superadmin'
 
   return (
@@ -204,15 +203,7 @@ export function HeaderNav() {
                     shape="circle"
                     aria-label="Menu Akun Pengguna"
                   >
-                    <Avatar size="default">
-                      {user.image && (
-                        <AvatarImage
-                          src={user.image}
-                          alt={user.name ?? 'Foto Profil'}
-                        />
-                      )}
-                      <AvatarFallback>{userInitial}</AvatarFallback>
-                    </Avatar>
+                    <UserAvatar user={user} role="true" size="default" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
@@ -289,15 +280,7 @@ export function HeaderNav() {
                 }
               >
                 <MenuDockIcon>
-                  <Avatar size="sm">
-                    {user.image && (
-                      <AvatarImage
-                        src={user.image}
-                        alt={user.name ?? 'Foto Profil'}
-                      />
-                    )}
-                    <AvatarFallback>{userInitial}</AvatarFallback>
-                  </Avatar>
+                  <UserAvatar user={user} role="false" size="sm" />
                 </MenuDockIcon>
                 <MenuDockLabel>Profil</MenuDockLabel>
               </DropdownMenuTrigger>

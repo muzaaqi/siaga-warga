@@ -4,12 +4,9 @@ import {
   CameraIcon,
   CheckIcon,
   PencilIcon,
-  ShieldCheckIcon,
   UserIcon,
   XIcon,
 } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
@@ -19,6 +16,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
+import { UserAvatar } from '@/components/shared/user-avatar'
 import type { MyProfileUser } from '@/lib/schema/profile'
 import { updateMyProfile } from '@/server/functions/profile'
 import { AvatarPickerOverlay } from './avatar-picker-overlay'
@@ -90,9 +88,6 @@ export function ProfileHeaderCard({
     form.reset()
   }
 
-  const userInitial = user.name ? user.name.charAt(0).toUpperCase() : 'U'
-  const isModerator = user.role === 'moderator' || user.role === 'superadmin'
-
   return (
     <>
       <Card variant="canvas">
@@ -115,15 +110,12 @@ export function ProfileHeaderCard({
                   aria-label="Ubah foto avatar"
                   title="Klik untuk memilih avatar taktis"
                 >
-                  <Avatar size="2xl">
-                    {selectedImage && (
-                      <AvatarImage
-                        src={selectedImage}
-                        alt={user.name || 'Foto Profil'}
-                      />
-                    )}
-                    <AvatarFallback>{userInitial}</AvatarFallback>
-                  </Avatar>
+                  <UserAvatar
+                    user={user}
+                    image={selectedImage}
+                    role="true"
+                    size="2xl"
+                  />
                   <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100">
                     <CameraIcon className="size-6 drop-shadow-sm" />
                   </div>
@@ -132,15 +124,7 @@ export function ProfileHeaderCard({
                   </div>
                 </button>
               ) : (
-                <Avatar size="2xl">
-                  {user.image && (
-                    <AvatarImage
-                      src={user.image}
-                      alt={user.name || 'Foto Profil'}
-                    />
-                  )}
-                  <AvatarFallback>{userInitial}</AvatarFallback>
-                </Avatar>
+                <UserAvatar user={user} role="true" size="2xl" />
               )}
             </div>
 
@@ -212,37 +196,13 @@ export function ProfileHeaderCard({
                 {user.email}
               </p>
 
-              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                <Badge
-                  variant={isModerator ? 'info' : 'secondary'}
-                  size="default"
-                >
-                  {user.role === 'moderator' ? (
-                    <>
-                      <ShieldCheckIcon className="size-3" />
-                      Petugas
-                    </>
-                  ) : user.role === 'superadmin' ? (
-                    <>
-                      <ShieldCheckIcon className="size-3" />
-                      Superadmin
-                    </>
-                  ) : (
-                    <>
-                      <UserIcon className="size-3" />
-                      Warga
-                    </>
-                  )}
-                </Badge>
-
-                <span className="text-xs text-muted-foreground">
-                  Bergabung{' '}
-                  {new Date(user.createdAtIso).toLocaleDateString('id-ID', {
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </span>
-              </div>
+              <p className="pt-1 text-xs text-muted-foreground">
+                Bergabung{' '}
+                {new Date(user.createdAtIso).toLocaleDateString('id-ID', {
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </p>
             </div>
 
             {/* Bagian Tombol Aksi (Edit Profil vs Batal/Simpan) */}
