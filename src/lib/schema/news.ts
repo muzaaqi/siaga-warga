@@ -5,18 +5,10 @@ import {
   verificationStatusEnum,
 } from './reports'
 
-export const newsFilterEnum = z.enum([
-  'all',
-  'verified',
-  'in_progress',
-  'resolved',
-])
-export type NewsFilter = z.infer<typeof newsFilterEnum>
-
 export const getNewsFeedInputSchema = z.object({
   cursor: z.string().optional(),
   limit: z.number().int().min(1).max(30).default(10),
-  filter: newsFilterEnum.default('all'),
+  search: z.string().optional(),
 })
 export type GetNewsFeedInput = z.infer<typeof getNewsFeedInputSchema>
 

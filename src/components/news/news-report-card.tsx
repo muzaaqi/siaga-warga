@@ -1,71 +1,28 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
-  AlertCircleIcon,
-  CheckCircle2Icon,
   CheckIcon,
   ClockIcon,
   FlameIcon,
-  HelpCircleIcon,
   MapPinIcon,
   Share2Icon,
   ShieldAlertIcon,
-  XCircleIcon,
 } from 'lucide-react'
 import { UserAvatar } from '@/components/shared/user-avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import type { NewsFeedItem } from '@/lib/schema/news'
-import { cn, formatRelativeTime } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/utils'
 
 interface NewsReportCardProps {
   item: NewsFeedItem
-}
-
-function getVerificationStatusConfig(
-  status: NewsFeedItem['verificationStatus'],
-) {
-  switch (status) {
-    case 'verified':
-      return {
-        label: 'Terverifikasi',
-        colorClass: 'text-[var(--color-pine)]',
-        icon: CheckCircle2Icon,
-      }
-    case 'needs_review':
-      return {
-        label: 'Perlu Review',
-        colorClass: 'text-[var(--warning)]',
-        icon: AlertCircleIcon,
-      }
-    case 'rejected':
-      return {
-        label: 'Ditolak',
-        colorClass: 'text-destructive',
-        icon: XCircleIcon,
-      }
-    case 'insufficient_evidence':
-      return {
-        label: 'Bukti Kurang',
-        colorClass: 'text-muted-foreground',
-        icon: HelpCircleIcon,
-      }
-    case 'pending':
-    default:
-      return {
-        label: 'Menunggu Triase',
-        colorClass: 'text-muted-foreground',
-        icon: ClockIcon,
-      }
-  }
 }
 
 const handlingStatusConfig: Record<
@@ -80,7 +37,7 @@ const handlingStatusConfig: Record<
   forwarded: { label: 'Diteruskan', variant: 'info', icon: ShieldAlertIcon },
   acknowledged: { label: 'Dikonfirmasi', variant: 'info', icon: CheckIcon },
   in_progress: { label: 'Ditangani', variant: 'warning', icon: FlameIcon },
-  resolved: { label: 'Selesai', variant: 'success', icon: CheckCircle2Icon },
+  resolved: { label: 'Selesai', variant: 'success', icon: CheckIcon },
   unknown: { label: 'Dipantau', variant: 'secondary', icon: ClockIcon },
 }
 
@@ -88,11 +45,6 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
   const navigate = useNavigate()
   const [isExpanded, setIsExpanded] = React.useState(false)
   const [isCopied, setIsCopied] = React.useState(false)
-
-  const verificationConfig = getVerificationStatusConfig(
-    item.verificationStatus,
-  )
-  const VerificationIcon = verificationConfig.icon
 
   const handlingBadge = handlingStatusConfig[item.handlingStatus]
   const HandlingIcon = handlingBadge.icon
@@ -189,16 +141,6 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
             </CardDescription>
           </div>
         </div>
-
-        <CardAction
-          title={`Status Validitas: ${verificationConfig.label}`}
-          aria-label={`Status Validitas: ${verificationConfig.label}`}
-        >
-          <VerificationIcon
-            className={cn('size-4 shrink-0', verificationConfig.colorClass)}
-            aria-hidden="true"
-          />
-        </CardAction>
       </CardHeader>
 
       {/* 2. Media Foto Bukti (Aspect 4:3 Berbingkai) */}

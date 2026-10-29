@@ -2,18 +2,20 @@ import * as React from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import {
-  CheckCircle2Icon,
-  FlameIcon,
   InboxIcon,
   PlusIcon,
   RotateCcwIcon,
-  ShieldCheckIcon,
-  SparklesIcon,
+  SearchIcon,
+  XIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { NewsFeedResponse, NewsFilter } from '@/lib/schema/news'
+import type { NewsFeedResponse } from '@/lib/schema/news'
 import { getPublicNewsFeed } from '@/server/functions/news'
 import { NewsFeedSkeleton } from './news-feed-skeleton'
 import { NewsReportCard } from './news-report-card'
@@ -23,8 +25,17 @@ interface NewsFeedListProps {
 }
 
 export function NewsFeedList({ initialData }: NewsFeedListProps) {
-  const [activeFilter, setActiveFilter] = React.useState<NewsFilter>('all')
+  const [searchInput, setSearchInput] = React.useState('')
+  const [debouncedSearch, setDebouncedSearch] = React.useState('')
   const sentinelRef = React.useRef<HTMLDivElement | null>(null)
+
+  // Debounce input pencarian selama 300ms untuk efisiensi kueri database
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput.trim())
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchInput])
 
   const {
     data,
@@ -35,9 +46,9 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['publicNewsFeed', activeFilter],
+    queryKey: ['publicNewsFeed', debouncedSearch],
     initialData:
-      activeFilter === 'all' && initialData
+      !debouncedSearch && initialData
         ? {
             pages: [initialData],
             pageParams: [undefined as string | undefined],
@@ -47,7 +58,7 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
       return getPublicNewsFeed({
         data: {
           cursor: pageParam,
-          filter: activeFilter,
+          search: debouncedSearch || undefined,
           limit: 10,
         },
       })
@@ -84,32 +95,33 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
-      {/* Tab Filter Kategori Status */}
-      <div className="flex items-center justify-center">
-        <Tabs
-          value={activeFilter}
-          onValueChange={(val) => setActiveFilter(val as NewsFilter)}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">
-              <SparklesIcon className="size-3.5" aria-hidden="true" />
-              <span>Semua</span>
-            </TabsTrigger>
-            <TabsTrigger value="verified">
-              <CheckCircle2Icon className="size-3.5" aria-hidden="true" />
-              <span>Valid</span>
-            </TabsTrigger>
-            <TabsTrigger value="in_progress">
-              <FlameIcon className="size-3.5" aria-hidden="true" />
-              <span>Ditangani</span>
-            </TabsTrigger>
-            <TabsTrigger value="resolved">
-              <ShieldCheckIcon className="size-3.5" aria-hidden="true" />
-              <span>Selesai</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      {/* Search Bar Pengganti Tab Filter */}
+      <div className="relative w-full">
+        <InputGroup className="h-10">
+          <InputGroupAddon align="inline-start">
+            <SearchIcon className="size-4" aria-hidden="true" />
+          </InputGroupAddon>
+          <InputGroupInput
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Cari lokasi, alamat, atau kata kunci laporan..."
+            className="h-10"
+            aria-label="Cari laporan kebakaran"
+          />
+          {searchInput && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => setSearchInput('')}
+              className="mr-2 shrink-0"
+              aria-label="Bersihkan pencarian"
+            >
+              <XIcon className="size-3.5" aria-hidden="true" />
+            </Button>
+          )}
+        </InputGroup>
       </div>
 
       {/* State Kesalahan Saat Memuat */}
@@ -156,24 +168,37 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
           </div>
           <div className="space-y-1">
             <h3 className="text-base font-semibold text-foreground">
-              Belum Ada Laporan Terpublikasi
+              {debouncedSearch
+                ? 'Tidak Ada Laporan yang Cocok'
+                : 'Belum Ada Laporan Terpublikasi'}
             </h3>
             <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-              {activeFilter === 'all'
-                ? 'Laporan yang dikirimkan warga akan tampil di feed ini secara transparan setelah melalui validasi awal.'
-                : 'Belum ada laporan yang sesuai dengan kriteria filter saat ini.'}
+              {debouncedSearch
+                ? `Tidak ditemukan laporan terverifikasi dengan kata kunci "${debouncedSearch}". Coba kata kunci lain atau bersihkan pencarian.`
+                : 'Laporan yang dikirimkan warga akan tampil di feed ini secara transparan setelah melalui proses verifikasi posko.'}
             </p>
           </div>
-          <Button
-            variant="ember"
-            size="sm"
-            render={
-              <Link to="/lapor" aria-label="Kirim laporan kebakaran baru" />
-            }
-          >
-            <PlusIcon className="size-3.5" aria-hidden="true" />
-            <span>Laporkan Kebakaran</span>
-          </Button>
+          {debouncedSearch ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSearchInput('')}
+            >
+              <span>Bersihkan Pencarian</span>
+            </Button>
+          ) : (
+            <Button
+              variant="ember"
+              size="sm"
+              render={
+                <Link to="/lapor" aria-label="Kirim laporan kebakaran baru" />
+              }
+            >
+              <PlusIcon className="size-3.5" aria-hidden="true" />
+              <span>Laporkan Kebakaran</span>
+            </Button>
+          )}
         </div>
       )}
 

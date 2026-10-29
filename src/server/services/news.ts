@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, lt } from 'drizzle-orm'
+import { and, desc, eq, ilike, inArray, lt, or } from 'drizzle-orm'
 import type { GetNewsFeedInput, NewsFeedResponse } from '@/lib/schema/news'
 import { db } from '@/server/db'
 import { user } from '@/server/db/schema/auth'
@@ -6,7 +6,8 @@ import { reportEvidence } from '@/server/db/schema/evidence'
 import { reports } from '@/server/db/schema/reports'
 
 /**
- * Mengambil feed laporan publik dengan cursor pagination dan proteksi privasi warga (Rule 7).
+ * Mengambil feed kabar laporan publik yang terverifikasi dengan pencarian teks,
+ * cursor pagination, dan proteksi privasi warga (Rule 7).
  */
 export async function fetchPublicNewsFeed(
   input: GetNewsFeedInput,
@@ -14,13 +15,19 @@ export async function fetchPublicNewsFeed(
   const limit = input.limit
   const conditions = []
 
-  // Filter status berdasarkan tab
-  if (input.filter === 'verified') {
-    conditions.push(eq(reports.verificationStatus, 'verified'))
-  } else if (input.filter === 'in_progress') {
-    conditions.push(eq(reports.handlingStatus, 'in_progress'))
-  } else if (input.filter === 'resolved') {
-    conditions.push(eq(reports.handlingStatus, 'resolved'))
+  // Hanya laporan yang sudah diverifikasi resmi oleh posko / moderator
+  conditions.push(eq(reports.verificationStatus, 'verified'))
+
+  // Filter pencarian teks (alamat, deskripsi, atau kode pelacakan)
+  if (input.search && input.search.trim().length > 0) {
+    const term = `%${input.search.trim()}%`
+    conditions.push(
+      or(
+        ilike(reports.description, term),
+        ilike(reports.addressDisplay, term),
+        ilike(reports.trackingCode, term),
+      ),
+    )
   }
 
   // Cursor pagination berbasis waktu kirim (submittedAt)

@@ -3,7 +3,6 @@ import {
   getNewsFeedInputSchema,
   newsFeedItemSchema,
   newsFeedResponseSchema,
-  newsFilterEnum,
 } from '@/lib/schema/news'
 import { getPublicNewsFeed } from '@/server/functions/news'
 import { fetchPublicNewsFeed } from '@/server/services/news'
@@ -15,30 +14,23 @@ describe('Plan 05: Public Incident News Feed', () => {
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.data.limit).toBe(10)
-        expect(result.data.filter).toBe('all')
         expect(result.data.cursor).toBeUndefined()
+        expect(result.data.search).toBeUndefined()
       }
     })
 
-    it('harus menerima parameter query yang valid', () => {
+    it('harus menerima parameter query yang valid dengan kata kunci pencarian', () => {
       const result = getNewsFeedInputSchema.safeParse({
         limit: 15,
-        filter: 'verified',
+        search: 'Pekanbaru',
         cursor: '2026-10-29T04:00:00.000Z',
       })
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.data.limit).toBe(15)
-        expect(result.data.filter).toBe('verified')
+        expect(result.data.search).toBe('Pekanbaru')
         expect(result.data.cursor).toBe('2026-10-29T04:00:00.000Z')
       }
-    })
-
-    it('harus menolak filter di luar enum yang diizinkan', () => {
-      const result = getNewsFeedInputSchema.safeParse({
-        filter: 'invalid_filter',
-      })
-      expect(result.success).toBe(false)
     })
 
     it('harus menolak limit kurang dari 1 atau lebih dari 30', () => {
@@ -47,14 +39,6 @@ describe('Plan 05: Public Incident News Feed', () => {
 
       const highResult = getNewsFeedInputSchema.safeParse({ limit: 50 })
       expect(highResult.success).toBe(false)
-    })
-
-    it('harus memvalidasi enum newsFilterEnum dengan benar', () => {
-      expect(newsFilterEnum.safeParse('all').success).toBe(true)
-      expect(newsFilterEnum.safeParse('verified').success).toBe(true)
-      expect(newsFilterEnum.safeParse('in_progress').success).toBe(true)
-      expect(newsFilterEnum.safeParse('resolved').success).toBe(true)
-      expect(newsFilterEnum.safeParse('rejected').success).toBe(false)
     })
 
     it('harus memvalidasi objek newsFeedItemSchema yang valid', () => {
@@ -99,23 +83,35 @@ describe('Plan 05: Public Incident News Feed', () => {
       expect(getPublicNewsFeed).toBeDefined()
     })
 
-    it('harus mengembalikan respons feed dari database dengan format yang valid', async () => {
+    it('harus mengembalikan respons feed hanya laporan yang berstatus terverifikasi', async () => {
       const response = await fetchPublicNewsFeed({
         limit: 5,
-        filter: 'all',
       })
 
       expect(response).toBeDefined()
       expect(Array.isArray(response.items)).toBe(true)
       expect(typeof response.hasMore).toBe('boolean')
 
-      // Jika ada item laporan di basis data dev/test, validasi strukturnya
-      if (response.items.length > 0) {
-        const first = response.items[0]
-        expect(first.trackingCode).toMatch(/^SW-\d{4}-[A-Z0-9]+$/)
-        expect(first.reporter).toBeDefined()
-        expect(typeof first.latitude).toBe('number')
-        expect(typeof first.longitude).toBe('number')
+      // Seluruh laporan yang tampil harus berstatus verified
+      for (const item of response.items) {
+        expect(item.verificationStatus).toBe('verified')
+        expect(item.trackingCode).toMatch(/^SW-\d{4}-[A-Z0-9]+$/)
+        expect(item.reporter).toBeDefined()
+        expect(typeof item.latitude).toBe('number')
+        expect(typeof item.longitude).toBe('number')
+      }
+    })
+
+    it('harus mendukung penyaringan pencarian teks pada fetchPublicNewsFeed', async () => {
+      const searchResponse = await fetchPublicNewsFeed({
+        limit: 5,
+        search: 'SW-',
+      })
+
+      expect(searchResponse).toBeDefined()
+      expect(Array.isArray(searchResponse.items)).toBe(true)
+      for (const item of searchResponse.items) {
+        expect(item.verificationStatus).toBe('verified')
       }
     })
   })

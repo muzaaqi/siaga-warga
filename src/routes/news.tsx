@@ -25,7 +25,6 @@ export const Route = createFileRoute('/news')({
     return getPublicNewsFeed({
       data: {
         limit: 10,
-        filter: 'all',
       },
     })
   },
