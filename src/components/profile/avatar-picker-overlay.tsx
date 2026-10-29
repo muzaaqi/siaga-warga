@@ -22,16 +22,16 @@ export function AvatarPickerOverlay({
   return (
     <div
       data-slot="avatar-picker-overlay"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in-0 duration-200"
+      className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-black/50 p-4 duration-200 fade-in-0"
       role="dialog"
       aria-modal="true"
       aria-label="Pilih Avatar"
     >
-      <div
-        className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl animate-in zoom-in-95 duration-200"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Pilih Avatar Taktis</h2>
+      <div className="relative w-full max-w-md animate-in rounded-xl border border-border bg-card p-6 shadow-xl duration-200 zoom-in-95">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-foreground">
+            Pilih Avatar Taktis
+          </h2>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -42,13 +42,13 @@ export function AvatarPickerOverlay({
           </Button>
         </div>
 
-        <p className="text-sm text-muted-foreground mb-4">
-          Pilih salah satu avatar preset SiagaWarga yang mewakili peran Anda dalam
-          mitigasi kebakaran hutan dan lahan.
+        <p className="mb-4 text-sm text-muted-foreground">
+          Pilih salah satu avatar preset SiagaWarga yang mewakili peran Anda
+          dalam mitigasi kebakaran hutan dan lahan.
         </p>
 
         <div
-          className="grid grid-cols-3 gap-3 mb-4"
+          className="mb-4 grid grid-cols-3 gap-3"
           role="radiogroup"
           aria-label="Daftar avatar preset"
         >
@@ -63,12 +63,13 @@ export function AvatarPickerOverlay({
                 aria-label={`${avatar.name}: ${avatar.description}`}
                 onClick={() => onSelect(avatar.path)}
                 className={cn(
-                  'relative group cursor-pointer transition-all',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-                  isSelected && 'ring-2 ring-[var(--color-pine)] ring-offset-2 ring-offset-card',
+                  'group relative cursor-pointer transition-all',
+                  'focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none',
+                  isSelected &&
+                    'ring-2 ring-[var(--color-pine)] ring-offset-2 ring-offset-card',
                 )}
               >
-                <div className="relative aspect-square rounded-lg overflow-hidden border border-border bg-muted">
+                <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted">
                   <Avatar size="lg" className="size-full">
                     <AvatarImage src={avatar.path} alt={avatar.name} />
                     <AvatarFallback>
@@ -81,10 +82,10 @@ export function AvatarPickerOverlay({
                     </div>
                   )}
                 </div>
-                <p className="mt-1.5 text-center text-xs font-medium text-foreground line-clamp-1">
+                <p className="mt-1.5 line-clamp-1 text-center text-xs font-medium text-foreground">
                   {avatar.name}
                 </p>
-                <p className="text-center text-[10px] text-muted-foreground line-clamp-1">
+                <p className="line-clamp-1 text-center text-[10px] text-muted-foreground">
                   {avatar.description}
                 </p>
               </button>

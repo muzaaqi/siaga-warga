@@ -168,8 +168,7 @@ describe('Plan 03: Citizen Incident Reporting', () => {
 
   describe('Server Functions Integration (Neon PostgreSQL)', () => {
     it('harus memproses pendaftaran laporan baru dan mengembalikan tracking code unik', async () => {
-      const { processCitizenReport } =
-        await import('@/server/functions/reports')
+      const { processCitizenReport } = await import('@/server/services/reports')
       const { db } = await import('@/server/db')
       const { reports } = await import('@/server/db/schema/reports')
       const { eq } = await import('drizzle-orm')

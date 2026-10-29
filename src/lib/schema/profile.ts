@@ -56,7 +56,14 @@ export const updateProfileInputSchema = z.object({
   image: z
     .string()
     .url('Tautan foto profil tidak valid')
-    .or(z.string().regex(/^\/avatars\/preset-[a-z-]+\.svg$/, 'Pilihan avatar tidak valid'))
+    .or(
+      z
+        .string()
+        .regex(
+          /^\/avatars\/preset-[a-z-]+\.svg$/,
+          'Pilihan avatar tidak valid',
+        ),
+    )
     .optional(),
 })
 

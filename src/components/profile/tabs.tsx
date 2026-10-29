@@ -8,10 +8,7 @@ interface ProfileTabsProps {
 
 export function ProfileTabs({ className, children }: ProfileTabsProps) {
   return (
-    <div
-      data-slot="profile-tabs"
-      className={cn('space-y-6', className)}
-    >
+    <div data-slot="profile-tabs" className={cn('space-y-6', className)}>
       {children}
     </div>
   )
@@ -52,9 +49,9 @@ export function ProfileTab({
       data-slot="profile-tab"
       className={cn(
         'relative px-4 py-3 text-sm font-medium transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+        'focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none',
         isActive
-          ? 'text-foreground [&::after]:absolute [&::after]:bottom-[-1px] [&::after]:left-0 [&::after]:right-0 [&::after]:h-0.5 [&::after]:bg-[#173b32]'
+          ? 'text-foreground [&::after]:absolute [&::after]:right-0 [&::after]:bottom-[-1px] [&::after]:left-0 [&::after]:h-0.5 [&::after]:bg-[#173b32]'
           : 'text-muted-foreground hover:text-foreground',
         className,
       )}
@@ -75,7 +72,7 @@ export function ProfileTabPanel({ className, children }: ProfileTabPanelProps) {
     <div
       role="tabpanel"
       data-slot="profile-tab-panel"
-      className={cn('animate-in fade-in-0 duration-200', className)}
+      className={cn('animate-in duration-200 fade-in-0', className)}
     >
       {children}
     </div>

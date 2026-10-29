@@ -34,7 +34,12 @@ export function EditProfileForm({
     setIsSubmitting(true)
 
     try {
-      await updateMyProfile({ name: name.trim(), image } as { name: string; image?: string | null })
+      await updateMyProfile({
+        data: {
+          name: name.trim(),
+          image: image ?? undefined,
+        },
+      })
       onSuccess?.()
       router.invalidate()
     } catch (err) {
@@ -66,9 +71,7 @@ export function EditProfileForm({
       <div className="flex items-center gap-4">
         <div className="relative">
           <Avatar size="lg">
-            {image && (
-              <AvatarImage src={image} alt={name || 'Foto Profil'} />
-            )}
+            {image && <AvatarImage src={image} alt={name || 'Foto Profil'} />}
             <AvatarFallback>
               {name ? name.charAt(0).toUpperCase() : 'U'}
             </AvatarFallback>
@@ -77,7 +80,7 @@ export function EditProfileForm({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="absolute -bottom-1 -right-1"
+            className="absolute -right-1 -bottom-1"
             onClick={() => setIsAvatarPickerOpen(true)}
             aria-label="Ganti avatar"
             disabled={isSubmitting}
@@ -121,7 +124,7 @@ export function EditProfileForm({
         </p>
       </div>
 
-      <div className="flex justify-end gap-2 pt-4 border-t border-border">
+      <div className="flex justify-end gap-2 border-t border-border pt-4">
         <Button
           type="button"
           variant="ghost"

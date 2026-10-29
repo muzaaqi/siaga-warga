@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'bun:test'
 import { quickTrackingSchema, landingStatsSchema } from '@/lib/schema'
 import type { LandingStats } from '@/lib/schema'
-import { fetchLandingStats, getLandingStats } from '@/server/functions/reports'
+import { fetchLandingStats } from '@/server/services/reports'
+import { getLandingStats } from '@/server/functions/reports'
 
 describe('Landing Page Schemas & Telemetry', () => {
   describe('quickTrackingSchema', () => {

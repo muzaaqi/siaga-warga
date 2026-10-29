@@ -5,7 +5,14 @@ import { useRouter } from '@tanstack/react-router'
 import { SettingsIcon, FileTextIcon, Loader2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card'
+import type { MyProfileAndReports } from '@/lib/schema/profile'
 import { EditProfileForm } from './edit-profile-form'
 import { MyReportsList } from './my-reports-list'
 import { Route } from '@/routes/profil'
@@ -13,7 +20,9 @@ import { Route } from '@/routes/profil'
 export function ProfilePage() {
   const router = useRouter()
   const data = Route.useLoaderData()
-  const [activeTab, setActiveTab] = React.useState<'profile' | 'reports'>('profile')
+  const [activeTab, setActiveTab] = React.useState<'profile' | 'reports'>(
+    'profile',
+  )
   const [isEditing, setIsEditing] = React.useState(false)
 
   const handleProfileUpdate = () => {
@@ -21,12 +30,14 @@ export function ProfilePage() {
     router.invalidate()
   }
 
-  const dataWithNull = data as { user: { name: string; email: string; image: string | null; role: string; createdAtIso: string } | null; reports: Array<{ id: string; trackingCode: string; incidentType: string; description: string; submittedAtIso: string; addressDisplay: string | null; verificationStatus: string; handlingStatus: string; isPotentialDuplicate: boolean }> } | null
-  const { user, reports } = dataWithNull ?? { user: null, reports: [] }
+  const { user, reports } = (data as MyProfileAndReports | null) ?? {
+    user: null,
+    reports: [],
+  }
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
       </div>
     )
@@ -36,7 +47,9 @@ export function ProfilePage() {
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Profil Saya</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Profil Saya
+        </h1>
         <p className="text-muted-foreground">
           Kelola informasi profil dan lacak riwayat laporan Anda
         </p>
@@ -51,11 +64,11 @@ export function ProfilePage() {
                 <img
                   src={user.image}
                   alt={user.name || 'Foto Profil'}
-                  className="size-20 sm:size-24 rounded-full object-cover ring-2 ring-border"
+                  className="size-20 rounded-full object-cover ring-2 ring-border sm:size-24"
                 />
               ) : (
-                <div className="size-20 sm:size-24 rounded-full bg-muted flex items-center justify-center ring-2 ring-border">
-                  <span className="text-3xl sm:text-4xl font-bold text-muted-foreground">
+                <div className="flex size-20 items-center justify-center rounded-full bg-muted ring-2 ring-border sm:size-24">
+                  <span className="text-3xl font-bold text-muted-foreground sm:text-4xl">
                     {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </span>
                 </div>
@@ -64,7 +77,7 @@ export function ProfilePage() {
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  className="absolute -bottom-1 -right-1"
+                  className="absolute -right-1 -bottom-1"
                   onClick={() => setIsEditing(true)}
                   aria-label="Ganti avatar"
                 >
@@ -72,12 +85,14 @@ export function ProfilePage() {
                 </Button>
               )}
             </div>
-            <div className="flex-1 min-w-0 space-y-1">
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground truncate">
+            <div className="min-w-0 flex-1 space-y-1">
+              <h2 className="truncate text-xl font-semibold text-foreground sm:text-2xl">
                 {user.name}
               </h2>
-              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-              <div className="flex items-center gap-2 mt-2">
+              <p className="truncate text-sm text-muted-foreground">
+                {user.email}
+              </p>
+              <div className="mt-2 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-pine)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--color-pine)]">
                   {user.role === 'moderator' ? (
                     <>
@@ -97,7 +112,11 @@ export function ProfilePage() {
                   )}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Bergabung {new Date(user.createdAtIso).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+                  Bergabung{' '}
+                  {new Date(user.createdAtIso).toLocaleDateString('id-ID', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
                 </span>
               </div>
             </div>
@@ -108,7 +127,7 @@ export function ProfilePage() {
                 onClick={() => setIsEditing(true)}
                 className="shrink-0"
               >
-                <SettingsIcon className="size-4 mr-1.5" />
+                <SettingsIcon className="mr-1.5 size-4" />
                 Edit Profil
               </Button>
             )}
@@ -120,11 +139,11 @@ export function ProfilePage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList aria-label="Tab profil">
           <TabsTrigger value="profile">
-            <SettingsIcon className="size-4 mr-2" />
+            <SettingsIcon className="mr-2 size-4" />
             Profil
           </TabsTrigger>
           <TabsTrigger value="reports">
-            <FileTextIcon className="size-4 mr-2" />
+            <FileTextIcon className="mr-2 size-4" />
             Laporan Saya ({reports.length})
           </TabsTrigger>
         </TabsList>
@@ -141,25 +160,34 @@ export function ProfilePage() {
               <CardHeader>
                 <CardTitle>Informasi Profil</CardTitle>
                 <CardDescription>
-                  Informasi akun Anda. Klik "Edit Profil" untuk mengubah nama dan avatar.
+                  Informasi akun Anda. Klik "Edit Profil" untuk mengubah nama
+                  dan avatar.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground">Nama Lengkap</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Nama Lengkap
+                    </label>
                     <p className="text-foreground">{user.name}</p>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground">Email</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Email
+                    </label>
                     <p className="text-foreground">{user.email}</p>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground">Peran</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Peran
+                    </label>
                     <p className="text-foreground capitalize">{user.role}</p>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground">Bergabung Sejak</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Bergabung Sejak
+                    </label>
                     <p className="text-foreground">
                       {new Date(user.createdAtIso).toLocaleDateString('id-ID', {
                         day: 'numeric',
@@ -169,8 +197,12 @@ export function ProfilePage() {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
-                  <SettingsIcon className="size-4 mr-1.5" />
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(true)}
+                  className="w-full sm:w-auto"
+                >
+                  <SettingsIcon className="mr-1.5 size-4" />
                   Edit Profil
                 </Button>
               </CardContent>

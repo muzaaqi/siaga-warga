@@ -28,7 +28,7 @@ export const getAuthSession = createServerFn({ method: 'GET' }).handler(
 /**
  * Memeriksa role pengguna langsung dari database Neon.
  */
-export async function verifyUserRole(userId: string): Promise<string | null> {
+async function verifyUserRole(userId: string): Promise<string | null> {
   const users = await db
     .select({ role: user.role })
     .from(user)

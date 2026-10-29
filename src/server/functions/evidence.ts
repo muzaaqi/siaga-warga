@@ -10,7 +10,7 @@ import { generateR2PresignedPutUrl } from '@/server/services/r2'
  * Logika pembuatan Presigned PUT URL untuk unggah berkas langsung ke Cloudflare R2 (Rule 3).
  * Mencegah buffering berkas berukuran besar di Cloudflare Workers.
  */
-export async function createUploadUrlLogic(
+async function createUploadUrlLogic(
   input: GetUploadUrlInput,
 ): Promise<GetUploadUrlOutput> {
   const fileExtension = input.filename.split('.').pop() || 'webp'
