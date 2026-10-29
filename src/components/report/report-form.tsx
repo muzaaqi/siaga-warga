@@ -1,13 +1,7 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
-import {
-  AlertCircleIcon,
-  CheckCircle2Icon,
-  FlameIcon,
-  LocateFixedIcon,
-  MapPinIcon,
-} from 'lucide-react'
+import { AlertCircleIcon, CheckCircle2Icon, FlameIcon } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -26,7 +20,6 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Separator } from '@/components/ui/separator'
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
 import type { IncidentType } from '@/lib/schema'
@@ -52,8 +45,6 @@ export function ReportForm() {
   const navigate = useNavigate()
 
   const [gpsLocked, setGpsLocked] = React.useState(false)
-  const [gpsLoading, setGpsLoading] = React.useState(false)
-  const [mapPickerOpen, setMapPickerOpen] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [submitError, setSubmitError] = React.useState<string | null>(null)
   const [locationError, setLocationError] = React.useState<string | null>(null)
@@ -140,48 +131,6 @@ export function ReportForm() {
       }
     },
   })
-
-  // Deteksi Lokasi Browser (GPS)
-  const handleDetectGps = () => {
-    if (!('geolocation' in navigator)) {
-      setLocationError(
-        'Peramban Anda tidak mendukung deteksi lokasi GPS. Silakan tentukan lokasi lewat peta.',
-      )
-      return
-    }
-
-    setGpsLoading(true)
-    setLocationError(null)
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = Number(pos.coords.latitude.toFixed(6))
-        const lon = Number(pos.coords.longitude.toFixed(6))
-
-        // Validasi Bounding Box Indonesia
-        if (lat < -11 || lat > 6 || lon < 95 || lon > 141) {
-          setLocationError(
-            'Lokasi GPS Anda terdeteksi di luar batas wilayah kedaulatan Indonesia.',
-          )
-          setGpsLoading(false)
-          return
-        }
-
-        form.setFieldValue('latitude', lat)
-        form.setFieldValue('longitude', lon)
-        setGpsLocked(true)
-        setGpsLoading(false)
-      },
-      (err) => {
-        console.warn('Gagal memperoleh GPS:', err.message)
-        setLocationError(
-          'Izin lokasi GPS peramban tidak diberikan atau sinyal lemah. Anda dapat memilih titik lokasi langsung dari peta.',
-        )
-        setGpsLoading(false)
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    )
-  }
 
   return (
     <form
@@ -437,47 +386,19 @@ export function ReportForm() {
             <CardTitle>3. Titik Koordinat & Lokasi</CardTitle>
             {gpsLocked && (
               <Badge variant="success">
-                <CheckCircle2Icon className="size-3" /> GPS Terkunci
+                <CheckCircle2Icon className="size-3" /> Lokasi Ditandai
               </Badge>
             )}
           </div>
           <CardDescription>
-            Akurasi lokasi sangat penting agar armada penanggulangan dapat
-            menavigasi rute terdekat menuju titik api.
+            Peta interaktif di bawah menampilkan titik kebakaran. Geser pin,
+            klik pada peta, atau tekan tombol GPS di pojok kanan atas peta untuk
+            mendeteksi lokasi secara otomatis.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
-            {/* Tombol GPS dan Peta */}
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleDetectGps}
-                disabled={gpsLoading || isSubmitting}
-              >
-                {gpsLoading ? (
-                  <Spinner className="size-4" />
-                ) : (
-                  <LocateFixedIcon className="size-4 text-[var(--color-ember)]" />
-                )}
-                Gunakan Lokasi Saya (GPS)
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setMapPickerOpen(true)}
-                disabled={isSubmitting}
-              >
-                <MapPinIcon className="size-4" />
-                Tandai Titik di Peta
-              </Button>
-            </div>
-
-            {/* Tampilan Koordinat Terpilih */}
+            {/* Peta Interaktif Langsung (Inline Map & Overlay Koordinat) */}
             <form.Subscribe
               selector={(state) => [
                 state.values.latitude,
@@ -485,22 +406,39 @@ export function ReportForm() {
               ]}
             >
               {([lat, lon]) => (
-                <div className="flex flex-col gap-1 rounded-md border border-border bg-muted/30 p-3">
-                  <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-                    Koordinat WGS84 Terpilih (PostGIS)
-                  </span>
-                  <div className="flex items-center gap-3 font-mono text-xs text-foreground">
-                    <span>
-                      Lat: <strong className="text-foreground">{lat}</strong>
-                    </span>
-                    <Separator orientation="vertical" className="h-3" />
-                    <span>
-                      Lon: <strong className="text-foreground">{lon}</strong>
-                    </span>
-                  </div>
-                </div>
+                <MapPinPicker
+                  latitude={lat}
+                  longitude={lon}
+                  initialLat={initialValues.latitude}
+                  initialLon={initialValues.longitude}
+                  onChangeLocation={(newLat, newLon) => {
+                    // Validasi batas wilayah Indonesia (Rule 5)
+                    if (
+                      newLat < -11 ||
+                      newLat > 6 ||
+                      newLon < 95 ||
+                      newLon > 141
+                    ) {
+                      setLocationError(
+                        'Koordinat kejadian berada di luar batas wilayah kedaulatan Indonesia.',
+                      )
+                    } else {
+                      setLocationError(null)
+                      setGpsLocked(true)
+                    }
+                    form.setFieldValue('latitude', newLat)
+                    form.setFieldValue('longitude', newLon)
+                  }}
+                  disabled={isSubmitting}
+                />
               )}
             </form.Subscribe>
+
+            {locationError && (
+              <p className="text-xs font-medium text-destructive">
+                {locationError}
+              </p>
+            )}
 
             {/* Input Alamat / Patokan Jalan */}
             <form.Field name="addressDisplay">
@@ -522,12 +460,6 @@ export function ReportForm() {
                 </Field>
               )}
             </form.Field>
-
-            {locationError && (
-              <p className="text-xs font-medium text-destructive">
-                {locationError}
-              </p>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -620,29 +552,6 @@ export function ReportForm() {
           penyelamatan dan penanganan kedaruratan publik.
         </p>
       </div>
-
-      {/* Modal Map Pin Picker */}
-      <form.Subscribe
-        selector={(state) => [state.values.latitude, state.values.longitude]}
-      >
-        {([lat, lon]) => (
-          <MapPinPicker
-            open={mapPickerOpen}
-            onOpenChange={setMapPickerOpen}
-            initialLat={lat}
-            initialLon={lon}
-            onConfirmLocation={(newLat, newLon, hint) => {
-              form.setFieldValue('latitude', newLat)
-              form.setFieldValue('longitude', newLon)
-              setGpsLocked(true)
-              if (hint && !form.getFieldValue('addressDisplay')) {
-                form.setFieldValue('addressDisplay', hint)
-              }
-              setLocationError(null)
-            }}
-          />
-        )}
-      </form.Subscribe>
     </form>
   )
 }
