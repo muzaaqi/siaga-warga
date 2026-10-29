@@ -24,7 +24,7 @@ export function NewsFeedSkeleton({ count = 3 }: { count?: number }) {
                 <Skeleton className="h-3 w-40" />
               </div>
             </div>
-            <Skeleton shape="circle" className="size-6" />
+            <Skeleton shape="circle" className="size-4" />
           </CardHeader>
 
           {/* Media Foto */}

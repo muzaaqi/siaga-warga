@@ -24,45 +24,45 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import type { NewsFeedItem } from '@/lib/schema/news'
-import { formatRelativeTime } from '@/lib/utils'
+import { cn, formatRelativeTime } from '@/lib/utils'
 
 interface NewsReportCardProps {
   item: NewsFeedItem
 }
 
-function getVerificationStatusBadge(
+function getVerificationStatusConfig(
   status: NewsFeedItem['verificationStatus'],
 ) {
   switch (status) {
     case 'verified':
       return {
         label: 'Terverifikasi',
-        variant: 'info' as const,
+        colorClass: 'text-[var(--color-pine)]',
         icon: CheckCircle2Icon,
       }
     case 'needs_review':
       return {
         label: 'Perlu Review',
-        variant: 'secondary' as const,
+        colorClass: 'text-[var(--warning)]',
         icon: AlertCircleIcon,
       }
     case 'rejected':
       return {
         label: 'Ditolak',
-        variant: 'destructive' as const,
+        colorClass: 'text-destructive',
         icon: XCircleIcon,
       }
     case 'insufficient_evidence':
       return {
         label: 'Bukti Kurang',
-        variant: 'secondary' as const,
+        colorClass: 'text-muted-foreground',
         icon: HelpCircleIcon,
       }
     case 'pending':
     default:
       return {
         label: 'Menunggu Triase',
-        variant: 'secondary' as const,
+        colorClass: 'text-muted-foreground',
         icon: ClockIcon,
       }
   }
@@ -89,8 +89,10 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
   const [isCopied, setIsCopied] = React.useState(false)
 
-  const verificationBadge = getVerificationStatusBadge(item.verificationStatus)
-  const VerificationIcon = verificationBadge.icon
+  const verificationConfig = getVerificationStatusConfig(
+    item.verificationStatus,
+  )
+  const VerificationIcon = verificationConfig.icon
 
   const handlingBadge = handlingStatusConfig[item.handlingStatus]
   const HandlingIcon = handlingBadge.icon
@@ -188,15 +190,14 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
           </div>
         </div>
 
-        <CardAction>
-          <Badge
-            variant={verificationBadge.variant}
-            size="xs"
-            title={`Validitas: ${verificationBadge.label}`}
-            aria-label={`Validitas: ${verificationBadge.label}`}
-          >
-            <VerificationIcon className="size-3.5" aria-hidden="true" />
-          </Badge>
+        <CardAction
+          title={`Status Validitas: ${verificationConfig.label}`}
+          aria-label={`Status Validitas: ${verificationConfig.label}`}
+        >
+          <VerificationIcon
+            className={cn('size-4 shrink-0', verificationConfig.colorClass)}
+            aria-hidden="true"
+          />
         </CardAction>
       </CardHeader>
 
