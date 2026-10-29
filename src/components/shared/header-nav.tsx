@@ -88,7 +88,7 @@ function UserDropdownMenuContent({
           <SettingsIcon />
           <span>Profil</span>
         </DropdownMenuItem>
-        <DropdownMenuItem render={<Link to="/lapor" />}>
+        <DropdownMenuItem render={<Link to="/profil" />}>
           <FileTextIcon />
           <span>Laporan Saya</span>
         </DropdownMenuItem>
@@ -122,9 +122,7 @@ export function HeaderNav() {
       ? 'home'
       : location.pathname.startsWith('/lapor')
         ? 'lapor'
-        : location.pathname === '/profil'
-          ? 'profil'
-          : 'home'
+        : 'home'
 
   const user = session?.user as
     | {
@@ -185,14 +183,6 @@ export function HeaderNav() {
               className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
             >
               <span>Lapor</span>
-              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
-            </Link>
-
-            <Link
-              to="/profil"
-              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
-            >
-              <span>Profil</span>
               <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
             </Link>
 
@@ -279,13 +269,6 @@ export function HeaderNav() {
               <FlameIcon />
             </MenuDockIcon>
             <MenuDockLabel>Lapor</MenuDockLabel>
-          </MenuDockItem>
-
-          <MenuDockItem value="profil" render={<Link to="/profil" />}>
-            <MenuDockIcon>
-              <SettingsIcon />
-            </MenuDockIcon>
-            <MenuDockLabel>Profil</MenuDockLabel>
           </MenuDockItem>
 
           <MenuDockItem value="news" render={<Link to="/" hash="news" />}>

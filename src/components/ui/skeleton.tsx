@@ -1,14 +1,33 @@
 import * as React from 'react'
+import { cva } from 'class-variance-authority'
+import type { VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
+const skeletonVariants = cva('animate-pulse bg-muted', {
+  variants: {
+    shape: {
+      default: 'rounded-md',
+      circle: 'rounded-full',
+      card: 'rounded-xl',
+    },
+  },
+  defaultVariants: {
+    shape: 'default',
+  },
+})
+
+interface SkeletonProps
+  extends React.ComponentProps<'div'>, VariantProps<typeof skeletonVariants> {}
+
+function Skeleton({ className, shape, ...props }: SkeletonProps) {
   return (
     <div
       data-slot="skeleton"
-      className={cn('animate-pulse rounded-md bg-muted', className)}
+      className={cn(skeletonVariants({ shape }), className)}
       {...props}
     />
   )
 }
 
-export { Skeleton }
+export { Skeleton, skeletonVariants }
+export type { SkeletonProps }
