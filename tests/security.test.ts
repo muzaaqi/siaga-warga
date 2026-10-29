@@ -147,4 +147,59 @@ describe('Plan 06: Security Headers & Rate Limiting Hardening', () => {
       expect(refreshed.allowed).toBe(true)
     })
   })
+
+  describe('4. Server Functions Rate Limit Enforcement', () => {
+    it('harus membatasi pembuatan tiket presigned upload saat kuota habis', async () => {
+      const { createUploadUrlLogic } = await import(
+        '@/server/functions/evidence'
+      )
+      const input = {
+        filename: 'foto-kebakaran.jpg',
+        mimeType: 'image/jpeg' as const,
+        fileSize: 102400,
+        checksum:
+          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      }
+      const testIp = '103.45.67.89'
+
+      // Jalankan hingga kuota evidence_upload habis (10 kali)
+      for (let i = 0; i < RATE_LIMIT_CONFIGS.evidence_upload.maxRequests; i++) {
+        const res = await createUploadUrlLogic(input, testIp)
+        expect(res.uploadUrl).toBeDefined()
+      }
+
+      // Pemanggilan ke-11 dari IP yang sama harus melempar error RATE_LIMIT_EXCEEDED
+      expect(createUploadUrlLogic(input, testIp)).rejects.toThrow(
+        /RATE_LIMIT_EXCEEDED/,
+      )
+    })
+
+    it('harus membatasi pengiriman formulir laporan saat kuota habis', async () => {
+      const { processCitizenReportWithRateLimit } = await import(
+        '@/server/functions/reports'
+      )
+      const testIp = '103.45.67.90'
+      const maxReports = RATE_LIMIT_CONFIGS.report_submission.maxRequests
+
+      // Simulasikan penghabis kuota rate limit dengan checkRateLimit langsung pada testIp
+      for (let i = 0; i < maxReports; i++) {
+        checkRateLimit(testIp, 'report_submission')
+      }
+
+      const dummyPayload = {
+        incidentType: 'karhutla' as const,
+        description: 'Laporan uji batasan frekuensi pengiriman.',
+        observedAt: new Date().toISOString(),
+        latitude: -0.5,
+        longitude: 101.5,
+        r2ObjectKey: 'evidence/test.webp',
+        fileHashSha256: 'a'.repeat(64),
+      }
+
+      // Pemanggilan berikutnya harus ditolak oleh rate limit
+      expect(
+        processCitizenReportWithRateLimit(dummyPayload, null, testIp),
+      ).rejects.toThrow(/RATE_LIMIT_EXCEEDED/)
+    })
+  })
 })
