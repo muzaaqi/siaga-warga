@@ -13,6 +13,10 @@
  */
 
 import path from 'node:path'
+import {
+  SECURITY_HEADERS,
+  applySecurityHeaders,
+} from './src/server/services/security-headers'
 
 // Configuration
 const SERVER_PORT = Number(process.env.PORT ?? 3000)
@@ -176,6 +180,7 @@ function createResponseHandler(
       'Cache-Control': asset.immutable
         ? 'public, max-age=31536000, immutable'
         : 'public, max-age=3600',
+      ...SECURITY_HEADERS,
     }
 
     if (ENABLE_ETAG && asset.etag) {
@@ -299,6 +304,7 @@ async function initializeStaticRoutes(
                 'Cache-Control': isImmutable
                   ? 'public, max-age=31536000, immutable'
                   : 'public, max-age=3600',
+                ...SECURITY_HEADERS,
               },
             })
           }
@@ -383,12 +389,18 @@ async function initializeServer() {
       ...routes,
 
       // Fallback to TanStack Start handler for SSR and API requests
-      '/*': (req: Request) => {
+      '/*': async (req: Request) => {
         try {
-          return handler.fetch(req)
+          const response = await handler.fetch(req)
+          applySecurityHeaders(response.headers)
+          return response
         } catch (error) {
           log.error(`Server handler error: ${String(error)}`)
-          return new Response('Internal Server Error', { status: 500 })
+          const errorResponse = new Response('Internal Server Error', {
+            status: 500,
+          })
+          applySecurityHeaders(errorResponse.headers)
+          return errorResponse
         }
       },
     },
@@ -398,7 +410,11 @@ async function initializeServer() {
       log.error(
         `Uncaught server error: ${error instanceof Error ? error.message : String(error)}`,
       )
-      return new Response('Internal Server Error', { status: 500 })
+      const errorResponse = new Response('Internal Server Error', {
+        status: 500,
+      })
+      applySecurityHeaders(errorResponse.headers)
+      return errorResponse
     },
   })
 

@@ -194,6 +194,7 @@ describe('Plan 06: Security Headers & Rate Limiting Hardening', () => {
         longitude: 101.5,
         r2ObjectKey: 'evidence/test.webp',
         fileHashSha256: 'a'.repeat(64),
+        isAnonymous: true,
       }
 
       // Pemanggilan berikutnya harus ditolak oleh rate limit
