@@ -121,17 +121,6 @@ export function MapPinPicker({
           </MapMarker>
         </Map>
 
-        {/* Overlay Informasi Koordinat di Peta */}
-        <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex flex-col gap-1.5">
-          <div className="pointer-events-auto flex items-center gap-2 rounded-lg border border-border bg-background/90 px-3 py-1.5 text-xs shadow-md backdrop-blur-md">
-            <div className="size-2 animate-pulse rounded-full bg-[var(--color-ember)]" />
-            <span className="font-medium text-foreground">Titik Api:</span>
-            <span className="font-mono font-semibold text-foreground">
-              {latitude.toFixed(6)}, {longitude.toFixed(6)}
-            </span>
-          </div>
-        </div>
-
         {/* Tombol Reset ke Lokasi Awal */}
         {initialLat !== undefined && initialLon !== undefined && (
           <div className="absolute top-2 left-2 z-10">

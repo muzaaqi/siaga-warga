@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
-import { AlertCircleIcon, CheckCircle2Icon, FlameIcon } from 'lucide-react'
+import { AlertCircleIcon, FlameIcon } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -44,7 +43,6 @@ interface ReportFormValues {
 export function ReportForm() {
   const navigate = useNavigate()
 
-  const [gpsLocked, setGpsLocked] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [submitError, setSubmitError] = React.useState<string | null>(null)
   const [locationError, setLocationError] = React.useState<string | null>(null)
@@ -382,14 +380,7 @@ export function ReportForm() {
       {/* CARD 3: TITIK LOKASI & KOORDINAT */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>3. Titik Koordinat & Lokasi</CardTitle>
-            {gpsLocked && (
-              <Badge variant="success">
-                <CheckCircle2Icon className="size-3" /> Lokasi Ditandai
-              </Badge>
-            )}
-          </div>
+          <CardTitle>3. Titik Koordinat & Lokasi</CardTitle>
           <CardDescription>
             Peta interaktif di bawah menampilkan titik kebakaran. Geser pin,
             klik pada peta, atau tekan tombol GPS di pojok kanan atas peta untuk
@@ -398,7 +389,7 @@ export function ReportForm() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
-            {/* Peta Interaktif Langsung (Inline Map & Overlay Koordinat) */}
+            {/* Peta Interaktif Langsung (Inline Map) */}
             <form.Subscribe
               selector={(state) => [
                 state.values.latitude,
@@ -424,7 +415,6 @@ export function ReportForm() {
                       )
                     } else {
                       setLocationError(null)
-                      setGpsLocked(true)
                     }
                     form.setFieldValue('latitude', newLat)
                     form.setFieldValue('longitude', newLon)
