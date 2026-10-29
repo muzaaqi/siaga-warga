@@ -298,7 +298,7 @@ export function PhotoUploadZone({
               Sentuh untuk mengambil foto atau pilih dari perangkat
             </p>
             <p className="text-xs text-muted-foreground">
-              Format JPEG, PNG, atau WebP (otomatis dikompresi &lt; 1 MB)
+              Format JPEG, PNG, atau WebP
             </p>
           </div>
 

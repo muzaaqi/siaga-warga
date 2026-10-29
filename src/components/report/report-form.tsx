@@ -4,19 +4,8 @@ import { useForm } from '@tanstack/react-form'
 import { AlertCircleIcon, FlameIcon } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from '@/components/ui/field'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Spinner } from '@/components/ui/spinner'
@@ -151,11 +140,7 @@ export function ReportForm() {
       {/* CARD 1: FOTO BUKTI KEJADIAN */}
       <Card>
         <CardHeader>
-          <CardTitle>1. Bukti Foto Kejadian</CardTitle>
-          <CardDescription>
-            Unggah minimal satu foto bukti kebakaran yang Anda amati langsung
-            dari lokasi yang aman.
-          </CardDescription>
+          <CardTitle size="lg">Bukti Foto</CardTitle>
         </CardHeader>
         <CardContent>
           <form.Field
@@ -188,11 +173,7 @@ export function ReportForm() {
       {/* CARD 2: RINCIAN KEJADIAN */}
       <Card>
         <CardHeader>
-          <CardTitle>2. Rincian & Karakteristik Insiden</CardTitle>
-          <CardDescription>
-            Tentukan kategori kebakaran dan waktu kejadian teramati untuk
-            menentukan prioritas triase.
-          </CardDescription>
+          <CardTitle size="lg">Rincian & Karakteristik</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-5">
@@ -200,7 +181,7 @@ export function ReportForm() {
             <form.Field name="incidentType">
               {(field) => (
                 <Field>
-                  <FieldLabel>Kategori Kebakaran</FieldLabel>
+                  <FieldLabel>Kategori</FieldLabel>
                   <RadioGroup
                     value={field.state.value}
                     onValueChange={(val) =>
@@ -320,16 +301,12 @@ export function ReportForm() {
             <form.Field name="observedAt">
               {(field) => (
                 <Field>
-                  <FieldLabel>Waktu Kejadian Teramati</FieldLabel>
+                  <FieldLabel>Waktu Kejadian</FieldLabel>
                   <DateTimePicker
                     value={field.state.value}
                     onChange={(date) => field.handleChange(date)}
                     disabled={isSubmitting}
                   />
-                  <FieldDescription>
-                    Waktu perkiraan saat Anda pertama kali melihat titik api
-                    atau asap.
-                  </FieldDescription>
                 </Field>
               )}
             </form.Field>
@@ -348,7 +325,7 @@ export function ReportForm() {
                 <Field data-invalid={field.state.meta.errors.length > 0}>
                   <div className="flex items-center justify-between">
                     <FieldLabel htmlFor="report-description">
-                      Deskripsi Situasi Kejadian
+                      Deskripsi
                     </FieldLabel>
                     <span className="text-[11px] text-muted-foreground">
                       {field.state.value.length} / 1000 karakter
@@ -366,10 +343,6 @@ export function ReportForm() {
                   {field.state.meta.errors.length > 0 && (
                     <FieldError>{field.state.meta.errors[0]}</FieldError>
                   )}
-                  <FieldDescription>
-                    Jelaskan kondisi api, arah angin, asap tebal, akses jalan
-                    untuk armada pemadam, atau potensi bahaya sekitar.
-                  </FieldDescription>
                 </Field>
               )}
             </form.Field>
@@ -380,12 +353,7 @@ export function ReportForm() {
       {/* CARD 3: TITIK LOKASI & KOORDINAT */}
       <Card>
         <CardHeader>
-          <CardTitle>3. Titik Koordinat & Lokasi</CardTitle>
-          <CardDescription>
-            Peta interaktif di bawah menampilkan titik kebakaran. Geser pin,
-            klik pada peta, atau tekan tombol GPS di pojok kanan atas peta untuk
-            mendeteksi lokasi secara otomatis.
-          </CardDescription>
+          <CardTitle size="lg">Lokasi</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
@@ -435,7 +403,7 @@ export function ReportForm() {
               {(field) => (
                 <Field>
                   <FieldLabel htmlFor="address-display">
-                    Patokan Alamat / Keterangan Jalan (Opsional)
+                    Alamat (Opsional)
                   </FieldLabel>
                   <Input
                     id="address-display"
@@ -443,10 +411,6 @@ export function ReportForm() {
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                   />
-                  <FieldDescription>
-                    Tuliskan nama jalan, gedung penting, atau nomor tiang
-                    listrik terdekat untuk mempermudah navigasi petugas.
-                  </FieldDescription>
                 </Field>
               )}
             </form.Field>
@@ -457,11 +421,7 @@ export function ReportForm() {
       {/* CARD 4: PERNYATAAN & PERSETUJUAN */}
       <Card>
         <CardHeader>
-          <CardTitle>4. Pernyataan & Persetujuan Pelaporan</CardTitle>
-          <CardDescription>
-            Pernyataan komitmen pelapor untuk menjamin pertanggungjawaban
-            kebenaran informasi kedaruratan.
-          </CardDescription>
+          <CardTitle size="lg">Pernyataan & Persetujuan</CardTitle>
         </CardHeader>
         <CardContent>
           <form.Field
