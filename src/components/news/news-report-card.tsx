@@ -5,6 +5,7 @@ import {
   CheckCircle2Icon,
   CheckIcon,
   ClockIcon,
+  FlameIcon,
   HelpCircleIcon,
   MapPinIcon,
   Share2Icon,
@@ -67,6 +68,22 @@ function getVerificationStatusBadge(
   }
 }
 
+const handlingStatusConfig: Record<
+  NewsFeedItem['handlingStatus'],
+  {
+    label: string
+    variant: 'secondary' | 'success' | 'warning' | 'info'
+    icon: React.ComponentType<{ className?: string }>
+  }
+> = {
+  not_forwarded: { label: 'Menunggu', variant: 'secondary', icon: ClockIcon },
+  forwarded: { label: 'Diteruskan', variant: 'info', icon: ShieldAlertIcon },
+  acknowledged: { label: 'Dikonfirmasi', variant: 'info', icon: CheckIcon },
+  in_progress: { label: 'Ditangani', variant: 'warning', icon: FlameIcon },
+  resolved: { label: 'Selesai', variant: 'success', icon: CheckCircle2Icon },
+  unknown: { label: 'Dipantau', variant: 'secondary', icon: ClockIcon },
+}
+
 export function NewsReportCard({ item }: NewsReportCardProps) {
   const navigate = useNavigate()
   const [isExpanded, setIsExpanded] = React.useState(false)
@@ -74,6 +91,9 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
 
   const verificationBadge = getVerificationStatusBadge(item.verificationStatus)
   const VerificationIcon = verificationBadge.icon
+
+  const handlingBadge = handlingStatusConfig[item.handlingStatus]
+  const HandlingIcon = handlingBadge.icon
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -172,9 +192,8 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
           <Badge
             variant={verificationBadge.variant}
             size="xs"
-            title={verificationBadge.label}
-            aria-label={verificationBadge.label}
-            
+            title={`Validitas: ${verificationBadge.label}`}
+            aria-label={`Validitas: ${verificationBadge.label}`}
           >
             <VerificationIcon className="size-3.5" aria-hidden="true" />
           </Badge>
@@ -204,43 +223,51 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
       {/* 3. Bar Aksi Ikon & Caption di dalam CardContent */}
       <CardContent>
         <div className="space-y-2.5">
-          {/* Bar Aksi Ikon Ringkas */}
-          <div className="flex items-center gap-1 border-b border-border/50 pb-2">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              render={
-                <a
-                  href={googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Buka lokasi di Google Maps"
-                  title="Buka lokasi di Google Maps"
-                />
-              }
-            >
-              <MapPinIcon className="size-4" aria-hidden="true" />
-            </Button>
+          {/* Bar Aksi Ikon & Status Penanganan */}
+          <div className="flex items-center justify-between border-b border-border/50 pb-2">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                render={
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Buka lokasi di Google Maps"
+                    title="Buka lokasi di Google Maps"
+                  />
+                }
+              >
+                <MapPinIcon className="size-4" aria-hidden="true" />
+              </Button>
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={handleShare}
-              aria-label="Salin tautan laporan"
-              title={
-                isCopied ? 'Tautan berhasil disalin' : 'Salin tautan laporan'
-              }
-            >
-              {isCopied ? (
-                <CheckIcon
-                  className="size-4 text-[var(--color-pine)]"
-                  aria-hidden="true"
-                />
-              ) : (
-                <Share2Icon className="size-4" aria-hidden="true" />
-              )}
-            </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleShare}
+                aria-label="Salin tautan laporan"
+                title={
+                  isCopied ? 'Tautan berhasil disalin' : 'Salin tautan laporan'
+                }
+              >
+                {isCopied ? (
+                  <CheckIcon
+                    className="size-4 text-[var(--color-pine)]"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Share2Icon className="size-4" aria-hidden="true" />
+                )}
+              </Button>
+            </div>
+
+            {/* Status Penanganan Lapangan */}
+            <Badge variant={handlingBadge.variant} size="xs">
+              <HandlingIcon className="size-3" aria-hidden="true" />
+              <span>{handlingBadge.label}</span>
+            </Badge>
           </div>
 
           {/* Waktu Laporan (di atas deskripsi, di bawah foto ala Instagram) */}
