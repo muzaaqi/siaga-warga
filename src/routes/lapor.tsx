@@ -9,12 +9,12 @@ export const Route = createFileRoute('/lapor')({
   head: () => ({
     meta: [
       {
-        title: 'Laporkan Kebakaran Hutan atau Permukiman | SiagaWarga',
+        title: 'Laporkan Kebakaran | SiagaWarga',
       },
       {
         name: 'description',
         content:
-          'Kirimkan laporan kebakaran hutan dan lahan (karhutla) atau permukiman dengan koordinat presisi dan bukti foto terverifikasi untuk mempercepat tindakan petugas penanggulangan.',
+          'Kirim foto dan titik lokasi kejadian kebakaran hutan atau permukiman. Laporan Anda langsung diverifikasi petugas untuk penanganan cepat.',
       },
     ],
   }),
@@ -29,12 +29,11 @@ function LaporPage() {
       {/* Header Halaman Utama (Rule 15 & DESIGN.md) */}
       <header className="mb-8 flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
-          Laporkan Kebakaran Hutan atau Permukiman
+          Laporkan Kebakaran
         </h1>
         <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Sampaikan data kejadian secara faktual dengan bukti foto dan koordinat
-          lokasi presisi. Data Anda akan ditriase dan diverifikasi secara
-          transparan untuk mempercepat koordinasi pemadaman di lapangan.
+          Kirim foto dan titik lokasi kejadian. Laporan Anda langsung
+          diverifikasi petugas untuk penanganan cepat.
         </p>
       </header>
 
