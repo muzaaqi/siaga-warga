@@ -28,10 +28,14 @@ export type ServerEnv = z.infer<typeof serverEnvSchema>
 /**
  * Helper untuk memvalidasi dan mengambil env server secara aman.
  */
-export function getServerEnv(
-  envObj: Record<string, unknown> = process.env,
-): ServerEnv {
-  const result = serverEnvSchema.safeParse(envObj)
+export function getServerEnv(envObj?: Record<string, unknown>): ServerEnv {
+  if (typeof window !== 'undefined') {
+    throw new Error(
+      'getServerEnv tidak boleh dipanggil di lingkungan browser/klien (Rule 18).',
+    )
+  }
+  const source = envObj ?? (typeof process !== 'undefined' ? process.env : {})
+  const result = serverEnvSchema.safeParse(source)
   if (!result.success) {
     console.error(
       'Konfigurasi environment server tidak valid:',

@@ -1,6 +1,16 @@
 import * as React from 'react'
 import { Link } from '@tanstack/react-router'
-import { FlameIcon, MapPinIcon, ClockIcon, AlertTriangleIcon, CheckCircleIcon, Loader2Icon, XCircleIcon, ShieldIcon, EyeIcon } from 'lucide-react'
+import {
+  FlameIcon,
+  MapPinIcon,
+  ClockIcon,
+  AlertTriangleIcon,
+  CheckCircleIcon,
+  Loader2Icon,
+  XCircleIcon,
+  ShieldIcon,
+  EyeIcon,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,7 +23,13 @@ const incidentTypeLabels: Record<string, string> = {
   lainnya: 'Lainnya',
 }
 
-const verificationStatusLabels: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'destructive' | 'info' }> = {
+const verificationStatusLabels: Record<
+  string,
+  {
+    label: string
+    variant: 'default' | 'success' | 'warning' | 'destructive' | 'info'
+  }
+> = {
   pending: { label: 'Menunggu', variant: 'warning' },
   needs_review: { label: 'Perlu Tinjau', variant: 'info' },
   verified: { label: 'Terverifikasi', variant: 'success' },
@@ -21,7 +37,13 @@ const verificationStatusLabels: Record<string, { label: string; variant: 'defaul
   rejected: { label: 'Ditolak', variant: 'destructive' },
 }
 
-const handlingStatusLabels: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'destructive' | 'info' }> = {
+const handlingStatusLabels: Record<
+  string,
+  {
+    label: string
+    variant: 'default' | 'success' | 'warning' | 'destructive' | 'info'
+  }
+> = {
   not_forwarded: { label: 'Belum Diteruskan', variant: 'default' },
   forwarded: { label: 'Diteruskan', variant: 'info' },
   acknowledged: { label: 'Dikonfirmasi', variant: 'warning' },
@@ -30,7 +52,10 @@ const handlingStatusLabels: Record<string, { label: string; variant: 'default' |
   unknown: { label: 'Tidak Diketahui', variant: 'default' },
 }
 
-const verificationIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+const verificationIcons: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   pending: ClockIcon,
   needs_review: AlertTriangleIcon,
   verified: CheckCircleIcon,
@@ -38,7 +63,10 @@ const verificationIcons: Record<string, React.ComponentType<{ className?: string
   rejected: XCircleIcon,
 }
 
-const handlingIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+const handlingIcons: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   not_forwarded: FlameIcon,
   forwarded: ShieldIcon,
   acknowledged: CheckCircleIcon,
@@ -53,9 +81,16 @@ interface MyReportCardProps {
 }
 
 export function MyReportCard({ report, className }: MyReportCardProps) {
-  const verification = verificationStatusLabels[report.verificationStatus] ?? { label: report.verificationStatus, variant: 'default' }
-  const handling = handlingStatusLabels[report.handlingStatus] ?? { label: report.handlingStatus, variant: 'default' }
-  const VerificationIcon = verificationIcons[report.verificationStatus] ?? AlertTriangleIcon
+  const verification = verificationStatusLabels[report.verificationStatus] ?? {
+    label: report.verificationStatus,
+    variant: 'default',
+  }
+  const handling = handlingStatusLabels[report.handlingStatus] ?? {
+    label: report.handlingStatus,
+    variant: 'default',
+  }
+  const VerificationIcon =
+    verificationIcons[report.verificationStatus] ?? AlertTriangleIcon
   const HandlingIcon = handlingIcons[report.handlingStatus] ?? FlameIcon
 
   const formatDate = (iso: string) => {
@@ -73,8 +108,8 @@ export function MyReportCard({ report, className }: MyReportCardProps) {
     <Card variant="elevated" className={cn('group overflow-hidden', className)}>
       <CardContent>
         <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-2">
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <Badge variant="outline" size="xs">
                 <FlameIcon className="size-3" />
                 {incidentTypeLabels[report.incidentType] ?? report.incidentType}
@@ -88,10 +123,11 @@ export function MyReportCard({ report, className }: MyReportCardProps) {
             </div>
 
             <Link
-              to={`/lacak/${report.trackingCode}`}
-              className="block group"
+              to="/lacak/$code"
+              params={{ code: report.trackingCode }}
+              className="group block"
             >
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+              <h3 className="line-clamp-2 font-semibold text-foreground transition-colors group-hover:text-primary">
                 {report.description}
               </h3>
             </Link>
@@ -112,7 +148,7 @@ export function MyReportCard({ report, className }: MyReportCardProps) {
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className="flex shrink-0 flex-col items-end gap-2">
             <div className="flex items-center gap-1.5">
               <Badge variant={verification.variant} size="xs">
                 <VerificationIcon className="size-3" />
@@ -128,10 +164,11 @@ export function MyReportCard({ report, className }: MyReportCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-border flex items-center justify-end gap-2">
+        <div className="mt-4 flex items-center justify-end gap-2 border-t border-border pt-4">
           <Link
-            to={`/lacak/${report.trackingCode}`}
-            className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+            to="/lacak/$code"
+            params={{ code: report.trackingCode }}
+            className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             <EyeIcon className="size-3.5" />
             Lacak

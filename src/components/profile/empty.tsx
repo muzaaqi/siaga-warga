@@ -39,7 +39,7 @@ export function EmptyState({
     <div
       data-slot="profile-empty-state"
       className={cn(
-        'flex flex-col items-center justify-center gap-4 p-8 text-center border border-border/50 rounded-xl bg-card/50',
+        'flex flex-col items-center justify-center gap-4 rounded-xl border border-border/50 bg-card/50 p-8 text-center',
         className,
       )}
     >
@@ -53,17 +53,15 @@ export function EmptyState({
         <Icon className="size-8" aria-hidden="true" />
       </div>
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-foreground">{config.title}</h3>
-        <p className="text-sm text-muted-foreground max-w-xs">
+        <h3 className="text-lg font-semibold text-foreground">
+          {config.title}
+        </h3>
+        <p className="max-w-xs text-sm text-muted-foreground">
           {config.description}
         </p>
       </div>
       {(actionLabel || onAction) && (
-        <Button
-          variant="ember"
-          size="sm"
-          onClick={onAction}
-        >
+        <Button variant="ember" size="sm" onClick={onAction}>
           <PlusIcon className="size-4" />
           {actionLabel ?? config.actionLabel}
         </Button>

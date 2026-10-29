@@ -1,5 +1,3 @@
-'use client'
-
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,7 +11,11 @@ interface MyReportsListProps {
   onCreateReport?: () => void
 }
 
-export function MyReportsList({ reports, isLoading = false, onCreateReport }: MyReportsListProps) {
+export function MyReportsList({
+  reports,
+  isLoading = false,
+  onCreateReport,
+}: MyReportsListProps) {
   if (isLoading) {
     return (
       <div className="space-y-4" role="status" aria-label="Memuat laporan">
@@ -53,7 +55,11 @@ export function MyReportsList({ reports, isLoading = false, onCreateReport }: My
   return (
     <div
       data-slot="my-reports-list"
-      className={cn('space-y-4', reports.length > 0 && 'animate-in stagger-children fade-in-0 duration-300')}
+      className={cn(
+        'space-y-4',
+        reports.length > 0 &&
+          'stagger-children animate-in duration-300 fade-in-0',
+      )}
     >
       {reports.map((report) => (
         <MyReportCard key={report.id} report={report} />

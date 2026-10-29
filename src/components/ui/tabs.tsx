@@ -30,7 +30,7 @@ function TabsTrigger({
     <BaseTabs.Tab
       data-slot="tabs-trigger"
       className={cn(
-        'relative inline-flex items-center justify-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium outline-none transition-all',
+        'relative inline-flex items-center justify-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium transition-all outline-none',
         'focus-visible:ring-2 focus-visible:ring-ring/50',
         'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs',
         'data-[state=inactive]:hover:bg-muted/50',
@@ -48,10 +48,7 @@ function TabsContent({
   return (
     <BaseTabs.Panel
       data-slot="tabs-content"
-      className={cn(
-        'animate-in fade-in-0 duration-200',
-        className,
-      )}
+      className={cn('animate-in duration-200 fade-in-0', className)}
       {...props}
     />
   )

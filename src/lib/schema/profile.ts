@@ -56,7 +56,14 @@ export const updateProfileInputSchema = z.object({
   image: z
     .string()
     .url('Tautan foto profil tidak valid')
-    .or(z.string().regex(/^\/avatars\/preset-[a-z-]+\.svg$/, 'Pilihan avatar tidak valid'))
+    .or(
+      z
+        .string()
+        .regex(
+          /^\/avatars\/preset-[a-z-]+\.svg$/,
+          'Pilihan avatar tidak valid',
+        ),
+    )
     .optional(),
 })
 
@@ -79,15 +86,19 @@ export const myReportItemSchema = z.object({
 
 export type MyReportItem = z.infer<typeof myReportItemSchema>
 
+export const myProfileUserSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  image: z.string().nullable(),
+  role: z.enum(['citizen', 'moderator', 'superadmin']),
+  createdAtIso: z.string().datetime(),
+})
+
+export type MyProfileUser = z.infer<typeof myProfileUserSchema>
+
 export const myProfileAndReportsSchema = z.object({
-  user: z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string().email(),
-    image: z.string().nullable(),
-    role: z.enum(['citizen', 'moderator', 'superadmin']),
-    createdAtIso: z.string().datetime(),
-  }),
+  user: myProfileUserSchema,
   reports: z.array(myReportItemSchema),
 })
 

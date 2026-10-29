@@ -17,7 +17,7 @@ import {
   MenuDockIcon,
   MenuDockLabel,
 } from '@/components/ui/menu-dock'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { UserAvatar } from '@/components/shared/user-avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,7 +88,7 @@ function UserDropdownMenuContent({
           <SettingsIcon />
           <span>Profil</span>
         </DropdownMenuItem>
-        <DropdownMenuItem render={<Link to="/lapor" />}>
+        <DropdownMenuItem render={<Link to="/profil" />}>
           <FileTextIcon />
           <span>Laporan Saya</span>
         </DropdownMenuItem>
@@ -122,9 +122,7 @@ export function HeaderNav() {
       ? 'home'
       : location.pathname.startsWith('/lapor')
         ? 'lapor'
-        : location.pathname === '/profil'
-          ? 'profil'
-          : 'home'
+        : 'home'
 
   const user = session?.user as
     | {
@@ -146,7 +144,6 @@ export function HeaderNav() {
     await signOut()
   }
 
-  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U'
   const isModerator = user?.role === 'moderator' || user?.role === 'superadmin'
 
   return (
@@ -174,26 +171,18 @@ export function HeaderNav() {
             <Link
               to="/"
               activeOptions={{ exact: true }}
-              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
+              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground"
             >
               <span>Beranda</span>
-              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
+              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-foreground transition-all group-[.active]:block" />
             </Link>
 
             <Link
               to="/lapor"
-              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
+              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground"
             >
               <span>Lapor</span>
-              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
-            </Link>
-
-            <Link
-              to="/profil"
-              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
-            >
-              <span>Profil</span>
-              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
+              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-foreground transition-all group-[.active]:block" />
             </Link>
 
             <Link
@@ -214,15 +203,7 @@ export function HeaderNav() {
                     shape="circle"
                     aria-label="Menu Akun Pengguna"
                   >
-                    <Avatar size="default">
-                      {user.image && (
-                        <AvatarImage
-                          src={user.image}
-                          alt={user.name ?? 'Foto Profil'}
-                        />
-                      )}
-                      <AvatarFallback>{userInitial}</AvatarFallback>
-                    </Avatar>
+                    <UserAvatar user={user} role="true" size="default" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
@@ -281,13 +262,6 @@ export function HeaderNav() {
             <MenuDockLabel>Lapor</MenuDockLabel>
           </MenuDockItem>
 
-          <MenuDockItem value="profil" render={<Link to="/profil" />}>
-            <MenuDockIcon>
-              <SettingsIcon />
-            </MenuDockIcon>
-            <MenuDockLabel>Profil</MenuDockLabel>
-          </MenuDockItem>
-
           <MenuDockItem value="news" render={<Link to="/" hash="news" />}>
             <MenuDockIcon>
               <NewspaperIcon />
@@ -306,15 +280,7 @@ export function HeaderNav() {
                 }
               >
                 <MenuDockIcon>
-                  <Avatar size="sm">
-                    {user.image && (
-                      <AvatarImage
-                        src={user.image}
-                        alt={user.name ?? 'Foto Profil'}
-                      />
-                    )}
-                    <AvatarFallback>{userInitial}</AvatarFallback>
-                  </Avatar>
+                  <UserAvatar user={user} role="false" size="sm" />
                 </MenuDockIcon>
                 <MenuDockLabel>Profil</MenuDockLabel>
               </DropdownMenuTrigger>

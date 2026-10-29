@@ -6,15 +6,15 @@ export function SafetyGuideSection() {
     <section id="news" className="scroll-mt-20 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Outer Container Card */}
-        <div className="rounded-3xl border border-[#ebe8e2] bg-[#f9f0eb] p-6 transition-colors sm:p-10 lg:p-12 dark:border-border dark:bg-card/40">
+        <div className="rounded-3xl border border-border bg-muted/30 p-6 transition-colors sm:p-10 lg:p-12 dark:bg-card/40">
           {/* Top Banner (Header & Photography Banner dengan Floating Quote) */}
           <div className="mb-8 grid grid-cols-1 items-center gap-8 lg:mb-12 lg:grid-cols-12">
             {/* Teks Judul Kiri */}
             <div className="space-y-3 lg:col-span-6">
-              <h2 className="text-2xl font-bold tracking-tight text-[#173b32] sm:text-3xl lg:text-4xl dark:text-foreground">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
                 Panduan Keselamatan Warga di Lokasi Kebakaran
               </h2>
-              <p className="text-sm leading-relaxed text-[#475467] sm:text-base dark:text-muted-foreground">
+              <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
                 Keselamatan jiwa adalah prioritas utama. Patuhi pedoman berikut
                 saat berada di sekitar wilayah kebakaran.
               </p>
@@ -38,7 +38,7 @@ export function SafetyGuideSection() {
                   <span className="text-xl leading-none font-bold text-[var(--color-ember)]">
                     “
                   </span>
-                  <p className="text-xs leading-relaxed font-medium text-[#344054] sm:text-sm dark:text-foreground">
+                  <p className="text-xs leading-relaxed font-medium text-foreground sm:text-sm">
                     Jangan mendekati titik api. Keselamatan anda lebih penting
                     dari pada dokumentasi.
                   </p>

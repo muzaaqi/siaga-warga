@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { CheckIcon, FlameIcon, RotateCcwIcon } from 'lucide-react'
+import { FlameIcon, RotateCcwIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -10,17 +11,15 @@ import {
   MarkerTooltip,
   useMap,
 } from '@/components/ui/map'
-import {
-  ResponsiveOverlay,
-  ResponsiveOverlayContent,
-} from '@/components/ui/responsive-overlay'
 
-interface MapPinPickerProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  initialLat: number
-  initialLon: number
-  onConfirmLocation: (lat: number, lon: number, addressHint?: string) => void
+export interface MapPinPickerProps {
+  latitude: number
+  longitude: number
+  initialLat?: number
+  initialLon?: number
+  onChangeLocation: (lat: number, lon: number) => void
+  disabled?: boolean
+  className?: string
 }
 
 function MapClickHandler({
@@ -46,154 +45,130 @@ function MapClickHandler({
   return null
 }
 
+function MapCenterSync({ lat, lon }: { lat: number; lon: number }) {
+  const { map } = useMap()
+  const prevCoordsRef = React.useRef({ lat, lon })
+
+  React.useEffect(() => {
+    if (!map) return
+    const diffLat = Math.abs(prevCoordsRef.current.lat - lat)
+    const diffLon = Math.abs(prevCoordsRef.current.lon - lon)
+    if (diffLat > 0.0001 || diffLon > 0.0001) {
+      prevCoordsRef.current = { lat, lon }
+      map.flyTo({
+        center: [lon, lat],
+        zoom: Math.max(map.getZoom(), 12),
+        duration: 800,
+      })
+    }
+  }, [map, lat, lon])
+
+  return null
+}
+
 export function MapPinPicker({
-  open,
-  onOpenChange,
+  latitude,
+  longitude,
   initialLat,
   initialLon,
-  onConfirmLocation,
+  onChangeLocation,
+  disabled = false,
+  className,
 }: MapPinPickerProps) {
-  const [lat, setLat] = React.useState<number>(initialLat)
-  const [lon, setLon] = React.useState<number>(initialLon)
-  const [addressHint, setAddressHint] = React.useState<string>('')
-
-  // Sinkronisasi koordinat awal saat modal dibuka
-  React.useEffect(() => {
-    if (open) {
-      setLat(initialLat)
-      setLon(initialLon)
-    }
-  }, [open, initialLat, initialLon])
-
-  // Reset ke lokasi awal
-  const handleResetLocation = () => {
-    setLat(initialLat)
-    setLon(initialLon)
-  }
-
-  // Terapkan koordinat manual
   const handleUpdateCoordinates = (newLat: number, newLon: number) => {
-    setLat(Number(newLat.toFixed(6)))
-    setLon(Number(newLon.toFixed(6)))
+    const roundedLat = Number(newLat.toFixed(6))
+    const roundedLon = Number(newLon.toFixed(6))
+    onChangeLocation(roundedLat, roundedLon)
   }
 
-  const handleConfirm = () => {
-    onConfirmLocation(lat, lon, addressHint)
-    onOpenChange(false)
+  const handleResetLocation = () => {
+    if (initialLat !== undefined && initialLon !== undefined) {
+      handleUpdateCoordinates(initialLat, initialLon)
+    }
   }
 
   return (
-    <ResponsiveOverlay open={open} onOpenChange={onOpenChange}>
-      <ResponsiveOverlayContent
-        title="Tandai Titik Api di Peta"
-        description="Klik pada peta atau geser pin penanda menuju lokasi kebakaran yang Anda amati."
-        className="max-w-2xl"
-      >
-        <div className="flex flex-col gap-4">
-          {/* Kontainer Peta mapcn (Rule: Give the map a height) */}
-          <div className="relative h-80 w-full overflow-hidden rounded-lg border border-border bg-muted/40 sm:h-96">
-            {open && (
-              <Map center={[lon, lat]} zoom={12}>
-                <MapControls showZoom showLocate position="top-right" />
-                <MapClickHandler onLocationSelect={handleUpdateCoordinates} />
-                <MapMarker
-                  longitude={lon}
-                  latitude={lat}
-                  draggable
-                  onDragEnd={(coords) => {
-                    handleUpdateCoordinates(coords.lat, coords.lng)
-                  }}
-                >
-                  <MarkerContent>
-                    <div className="flex size-7 items-center justify-center rounded-full bg-[var(--color-ember)] text-white shadow-md ring-2 ring-white transition-transform hover:scale-110">
-                      <FlameIcon className="size-4" />
-                    </div>
-                  </MarkerContent>
-                  <MarkerTooltip>
-                    Titik Api: {lat.toFixed(4)}, {lon.toFixed(4)}
-                  </MarkerTooltip>
-                </MapMarker>
-              </Map>
-            )}
+    <div className={cn('flex flex-col gap-3', className)}>
+      {/* Kontainer Peta mapcn Langsung (Inline Map) */}
+      <div className="relative h-72 w-full overflow-hidden rounded-xl border border-border bg-muted/40 shadow-xs sm:h-84">
+        <Map center={[longitude, latitude]} zoom={12} className="size-full">
+          <MapControls
+            showZoom
+            showLocate
+            position="top-right"
+            onLocate={(coords) => {
+              handleUpdateCoordinates(coords.latitude, coords.longitude)
+            }}
+          />
+          <MapClickHandler onLocationSelect={handleUpdateCoordinates} />
+          <MapCenterSync lat={latitude} lon={longitude} />
+          <MapMarker
+            longitude={longitude}
+            latitude={latitude}
+            draggable={!disabled}
+            onDragEnd={(coords) => {
+              handleUpdateCoordinates(coords.lat, coords.lng)
+            }}
+          >
+            <MarkerContent>
+              <div className="flex size-8 items-center justify-center rounded-full bg-[var(--color-ember)] text-white shadow-lg ring-2 ring-white transition-transform hover:scale-110">
+                <FlameIcon className="size-4.5" />
+              </div>
+            </MarkerContent>
+            <MarkerTooltip>
+              Titik Api: {latitude.toFixed(4)}, {longitude.toFixed(4)}
+            </MarkerTooltip>
+          </MapMarker>
+        </Map>
 
-            {/* Tombol Reset Lokasi */}
-            <div className="absolute top-2 left-2 z-10">
-              <Button
-                type="button"
-                variant="secondary"
-                size="xs"
-                onClick={handleResetLocation}
-              >
-                <RotateCcwIcon className="size-3" />
-                Reset ke Posisi Awal
-              </Button>
-            </div>
-          </div>
-
-          {/* Form Koordinat Manual & Hint */}
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="flex flex-col gap-1">
-              <span className="font-medium text-muted-foreground">
-                Latitude (Lintang)
-              </span>
-              <Input
-                variant="mono"
-                value={lat}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value)
-                  if (!isNaN(val)) handleUpdateCoordinates(val, lon)
-                }}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="font-medium text-muted-foreground">
-                Longitude (Bujur)
-              </span>
-              <Input
-                variant="mono"
-                value={lon}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value)
-                  if (!isNaN(val)) handleUpdateCoordinates(lat, val)
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Catatan Patokan Alamat Opsional */}
-          <div className="flex flex-col gap-1 text-xs">
-            <span className="font-medium text-muted-foreground">
-              Patokan / Catatan Lokasi
-            </span>
-            <Input
-              placeholder="Contoh: Belakang pabrik sawit, dekat sungai"
-              value={addressHint}
-              onChange={(e) => setAddressHint(e.target.value)}
-            />
-          </div>
-
-          {/* Tombol Konfirmasi */}
-          <div className="mt-2 flex items-center justify-end gap-2">
+        {/* Tombol Reset ke Lokasi Awal */}
+        {initialLat !== undefined && initialLon !== undefined && (
+          <div className="absolute top-2 left-2 z-10">
             <Button
               type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenChange(false)}
+              variant="secondary"
+              size="xs"
+              onClick={handleResetLocation}
+              disabled={disabled}
             >
-              Batal
-            </Button>
-            <Button
-              type="button"
-              variant="ember"
-              size="sm"
-              onClick={handleConfirm}
-            >
-              <CheckIcon className="size-4" />
-              Terapkan Lokasi Ini
+              <RotateCcwIcon className="size-3" />
+              Reset Posisi
             </Button>
           </div>
+        )}
+      </div>
+
+      {/* Input Koordinat Manual untuk Presisi atau Verifikasi */}
+      <div className="grid grid-cols-2 gap-3 text-xs">
+        <div className="flex flex-col gap-1">
+          <span className="font-medium text-muted-foreground">
+            Latitude (Lintang)
+          </span>
+          <Input
+            variant="mono"
+            value={latitude}
+            disabled={disabled}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value)
+              if (!isNaN(val)) handleUpdateCoordinates(val, longitude)
+            }}
+          />
         </div>
-      </ResponsiveOverlayContent>
-    </ResponsiveOverlay>
+        <div className="flex flex-col gap-1">
+          <span className="font-medium text-muted-foreground">
+            Longitude (Bujur)
+          </span>
+          <Input
+            variant="mono"
+            value={longitude}
+            disabled={disabled}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value)
+              if (!isNaN(val)) handleUpdateCoordinates(latitude, val)
+            }}
+          />
+        </div>
+      </div>
+    </div>
   )
 }
