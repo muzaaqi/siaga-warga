@@ -6,11 +6,15 @@ export const Route = createFileRoute('/admin/triase')({
 
 function AdminTriasePage() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12">
-      <h1 className="text-2xl font-bold">Dasbor Triase Moderator</h1>
-      <p className="mt-2 text-muted-foreground">
-        Pusat kendali triase laporan dan verifikasi insiden kebakaran.
-      </p>
+    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
+      <header className="mb-8 flex flex-col gap-2">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
+          Dasbor Triase Moderator
+        </h1>
+        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          Pusat kendali triase laporan dan verifikasi insiden kebakaran.
+        </p>
+      </header>
     </div>
   )
 }

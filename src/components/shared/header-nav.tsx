@@ -122,7 +122,9 @@ export function HeaderNav() {
       ? 'home'
       : location.pathname.startsWith('/lapor')
         ? 'lapor'
-        : 'home'
+        : location.pathname.startsWith('/news')
+          ? 'news'
+          : 'home'
 
   const user = session?.user as
     | {
@@ -186,11 +188,11 @@ export function HeaderNav() {
             </Link>
 
             <Link
-              to="/"
-              hash="news"
-              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              to="/news"
+              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground"
             >
               <span>News</span>
+              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-foreground transition-all group-[.active]:block" />
             </Link>
           </nav>
 
@@ -262,7 +264,7 @@ export function HeaderNav() {
             <MenuDockLabel>Lapor</MenuDockLabel>
           </MenuDockItem>
 
-          <MenuDockItem value="news" render={<Link to="/" hash="news" />}>
+          <MenuDockItem value="news" render={<Link to="/news" />}>
             <MenuDockIcon>
               <NewspaperIcon />
             </MenuDockIcon>

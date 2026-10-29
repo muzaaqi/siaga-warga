@@ -32,7 +32,7 @@ export const Route = createFileRoute('/profil')({
 
 function ProfilePending() {
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8 sm:px-6 lg:py-12">
       <div className="space-y-2">
         <Skeleton className="h-8 w-48 sm:h-9" />
         <Skeleton className="h-4 w-72" />
@@ -70,7 +70,7 @@ function ProfileError({ error, reset }: ErrorComponentProps) {
   const router = useRouter()
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
       <Alert variant="destructive">
         <AlertCircleIcon className="size-4" />
         <AlertTitle>Gagal Memuat Profil Akun</AlertTitle>
