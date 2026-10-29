@@ -109,11 +109,12 @@ export function ReportForm() {
         })
       } catch (err) {
         console.error('Galat pengiriman laporan:', err)
-        setSubmitError(
-          err instanceof Error
-            ? err.message
-            : 'Terjadi kendala saat mendaftarkan laporan. Periksa jaringan Anda dan coba lagi.',
-        )
+        const rawMessage = err instanceof Error ? err.message : ''
+        const friendlyMessage = rawMessage.includes('RATE_LIMIT_EXCEEDED')
+          ? 'Sistem mendeteksi pengiriman beberapa laporan dari koneksi Anda dalam waktu berdekatan. Laporan sebelumnya telah berhasil diterima oleh petugas verifikasi. Mohon tunggu beberapa saat sebelum mengirim laporan berikutnya.'
+          : rawMessage ||
+            'Terjadi kendala saat mendaftarkan laporan. Periksa jaringan Anda dan coba lagi.'
+        setSubmitError(friendlyMessage)
         setIsSubmitting(false)
       }
     },
