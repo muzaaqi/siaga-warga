@@ -103,7 +103,7 @@ export function ProfileHeaderCard({
               e.stopPropagation()
               form.handleSubmit()
             }}
-            className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6"
+            className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left"
           >
             {/* Bagian Avatar (Tampilan atau Interaktif saat Mode Edit) */}
             <div className="relative shrink-0">
@@ -169,7 +169,7 @@ export function ProfileHeaderCard({
                           <FieldLabel htmlFor={field.name} className="sr-only">
                             Nama Lengkap
                           </FieldLabel>
-                          <InputGroup className="max-w-md">
+                          <InputGroup className="mx-auto max-w-md sm:mx-0">
                             <InputGroupAddon align="inline-start">
                               <UserIcon className="size-4" />
                             </InputGroupAddon>
@@ -187,7 +187,7 @@ export function ProfileHeaderCard({
                             />
                           </InputGroup>
                           {isInvalid && (
-                            <FieldError>
+                            <FieldError className="text-center sm:text-left">
                               {field.state.meta.errors[0]}
                             </FieldError>
                           )}
@@ -212,7 +212,7 @@ export function ProfileHeaderCard({
                 {user.email}
               </p>
 
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                 <Badge
                   variant={isModerator ? 'info' : 'secondary'}
                   size="default"
@@ -246,7 +246,7 @@ export function ProfileHeaderCard({
             </div>
 
             {/* Bagian Tombol Aksi (Edit Profil vs Batal/Simpan) */}
-            <div className="flex shrink-0 items-center gap-2 pt-2 sm:pt-0">
+            <div className="flex shrink-0 items-center justify-center gap-2 pt-2 sm:justify-start sm:pt-0">
               {isEditing ? (
                 <>
                   <Button

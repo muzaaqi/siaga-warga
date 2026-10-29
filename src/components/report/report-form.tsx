@@ -495,12 +495,6 @@ export function ReportForm() {
             </>
           )}
         </Button>
-
-        <p className="text-center text-xs text-muted-foreground">
-          Dengan mengirimkan laporan, Anda menyatakan bahwa informasi dan bukti
-          foto yang disampaikan adalah benar adanya untuk kepentingan
-          penyelamatan dan penanganan kedaruratan publik.
-        </p>
       </div>
     </form>
   )

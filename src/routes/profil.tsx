@@ -40,12 +40,12 @@ function ProfilePending() {
 
       <Card variant="canvas">
         <CardContent>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
             <Skeleton shape="circle" className="size-20 sm:size-24" />
-            <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex min-w-0 flex-1 flex-col items-center space-y-2 sm:items-start">
               <Skeleton className="h-6 w-44" />
               <Skeleton className="h-4 w-56" />
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center justify-center gap-2 pt-1 sm:justify-start">
                 <Skeleton shape="circle" className="h-5 w-18" />
                 <Skeleton className="h-4 w-32" />
               </div>
