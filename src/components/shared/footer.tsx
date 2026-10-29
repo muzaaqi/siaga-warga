@@ -8,7 +8,7 @@ import {
 
 export function Footer() {
   return (
-    <footer className="w-full bg-[#173b32] text-white selection:bg-white/20 selection:text-white">
+    <footer className="w-full bg-[var(--color-pine)] text-white selection:bg-white/20 selection:text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3 lg:gap-12">
           {/* Kolom 1: Brand & Misi Publik */}
@@ -128,7 +128,7 @@ export function Footer() {
         </div>
 
         {/* Sub-footer Hak Cipta & Legalitas */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#245c4b] pt-6 text-xs text-white/70 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/70 sm:flex-row">
           <p>Dikembangkan untuk Web In action 2026</p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <span className="cursor-pointer transition-colors hover:text-white">

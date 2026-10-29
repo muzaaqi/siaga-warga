@@ -26,12 +26,12 @@ export function HeroSection() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl space-y-6">
-          <h1 className="text-4xl leading-[1.15] font-extrabold tracking-tight text-[#173b32] sm:text-5xl lg:text-[56px] dark:text-foreground">
+          <h1 className="text-4xl leading-[1.15] font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-[56px]">
             Pantau dan Verifikasi Laporan{' '}
             <span className="text-[var(--color-ember)]">Kebakaran</span>
           </h1>
 
-          <p className="max-w-xl text-base leading-relaxed text-[#475467] sm:text-lg dark:text-muted-foreground">
+          <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             Laporkan kebakaran hutan, lahan, atau permukiman dengan mudah dan
             aman. SiagaWarga membantu memeriksa laporan melalui validasi lokasi,
             data hotspot satelit, dan verifikasi moderator, serta menyediakan

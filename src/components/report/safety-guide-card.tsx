@@ -23,19 +23,19 @@ export function SafetyGuideCard({
           className={cn(
             'mb-4 flex size-12 items-center justify-center rounded-xl',
             iconColorVariant === 'danger' &&
-              'bg-[#fef2f2] text-[#b42318] dark:bg-[#3d1612] dark:text-[#fca5a5]',
+              'bg-destructive/10 text-destructive',
             iconColorVariant === 'ember' &&
-              'bg-[#fff7ed] text-[#c2410c] dark:bg-[#3a1b0c] dark:text-[#fdba74]',
+              'bg-[var(--color-ember)]/10 text-[var(--color-ember)]',
           )}
         >
           <Icon className="size-6 shrink-0" aria-hidden="true" />
         </div>
 
-        <h3 className="mb-2 text-base font-bold text-[#173b32] sm:text-lg dark:text-foreground">
+        <h3 className="mb-2 text-base font-bold text-foreground sm:text-lg">
           {title}
         </h3>
 
-        <p className="text-xs leading-relaxed text-[#475467] sm:text-sm dark:text-muted-foreground">
+        <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
           {description}
         </p>
       </CardContent>

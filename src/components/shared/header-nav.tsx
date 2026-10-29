@@ -172,18 +172,18 @@ export function HeaderNav() {
             <Link
               to="/"
               activeOptions={{ exact: true }}
-              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
+              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground"
             >
               <span>Beranda</span>
-              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
+              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-foreground transition-all group-[.active]:block" />
             </Link>
 
             <Link
               to="/lapor"
-              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-[#173b32] dark:[&.active]:text-foreground"
+              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground"
             >
               <span>Lapor</span>
-              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-[#173b32] transition-all group-[.active]:block dark:bg-foreground" />
+              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-foreground transition-all group-[.active]:block" />
             </Link>
 
             <Link

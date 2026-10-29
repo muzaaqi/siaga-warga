@@ -26,7 +26,7 @@ function Card({
         radius === '2xl' && 'rounded-2xl',
         radius === '3xl' && 'rounded-3xl',
         variant === 'canvas' &&
-          'border-[#ebe8e2] bg-[var(--color-canvas)] shadow-xl shadow-black/5 dark:border-border dark:bg-card/40',
+          'border-border bg-[var(--color-canvas)] shadow-xl shadow-black/5 dark:bg-card/40',
         variant === 'elevated' &&
           'border-border/60 bg-card shadow-xl shadow-black/5',
         variant === 'ghost' && 'border-transparent bg-transparent shadow-none',
