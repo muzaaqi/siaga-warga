@@ -1,5 +1,3 @@
-'use client'
-
 import { useRouter } from '@tanstack/react-router'
 import { ProfileHeaderCard } from './profile-header-card'
 import { MyReportsList } from './my-reports-list'
