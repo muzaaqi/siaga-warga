@@ -1,13 +1,11 @@
 import * as React from 'react'
-import { Link } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import {
   AlertCircleIcon,
   CheckCircle2Icon,
   CheckIcon,
   ClockIcon,
-  ExternalLinkIcon,
   HelpCircleIcon,
-  MapIcon,
   MapPinIcon,
   Share2Icon,
   ShieldAlertIcon,
@@ -70,13 +68,15 @@ function getVerificationStatusBadge(
 }
 
 export function NewsReportCard({ item }: NewsReportCardProps) {
+  const navigate = useNavigate()
   const [isExpanded, setIsExpanded] = React.useState(false)
   const [isCopied, setIsCopied] = React.useState(false)
 
   const verificationBadge = getVerificationStatusBadge(item.verificationStatus)
   const VerificationIcon = verificationBadge.icon
 
-  const handleShare = async () => {
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation()
     try {
       const shareUrl = `${window.location.origin}/lacak/${item.trackingCode}`
       await navigator.clipboard.writeText(shareUrl)
@@ -87,20 +87,59 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
     }
   }
 
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement | null
+    if (
+      target?.closest(
+        'button, a, input, select, textarea, [role="button"], [data-interactive]',
+      )
+    ) {
+      return
+    }
+    navigate({
+      to: '/lacak/$code',
+      params: { code: item.trackingCode },
+    })
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const target = e.target as HTMLElement | null
+      if (
+        target?.closest(
+          'button, a, input, select, textarea, [role="button"], [data-interactive]',
+        )
+      ) {
+        return
+      }
+      e.preventDefault()
+      navigate({
+        to: '/lacak/$code',
+        params: { code: item.trackingCode },
+      })
+    }
+  }
+
   const isLongDescription = item.description.length > 140
   const displayedDescription =
     isLongDescription && !isExpanded
       ? `${item.description.slice(0, 140)}...`
       : item.description
 
+  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.latitude},${item.longitude}`)}`
+
   return (
     <Card
       variant="canvas"
       size="sm"
-      className="overflow-hidden"
+      tabIndex={0}
+      role="article"
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
+      className="cursor-pointer overflow-hidden"
       style={{
         contentVisibility: 'auto',
-        containIntrinsicSize: '550px',
+        containIntrinsicSize: '500px',
       }}
     >
       {/* 1. Header Kartu Ala Instagram */}
@@ -124,10 +163,6 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
                 <span className="truncate">
                   {item.addressDisplay || 'Lokasi Terverifikasi'}
                 </span>
-                <span className="shrink-0">•</span>
-                <span className="shrink-0">
-                  {formatRelativeTime(item.submittedAtIso)}
-                </span>
               </span>
             </CardDescription>
           </div>
@@ -136,11 +171,12 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
         <CardAction>
           <Badge
             variant={verificationBadge.variant}
-            size="default"
-            className="shrink-0"
+            size="xs"
+            title={verificationBadge.label}
+            aria-label={verificationBadge.label}
+            
           >
-            <VerificationIcon className="size-3" aria-hidden="true" />
-            <span>{verificationBadge.label}</span>
+            <VerificationIcon className="size-3.5" aria-hidden="true" />
           </Badge>
         </CardAction>
       </CardHeader>
@@ -165,68 +201,55 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
         )}
       </div>
 
-      {/* 3. Bar Aksi Cepat & Caption di dalam CardContent */}
+      {/* 3. Bar Aksi Ikon & Caption di dalam CardContent */}
       <CardContent>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-border/50 pb-2">
-            <div className="flex items-center gap-1.5">
-              <Button
-                variant="ghost"
-                size="sm"
-                render={
-                  <Link
-                    to="/lacak/$code"
-                    params={{ code: item.trackingCode }}
-                    aria-label={`Lacak status detail laporan ${item.trackingCode}`}
-                  />
-                }
-              >
-                <ExternalLinkIcon className="size-4" aria-hidden="true" />
-                <span>Lacak</span>
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                render={
-                  <Link
-                    to="/pantau"
-                    search={{
-                      lat: item.latitude,
-                      lng: item.longitude,
-                    }}
-                    aria-label="Lihat lokasi kejadian di peta interaktif"
-                  />
-                }
-              >
-                <MapIcon className="size-4" aria-hidden="true" />
-                <span>Peta</span>
-              </Button>
-            </div>
+        <div className="space-y-2.5">
+          {/* Bar Aksi Ikon Ringkas */}
+          <div className="flex items-center gap-1 border-b border-border/50 pb-2">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              render={
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Buka lokasi di Google Maps"
+                  title="Buka lokasi di Google Maps"
+                />
+              }
+            >
+              <MapPinIcon className="size-4" aria-hidden="true" />
+            </Button>
 
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={handleShare}
               aria-label="Salin tautan laporan"
+              title={
+                isCopied ? 'Tautan berhasil disalin' : 'Salin tautan laporan'
+              }
             >
               {isCopied ? (
-                <>
-                  <CheckIcon
-                    className="size-4 text-[var(--color-pine)]"
-                    aria-hidden="true"
-                  />
-                  <span className="text-[var(--color-pine)]">Tersalin</span>
-                </>
+                <CheckIcon
+                  className="size-4 text-[var(--color-pine)]"
+                  aria-hidden="true"
+                />
               ) : (
-                <>
-                  <Share2Icon className="size-4" aria-hidden="true" />
-                  <span>Bagikan</span>
-                </>
+                <Share2Icon className="size-4" aria-hidden="true" />
               )}
             </Button>
           </div>
+
+          {/* Waktu Laporan (di atas deskripsi, di bawah foto ala Instagram) */}
+          <time
+            dateTime={item.submittedAtIso}
+            className="block text-[11px] text-muted-foreground"
+          >
+            {formatRelativeTime(item.submittedAtIso)}
+          </time>
 
           {/* Deskripsi & Caption Ala Feed */}
           <p className="text-sm leading-relaxed text-foreground">
