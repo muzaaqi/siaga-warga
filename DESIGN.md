@@ -120,6 +120,19 @@ Aplikasi mengadopsi pemisahan navigasi responsif adaptif antara tablet/desktop d
 5. **Authenticated State Elevation:**  
    Setelah terotentikasi, tombol aksi di navbar beralih menjadi foto profil (`Avatar` Base UI). Mengklik foto membuka `DropdownMenu` taktis yang menyediakan opsi _"Laporan Saya"_, _"Dasbor Triase"_ (khusus moderator/superadmin), dan _"Keluar"_.
 
+### 4.6 Standard Desktop Container Geometry (`max-w-4xl` for Operational Views)
+
+Aplikasi menerapkan pemisahan kontainer desktop yang disengaja untuk menjaga ketertiban visual:
+
+1. **Kanvas Bebas Halaman Utama (`/` — `max-w-7xl`):**  
+   Halaman beranda mempertahankan lebar penuh (`max-w-7xl px-4 sm:px-6 lg:px-8`) untuk mengakomodasi hero banner, kartu pelacakan cepat, dan grid panduan keselamatan yang luas.
+2. **Kontainer Terpadu Halaman Operasional & Konten (`max-w-4xl`):**  
+   Seluruh halaman non-landing (`/news`, `/lapor`, `/profil`, `/pantau`, `/lacak/$code`, `/admin/triase`) wajib dibungkus dalam kontainer berukuran konsisten:
+   ```tsx
+   <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
+   ```
+   Seluruh elemen anak (bilah pencarian, formulir pelaporan, kartu berita Instagram, dan daftar riwayat) wajib mengisi lebar penuh (`w-full`). Dilarang menambahkan `max-w-` internal yang lebih sempit pada daftar kartu atau formulir karena menyebabkan margin kiri-kanan tidak sejajar dengan judul header.
+
 ---
 
 ## 5. Bahasa Indonesia Quality Standards (`bahasa-skills`)

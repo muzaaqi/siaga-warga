@@ -118,11 +118,12 @@ export function PhotoUploadZone({
     } catch (err) {
       console.error('Galat proses unggah foto:', err)
       setState('error')
-      setErrorMessage(
-        err instanceof Error
-          ? err.message
-          : 'Terjadi kendala saat memproses foto bukti. Silakan coba kembali.',
-      )
+      const rawMessage = err instanceof Error ? err.message : ''
+      const friendlyMessage = rawMessage.includes('RATE_LIMIT_EXCEEDED')
+        ? 'Batas frekuensi unggah foto terlampaui. Perangkat Anda telah melakukan beberapa kali pengunggahan dalam waktu singkat. Harap tunggu sekitar 5–10 menit sebelum mengunggah foto baru demi menjaga stabilitas sistem.'
+        : rawMessage ||
+          'Terjadi kendala saat memproses foto bukti. Silakan coba kembali.'
+      setErrorMessage(friendlyMessage)
     }
   }
 

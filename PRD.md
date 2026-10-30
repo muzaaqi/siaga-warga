@@ -84,9 +84,11 @@ mindmap
 ```mermaid
 flowchart TD
     Root["/ (__root.tsx)\nShell Navigasi: MenuDock + 1-Click Masuk"] --> Home["/ (index.tsx)\nLanding Page & Emergency Hotline"]
+    Root --> News["/news (news.tsx)\nKabar Warga: Linimasa Publik Laporan Terverifikasi & Pencarian"]
     Root --> Lapor["/lapor (lapor.tsx)\nFormulir Pelaporan Warga"]
     Root --> Pantau["/pantau (pantau.tsx)\nPeta Interaktif Publik & Filter Klaster"]
     Root --> Lacak["/lacak/$code (lacak.$code.tsx)\nDetail Status Laporan & Linimasa Audit"]
+    Root --> Profile["/profil (profil.tsx)\nProfil Akun, Ubah Identitas & Riwayat Laporan Saya"]
     Root --> AuthApi["/api/auth/$ (api/auth.$.ts)\nEndpoint Better Auth & Callback Google OAuth"]
     Root --> Triase["/admin/triase (admin/triase.tsx)\nAntrean Triase Berdasarkan Urgensi (RBAC Moderator)"]
     Triase --> Review["/admin/laporan/$id (admin/laporan.$id.tsx)\nPeninjauan Bukti & Pengubah Status"]
@@ -368,16 +370,37 @@ CREATE INDEX idx_hotspots_geom ON satellite_hotspots USING GIST (geom);
 - Menampilkan riwayat perubahan status dari `report_status_history` secara kronologis.
 - **Kebijakan Privasi Ketat:** Nomor telepon dan identitas pelapor dibuang. Koordinat titik peta pada tampilan publik diburamkan (jitter) ke radius kelurahan (500m–1km) untuk melindungi privasi lokasi warga. Identitas akun internal moderator disembunyikan dari publik.
 
+### FR-6: Kabar Warga & Linimasa Publik Terverifikasi (`/news`)
+
+- Menyajikan linimasa publik eksklusif untuk laporan insiden yang telah berstatus **terverifikasi** (`verification_status = 'verified'`).
+- **Format Kartu Linimasa Ala Instagram:**
+  - Foto bukti kejadian berasio 4:3 berbingkai bersih.
+  - Waktu laporan relatif (`formatRelativeTime`) yang ditempatkan di atas deskripsi dengan tipografi ringkas dan tenang (`text-[11px] text-muted-foreground`).
+  - Bar aksi taktis menggunakan tombol berbasis ikon saja: tombol buka lokasi langsung ke Google Maps (`_blank`), tombol salin tautan lacak cepat, dan lencana status penanganan lapangan (`handling_status`).
+  - Seluruh permukaan kartu dapat diklik langsung untuk membuka halaman pelacakan detail (`/lacak/$code`), dengan pengecualian interaksi pada tombol di dalamnya.
+- **Pencarian Terpadu (Search Bar):**
+  - Menggantikan filter tab status dengan bilah pencarian teks waktu nyata (debounced 300ms) untuk menyaring laporan berdasarkan deskripsi, alamat, dan kode pelacakan.
+  - Paginasi kursor/offset tak terbatas (_infinite stream_) untuk penjelajahan berita tanpa jeda.
+
+### FR-7: Manajemen Profil & Riwayat Laporan Pengguna (`/profil`)
+
+- **Profil Akun Warga:** Menampilkan identitas akun Google OAuth, status email, dan peran sistem (`citizen`, `moderator`, `superadmin`).
+- **Pengaturan Nama & Avatar:** Fitur pembaruan nama tampilan langsung di tempat (_in-place edit_) serta pemilihan avatar profil dari 6 preset visual bertema kebencanaan atau foto akun Google.
+- **Linimasa "Laporan Saya":** Menampilkan seluruh riwayat laporan insiden yang dikirimkan oleh akun warga secara transparan, lengkap dengan status verifikasi, status penanganan lapangan, dan tautan langsung ke linimasa pelacakan audit.
+
 ### 7.1 Spesifikasi Server Functions (API Contracts)
 
-| Server Function           | HTTP Method / Validator | Input Payload                                                                                      | Output Response                                         |
-| ------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `getPresignedUploadUrl`   | `POST`                  | `{ filename: string, mimeType: string, checksum: string }`                                         | `{ uploadUrl: string, objectKey: string }`              |
-| `createReport`            | `POST`                  | `CreateReportInput` (koordinat, jenis insiden, waktu, deskripsi, objectKey wajib, kontak opsional) | `{ trackingCode: string, id: string }`                  |
-| `getPublicReports`        | `GET`                   | `{ bounds?: [number, number, number, number], incidentType?: string }`                             | `Array<PublicReportItem>` (PII stripped, jittered geom) |
-| `getReportByTrackingCode` | `GET`                   | `{ trackingCode: string }`                                                                         | `ReportDetailWithTimeline` (4-phase stepper data)       |
-| `getTriageQueue`          | `GET` (Auth mod)        | `{ priority?: string, status?: string }`                                                           | `Array<ModeratorQueueItem>`                             |
-| `updateReportStatus`      | `POST` (Auth mod)       | `{ reportId: string, statusType: string, newValue: string, reasonNote: string }`                   | `{ success: boolean }`                                  |
+| Server Function           | HTTP Method / Validator | Input Payload                                                                                      | Output Response                                               |
+| ------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `getPresignedUploadUrl`   | `POST`                  | `{ filename: string, mimeType: string, checksum: string }`                                         | `{ uploadUrl: string, objectKey: string, publicUrl: string }` |
+| `createReport`            | `POST`                  | `CreateReportInput` (koordinat, jenis insiden, waktu, deskripsi, objectKey wajib, kontak opsional) | `{ trackingCode: string, id: string }`                        |
+| `getPublicReports`        | `GET`                   | `{ bounds?: [number, number, number, number], incidentType?: string }`                             | `Array<PublicReportItem>` (PII stripped, jittered geom)       |
+| `getReportByTrackingCode` | `GET`                   | `{ trackingCode: string }`                                                                         | `ReportDetailWithTimeline` (4-phase stepper data)             |
+| `getPublicNewsFeed`       | `GET`                   | `{ limit?: number, cursor?: string, search?: string }`                                             | `NewsFeedResponse` (items terverifikasi, hasMore)             |
+| `getMyProfileAndReports`  | `GET` (Auth user)       | Tanpa payload (membaca sesi aktif)                                                                 | `{ user: UserProfile, reports: Array<MyReportItem> }`         |
+| `updateMyProfile`         | `POST` (Auth user)      | `{ name: string, image?: string }`                                                                 | `UserProfile`                                                 |
+| `getTriageQueue`          | `GET` (Auth mod)        | `{ priority?: string, status?: string }`                                                           | `Array<ModeratorQueueItem>`                                   |
+| `updateReportStatus`      | `POST` (Auth mod)       | `{ reportId: string, statusType: string, newValue: string, reasonNote: string }`                   | `{ success: boolean }`                                        |
 
 ---
 
@@ -385,18 +408,31 @@ CREATE INDEX idx_hotspots_geom ON satellite_hotspots USING GIST (geom);
 
 1. **Kecepatan & Performa Edge:**
    - Deployed di Cloudflare Workers dengan SSR rendering TanStack Start. Target respons time awal < 100ms di wilayah Indonesia.
-2. **Keamanan & Validasi Input:**
-   - Perlindungan CSRF pada mutasi formulir.
-   - Pembatasan ukuran file bukti (maksimal 5 MB per foto, format foto yang didukung: `image/jpeg`, `image/png`, dan `image/webp`).
-   - Rate limiting pengiriman laporan per IP di level Cloudflare.
-3. **Aksesibilitas & Tampilan:**
+2. **Keamanan, Proteksi Header & Pembatasan Laju (Rate Limiting):**
+   - **HTTP Security Headers Standar:** Seluruh respons HTTP menyuntikkan header proteksi:
+     - `X-Frame-Options: DENY` (anti-clickjacking/framing).
+     - `X-Content-Type-Options: nosniff` (mencegah MIME-type confusion).
+     - `Referrer-Policy: strict-origin-when-cross-origin` (melindungi privasi referrer lintas-domain).
+     - `Permissions-Policy: camera=(self), geolocation=(self), microphone=()` (mengizinkan kamera belakang & GPS warga, menonaktifkan mikrofon).
+   - **Kamera Belakang Wajib:** Input unggahan foto bukti wajib menetapkan atribut `capture="environment"` pada peramban ponsel pintar untuk memicu kamera belakang secara langsung saat pelaporan.
+   - **Isolasi COOP/COEP:** Pengecualian sadar terhadap `Cross-Origin-Embedder-Policy` agar tidak memblokir render tile peta MapLibre GL (CARTO/OSM), data satelit NASA FIRMS, dan alur autentikasi Google OAuth.
+   - **Rate Limiting Sisi Server:** Menggunakan modul _sliding-window in-memory_ pada endpoint `/lapor` (10 tiket presigned upload per 10 menit, 5 pelaporan insiden per 10 menit per IP) untuk menangkal spam dan banjir unggahan R2, dengan respons edukatif HTTP 429.
+   - **Perlindungan Data & Validasi Input:**
+     - Pembatasan ukuran file bukti (maksimal 5 MB per foto, format foto yang didukung: `image/jpeg`, `image/png`, dan `image/webp`).
+     - Kompresi gambar client-side otomatis sebelum meminta URL unggah presigned.
+3. **Standar Konsistensi Tata Letak Kontainer Desktop:**
+   - Halaman utama / Landing Page (`/`) memanfaatkan kanvas lebar penuh (`max-w-7xl`) untuk menampung banner darurat, hero section interaktif, dan panduan keselamatan.
+   - Seluruh halaman konten dan operasional non-landing (`/news`, `/lapor`, `/profil`, `/pantau`, `/lacak/$code`, `/admin/triase`) wajib mematuhi standar kontainer terpadu:  
+     `mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12`  
+     Seluruh elemen anak (kartu berita, header, formulir, dan tabel) mengisi lebar kontainer penuh (`w-full`) secara flush tanpa batasan lebar acak internal.
+4. **Aksesibilitas & Tampilan:**
    - Desain responsif (Mobile First, breakpoint 375px s/d 1440px).
    - Memenuhi standar kontras warna WCAG AA.
    - Komponen UI menggunakan shadcn/ui dengan navigasi keyboard yang aksesibel.
-4. **Tooling, Runtime & Linter:**
+5. **Tooling, Runtime & Linter:**
    - Menggunakan **Bun** sebagai runtime dan package manager utama untuk performa instalasi dependensi, task execution, dan build pipeline.
    - Menggunakan **ESLint** dengan aturan ketat TypeScript dan React.
-5. **Standar Bahasa & Anti-Slop (`bahasa-skills`):**
+6. **Standar Bahasa & Anti-Slop (`bahasa-skills`):**
    - Seluruh microcopy antarmuka, teks notifikasi, dan dokumen pelaporan wajib disusun mengikuti panduan `bahasa-inti` dan `bahasa-website` untuk mencegah kalimat klise kecerdasan buatan (_AI-slop_), menjamin laras bahasa yang tepat (Ivan Lanin), dan menyajikan teks yang memanusiakan warga pelapor.
 
 ---

@@ -137,6 +137,14 @@ Team members work on isolated feature slices (route + server function + colocate
     To support low-bandwidth rural conditions and prevent storage exhaustion, the browser upload component must compress photos client-side (max dimension 1600px, WebP/JPEG, target size ~500 KB–1 MB, hard capped at 5 MB) via Canvas API or client compression helper before requesting presigned URLs and uploading to Cloudflare R2.
 21. **Rule 21 — Zero Friction 1-Click Direct Google OAuth (No Manual Login Pages):**  
     Authentication operates strictly via 1-click direct Google OAuth managed by Better Auth. Zero dedicated `/login` or `/register` pages, and zero modal dialogs with email/password inputs. In the navigation bar (`HeaderNav`), a single **"Masuk"** action (integrated with `MenuDock`) immediately triggers Google OAuth. Once authenticated, user state switches seamlessly to an interactive `Avatar` with a Base UI `DropdownMenu` providing access to _"Laporan Saya"_, role-gated _"Dasbor Triase"_ (for `moderator`/`superadmin`), and _"Keluar"_. Session verification runs in a Hybrid mode: fast cryptographic cookie cache on Cloudflare Edge (5 minutes TTL) combined with PostgreSQL source of truth in Neon.
+22. **Rule 22 — Standardized Desktop Container Geometry (`max-w-4xl` for Non-Landing Routes):**  
+    The landing page (`/`, `src/routes/index.tsx`) retains a wide, expressive canvas (`max-w-7xl`) for the emergency hotline banner, hero section, safety guides, and footer. In contrast, all operational and content pages (`/news`, `/lapor`, `/profil`, `/pantau`, `/lacak/$code`, `/admin/triase`) MUST strictly follow the container standard established in `src/routes/lapor.tsx`: `<div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">`. All inner components (search bars, report forms, feed cards, and profile panels) must fill the container width (`w-full`) to guarantee flush, balanced left and right boundaries across the entire application.
+23. **Rule 23 — Public Incident News Feed Curation (`/news`):**  
+    The public incident stream exclusively queries and displays officially verified reports (`verification_status = 'verified'`). It replaces status tab filters with an integrated real-time text search bar (debounced 300ms) searching across descriptions, addresses, and tracking codes. News feed cards adopt an Instagram-inspired visual structure (4:3 aspect ratio photo, relative timestamp above caption, icon-only actions for Google Maps and share link, and a handling status badge). The card surface is clickable to navigate to `/lacak/$code` while preserving clicks on inner interactive action buttons.
+24. **Rule 24 — Infrastructure Security Headers & Rate Limiting Hardening:**  
+    All HTTP responses from the production server (`server.ts`) and SSR handlers must inject standard security headers: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy: camera=(self), geolocation=(self), microphone=()`. COOP/COEP (`same-origin`) headers are strictly prohibited because they break cross-origin MapLibre GL tiles (CARTO/OSM), NASA FIRMS overlays, and Google OAuth redirection. Public reporting endpoints (`/lapor` and presigned upload) must enforce in-memory IP-based sliding window rate limits (10 uploads & 5 reports per 10 minutes per IP) with educational HTTP 429 error feedback.
+25. **Rule 25 — Mandatory Rear Camera Capture (`capture="environment"`):**  
+    To ensure authentic field evidence of fire incidents, the mobile photo upload input must set `capture="environment"` (rear camera) rather than front/selfie cameras. Browser permissions must explicitly allow camera access for the origin via `Permissions-Policy: camera=(self)`.
 
 ---
 
@@ -197,9 +205,11 @@ ON-FIRE/
 │   ├── routes/                     # File-based TanStack Router routes
 │   │   ├── __root.tsx              # Root shell layout, theme provider, global toast
 │   │   ├── index.tsx               # Landing page (hero, emergency banner, live stats)
+│   │   ├── news.tsx                # Public verified incident feed & real-time search
 │   │   ├── lapor.tsx               # Citizen report submission form (mandatory photo)
 │   │   ├── pantau.tsx              # Public interactive map & incident explorer (dual-layer)
 │   │   ├── lacak.$code.tsx         # Public report tracking & 4-phase audit timeline
+│   │   ├── profil.tsx              # Citizen profile, identity settings & "Laporan Saya" list
 │   │   ├── api/
 │   │   │   └── auth.$.ts           # Better Auth server catch-all handler (Google OAuth)
 │   │   └── admin/
@@ -208,6 +218,7 @@ ON-FIRE/
 │   │
 │   ├── server/
 │   │   ├── auth.ts                 # Better Auth server instance (Google provider, cookieCache)
+│   │   ├── env.ts                  # Type-safe server environment variable schema
 │   │   ├── db/
 │   │   │   ├── schema/             # Modular Drizzle schemas (reports, evidence, hotspots, auth)
 │   │   │   │   ├── index.ts
@@ -220,20 +231,28 @@ ON-FIRE/
 │   │   │
 │   │   ├── functions/              # TanStack Start Server Functions (`createServerFn`)
 │   │   │   ├── auth.ts             # getAuthSession, requireModeratorSession
-│   │   │   ├── reports.ts          # createReport, getPublicReports, getReportByTrackingCode
-│   │   │   ├── evidence.ts         # getPresignedUploadUrl, registerEvidence
+│   │   │   ├── reports.ts          # submitCitizenReport, getLandingStats
+│   │   │   ├── evidence.ts         # getPresignedUploadUrl
 │   │   │   ├── hotspots.ts         # getActiveHotspots (NASA FIRMS cache)
+│   │   │   ├── news.ts             # getPublicNewsFeed
+│   │   │   ├── profile.ts          # getMyProfileAndReports, updateMyProfile
 │   │   │   └── moderator.ts        # getTriageQueue, updateReportStatus
 │   │   │
 │   │   └── services/               # Reusable server utilities
 │   │       ├── r2.ts               # S3 Client & presigned PUT URL generator
 │   │       ├── spatial.ts          # PostGIS ST_DWithin query helpers
-│   │       └── nasa-firms.ts       # NASA FIRMS API client with 6-hour cache handling
+│   │       ├── nasa-firms.ts       # NASA FIRMS API client with 6-hour cache handling
+│   │       ├── news.ts             # News feed query service with verified report filtering
+│   │       ├── profile.ts          # Profile update and user reports query service
+│   │       ├── rate-limit.ts       # In-memory sliding window rate limiter with TTL cleanup
+│   │       └── security-headers.ts # Standard HTTP security headers injector
 │   │
 │   ├── components/
 │   │   ├── ui/                     # shadcn/ui components (Base UI primitives: MenuDock, Button, etc.)
-│   │   ├── shared/                 # Emergency banner (112/113), header nav (Desktop Nav + Mobile MenuDock), theme toggle
+│   │   ├── shared/                 # Emergency banner (112/113), header nav, theme toggle, footer
 │   │   ├── report/                 # Report form & photo upload components
+│   │   ├── news/                   # News feed list, Instagram-style report card & skeleton
+│   │   ├── profile/                # Profile header card, my reports list, preset avatar picker
 │   │   ├── map/                    # MapLibre GL map visualizer & dual-layer controls
 │   │   ├── timeline/               # 4-Phase audit status timeline for /lacak/$code
 │   │   └── triage/                 # Moderator queue cards & evidence viewer
@@ -243,11 +262,25 @@ ON-FIRE/
 │   │   ├── schema/                 # Zod validation schemas (barrel import: ~/lib/schema)
 │   │   │   ├── index.ts
 │   │   │   ├── auth.ts             # authUserSchema, authSessionSchema, userRoleEnum
-│   │   │   └── reports.ts
+│   │   │   ├── reports.ts
+│   │   │   ├── evidence.ts
+│   │   │   ├── news.ts
+│   │   │   ├── profile.ts
+│   │   │   └── rate-limit.ts
 │   │   ├── exifr.ts                # Client-side metadata & timestamp extractor
-│   │   └── utils.ts                # cn(), formatDate(), formatDistance()
+│   │   ├── image-compression.ts    # Browser-side canvas image compressor (Rule 20)
+│   │   └── utils.ts                # cn(), formatDate(), formatDistance(), formatRelativeTime()
 │   │
 │   └── styles.css                  # Tailwind CSS v4 @theme inline mappings (OKLCH, Plus Jakarta Sans)
+│
+├── tests/                          # Native Bun test suites
+│   ├── auth.test.ts
+│   ├── landing.test.ts
+│   ├── report-submission.test.ts
+│   ├── news.test.ts
+│   ├── profile.test.ts
+│   ├── security.test.ts
+│   └── schema.test.ts
 │
 └── drizzle/
     └── migrations/                 # Generated Drizzle migration files
