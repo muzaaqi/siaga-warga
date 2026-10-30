@@ -51,9 +51,7 @@ export const getPresignedUploadUrl = createServerFn({ method: 'POST' })
     let clientIp = '127.0.0.1'
     try {
       const req = getRequest()
-      if (req) {
-        clientIp = extractClientIp(req)
-      }
+      clientIp = extractClientIp(req)
     } catch {
       // Fallback aman jika dipanggil di luar konteks request (misal: pengujian unit)
     }
