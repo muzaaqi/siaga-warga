@@ -5,7 +5,6 @@ import {
   reportEvidence,
   reportStatusHistory,
   user,
-  satelliteHotspots,
 } from '@/server/db/schema'
 import type {
   HandlingStatus,
@@ -101,13 +100,29 @@ export async function fetchTriageStats(): Promise<TriageStats> {
     needs_review_count: number
     high_priority_count: number
     today_reports_count: number
-  }>)[0]
+  }>)[0] as
+    | {
+        pending_count: number
+        needs_review_count: number
+        high_priority_count: number
+        today_reports_count: number
+      }
+    | undefined
+
+  if (!row) {
+    return {
+      pendingCount: 0,
+      needsReviewCount: 0,
+      highPriorityCount: 0,
+      todayReportsCount: 0,
+    }
+  }
 
   return {
-    pendingCount: Number(row?.pending_count ?? 0),
-    needsReviewCount: Number(row?.needs_review_count ?? 0),
-    highPriorityCount: Number(row?.high_priority_count ?? 0),
-    todayReportsCount: Number(row?.today_reports_count ?? 0),
+    pendingCount: Number(row.pending_count),
+    needsReviewCount: Number(row.needs_review_count),
+    highPriorityCount: Number(row.high_priority_count),
+    todayReportsCount: Number(row.today_reports_count),
   }
 }
 
@@ -122,13 +137,11 @@ export async function fetchTriageQueue(
   const conditions = []
 
   if (query.priority !== 'all') {
-    conditions.push(eq(reports.priority, query.priority as Priority))
+    conditions.push(eq(reports.priority, query.priority))
   }
 
   if (query.status !== 'all') {
-    conditions.push(
-      eq(reports.verificationStatus, query.status as VerificationStatus),
-    )
+    conditions.push(eq(reports.verificationStatus, query.status))
   }
 
   if (query.incidentType !== 'all') {
@@ -459,7 +472,7 @@ export async function executeReportStatusChange(
         updatedAt: new Date(),
       })
       .where(eq(reports.id, input.reportId))
-  } else if (input.statusType === 'priority') {
+  } else {
     previousValue = currentReport.priority
     await db
       .update(reports)

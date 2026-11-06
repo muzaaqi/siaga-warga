@@ -79,6 +79,38 @@ describe('Moderator Command Center & Triage (Plan 09)', () => {
       expect(parsed.highPriorityCount).toBe(3)
     })
 
+    it('harus memvalidasi moderatorReportDetailSchema secara lengkap', () => {
+      const detail = {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        trackingCode: 'SW-2026-X89B',
+        incidentType: 'karhutla',
+        description: 'Kebakaran lahan gambut di pinggir jalan raya utama',
+        observedAt: new Date().toISOString(),
+        submittedAt: new Date().toISOString(),
+        latitude: -0.5021,
+        longitude: 101.4478,
+        addressDisplay: 'Kecamatan Siak, Riau',
+        verificationStatus: 'pending',
+        priority: 'high',
+        handlingStatus: 'not_forwarded',
+        isPotentialDuplicate: false,
+        clusterId: null,
+        satelliteHotspotMatched: true,
+        isAnonymous: false,
+        reporterName: 'Warga Siaga',
+        reporterPhone: '081234567890',
+        reporterEmail: 'warga@gmail.com',
+        evidence: [],
+        nearbyClusterReports: [],
+        nearbySatelliteHotspots: [],
+        statusHistory: [],
+      }
+
+      const parsed = moderatorReportDetailSchema.parse(detail)
+      expect(parsed.trackingCode).toBe('SW-2026-X89B')
+      expect(parsed.latitude).toBe(-0.5021)
+    })
+
     it('harus menolak updateReportStatusInputSchema jika alasan kurang dari 10 karakter', () => {
       const invalidInput = {
         reportId: '123e4567-e89b-12d3-a456-426614174000',
