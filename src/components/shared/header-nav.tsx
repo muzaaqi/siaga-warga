@@ -8,6 +8,7 @@ import {
   ShieldCheckIcon,
   FileTextIcon,
   SettingsIcon,
+  UsersIcon,
 } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { Button } from '@/components/ui/button'
@@ -54,12 +55,14 @@ interface UserDropdownMenuContentProps {
     role?: string | null
   }
   isModerator: boolean
+  isSuperadmin: boolean
   onSignOut: () => Promise<void>
 }
 
 function UserDropdownMenuContent({
   user,
   isModerator,
+  isSuperadmin,
   onSignOut,
 }: UserDropdownMenuContentProps) {
   return (
@@ -73,12 +76,17 @@ function UserDropdownMenuContent({
             <p className="truncate text-xs text-muted-foreground">
               {user.email ?? ''}
             </p>
-            {isModerator && (
+            {isSuperadmin ? (
+              <span className="mt-1.5 inline-flex items-center gap-1 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
+                <ShieldCheckIcon className="size-3" />
+                Administrator
+              </span>
+            ) : isModerator ? (
               <span className="mt-1.5 inline-flex items-center gap-1 rounded bg-[var(--color-pine)]/10 px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-pine)]">
                 <ShieldCheckIcon className="size-3" />
                 Petugas
               </span>
-            )}
+            ) : null}
           </div>
         </DropdownMenuLabel>
       </DropdownMenuGroup>
@@ -99,6 +107,14 @@ function UserDropdownMenuContent({
           >
             <ShieldCheckIcon />
             <span>Dasbor Triase</span>
+          </DropdownMenuItem>
+        )}
+        {isSuperadmin && (
+          <DropdownMenuItem
+            render={<Link to="/admin/pengguna" />}
+          >
+            <UsersIcon />
+            <span>Kelola Pengguna</span>
           </DropdownMenuItem>
         )}
       </DropdownMenuGroup>
@@ -147,6 +163,7 @@ export function HeaderNav() {
   }
 
   const isModerator = user?.role === 'moderator' || user?.role === 'superadmin'
+  const isSuperadmin = user?.role === 'superadmin'
 
   return (
     <>
@@ -216,6 +233,7 @@ export function HeaderNav() {
                     <UserDropdownMenuContent
                       user={user}
                       isModerator={isModerator}
+                      isSuperadmin={isSuperadmin}
                       onSignOut={handleSignOut}
                     />
                   </DropdownMenuContent>
@@ -295,6 +313,7 @@ export function HeaderNav() {
                 <UserDropdownMenuContent
                   user={user}
                   isModerator={isModerator}
+                  isSuperadmin={isSuperadmin}
                   onSignOut={handleSignOut}
                 />
               </DropdownMenuContent>

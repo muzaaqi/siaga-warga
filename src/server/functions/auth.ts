@@ -65,3 +65,29 @@ export const requireModeratorSession = createServerFn({
 
   return session
 })
+
+/**
+ * Memvalidasi hak akses superadmin secara ketat ke database Neon.
+ */
+export const requireSuperadminSession = createServerFn({
+  method: 'GET',
+}).handler(async () => {
+  const request = getRequest()
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  })
+
+  if (!session) {
+    throw new Error('Autentikasi diperlukan.')
+  }
+
+  const role = await verifyUserRole(session.user.id)
+
+  if (role !== 'superadmin') {
+    throw new Error(
+      'Akses ditolak: Anda tidak memiliki hak akses administrator utama.',
+    )
+  }
+
+  return session
+})

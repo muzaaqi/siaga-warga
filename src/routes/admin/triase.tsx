@@ -1,7 +1,13 @@
 import * as React from 'react'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import type { ErrorComponentProps } from '@tanstack/react-router'
-import { AlertCircleIcon, RotateCcwIcon, ShieldAlertIcon } from 'lucide-react'
+import {
+  AlertCircleIcon,
+  RotateCcwIcon,
+  ShieldAlertIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+} from 'lucide-react'
 import { TriageEmptyState } from '@/components/triage/triage-empty-state'
 import { TriageFilterBar } from '@/components/triage/triage-filter-bar'
 import { TriageQueueCard } from '@/components/triage/triage-queue-card'
@@ -37,6 +43,7 @@ export const Route = createFileRoute('/admin/triase')({
         return {
           authorized: false,
           queueData: null,
+          isSuperadmin: false,
         }
       }
 
@@ -54,11 +61,13 @@ export const Route = createFileRoute('/admin/triase')({
       return {
         authorized: true,
         queueData,
+        isSuperadmin: role === 'superadmin',
       }
     } catch {
       return {
         authorized: false,
         queueData: null,
+        isSuperadmin: false,
       }
     }
   },
@@ -104,14 +113,20 @@ function AdminTriasePage() {
     )
   }
 
-  return <TriageDashboard initialData={loaderData.queueData} />
+  return (
+    <TriageDashboard
+      initialData={loaderData.queueData}
+      isSuperadmin={loaderData.isSuperadmin}
+    />
+  )
 }
 
 interface TriageDashboardProps {
   initialData: TriageQueueResponse
+  isSuperadmin: boolean
 }
 
-function TriageDashboard({ initialData }: TriageDashboardProps) {
+function TriageDashboard({ initialData, isSuperadmin }: TriageDashboardProps) {
   const [query, setQuery] = React.useState<TriageQueueQuery>({
     priority: 'all',
     status: 'all',
@@ -167,6 +182,28 @@ function TriageDashboard({ initialData }: TriageDashboardProps) {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
+      {/* Tab Navigasi Admin */}
+      {isSuperadmin ? (
+        <nav className="mb-6 flex items-center gap-2 border-b border-border/60 pb-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            render={<Link to="/admin/triase" />}
+          >
+            <ShieldCheckIcon className="size-3.5" />
+            <span>Dasbor Triase</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            render={<Link to="/admin/pengguna" />}
+          >
+            <UsersIcon className="size-3.5" />
+            <span>Kelola Pengguna</span>
+          </Button>
+        </nav>
+      ) : null}
+
       {/* Header Halaman */}
       <header className="mb-6 flex flex-col gap-1.5 sm:mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
