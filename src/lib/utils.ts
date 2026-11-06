@@ -25,3 +25,16 @@ export function formatRelativeTime(isoString: string): string {
     year: 'numeric',
   })
 }
+
+export function formatFullDateTime(isoString: string): string {
+  const date = new Date(isoString)
+  return `${date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })}, ${date.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })} WIB`
+}
