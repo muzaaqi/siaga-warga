@@ -1,9 +1,7 @@
 import { desc, gte, sql } from 'drizzle-orm'
 import { db } from '@/server/db'
-import {
-  satelliteHotspots,
-  type NewSatelliteHotspot,
-} from '@/server/db/schema/hotspots'
+import type { NewSatelliteHotspot } from '@/server/db/schema/hotspots'
+import { satelliteHotspots } from '@/server/db/schema/hotspots'
 import { getServerEnv } from '@/server/env'
 import type { PublicMapHotspotItem } from '@/lib/schema/map'
 
@@ -59,7 +57,7 @@ export function parseNasaFirmsCsv(csvText: string): Array<NewSatelliteHotspot> {
     }
 
     const source =
-      instrument?.toUpperCase() === 'MODIS' ? 'MODIS' : 'VIIRS_SNPP'
+      instrument.toUpperCase() === 'MODIS' ? 'MODIS' : 'VIIRS_SNPP'
 
     results.push({
       source,
