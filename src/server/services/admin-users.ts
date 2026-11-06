@@ -81,7 +81,7 @@ export async function fetchAdminUsersList(
   // 2. Susun kondisi filter
   const conditions = []
 
-  if (query.role && query.role !== 'all') {
+  if (query.role !== 'all') {
     conditions.push(eq(user.role, query.role))
   }
 
@@ -131,7 +131,7 @@ export async function fetchAdminUsersList(
         name: u.name,
         email: u.email,
         image: u.image,
-        role: (u.role as UserRole) || 'citizen',
+        role: u.role as UserRole,
         createdAt: u.createdAt,
         reportsCount: reportCountRes[0]?.count ?? 0,
         moderationActionsCount: modCountRes[0]?.count ?? 0,
@@ -217,7 +217,7 @@ export async function executeUserRoleChange(
       name: updated.name,
       email: updated.email,
       image: updated.image,
-      role: (updated.role as UserRole) || 'citizen',
+      role: updated.role as UserRole,
       createdAt: updated.createdAt,
       reportsCount: reportCountRes[0]?.count ?? 0,
       moderationActionsCount: modCountRes[0]?.count ?? 0,

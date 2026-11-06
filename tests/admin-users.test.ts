@@ -69,6 +69,34 @@ describe('Superadmin User & Role Management (Plan 10)', () => {
       expect(parsed.superadminCount).toBe(2)
     })
 
+    it('harus memvalidasi adminUsersResponseSchema secara utuh', () => {
+      const response = {
+        users: [
+          {
+            id: 'usr-1',
+            name: 'Budi',
+            email: 'budi@example.com',
+            image: null,
+            role: 'citizen',
+            createdAt: new Date(),
+            reportsCount: 1,
+            moderationActionsCount: 0,
+          },
+        ],
+        totalCount: 1,
+        stats: {
+          totalUsers: 1,
+          citizenCount: 1,
+          moderatorCount: 0,
+          superadminCount: 0,
+        },
+      }
+      const parsed = adminUsersResponseSchema.parse(response)
+      expect(parsed.users.length).toBe(1)
+      expect(parsed.totalCount).toBe(1)
+      expect(parsed.stats.totalUsers).toBe(1)
+    })
+
     it('harus menerima input mutasi peran yang valid', () => {
       const input = {
         targetUserId: 'usr-target-1',

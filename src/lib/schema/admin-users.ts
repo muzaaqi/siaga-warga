@@ -1,7 +1,9 @@
 import { z } from 'zod'
-import { userRoleEnum, type UserRole } from './auth'
+import type { UserRole } from './auth'
+import { userRoleEnum } from './auth'
 
-export { userRoleEnum, type UserRole }
+export type { UserRole }
+export { userRoleEnum }
 
 /**
  * Parameter kueri pencarian dan penyaringan daftar pengguna superadmin.

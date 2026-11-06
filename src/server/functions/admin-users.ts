@@ -1,9 +1,11 @@
 import { createServerFn } from '@tanstack/react-start'
+import type {
+  AdminUsersResponse,
+  AdminUserItem,
+} from '@/lib/schema/admin-users'
 import {
   adminUsersQuerySchema,
   updateUserRoleInputSchema,
-  type AdminUsersResponse,
-  type AdminUserItem,
 } from '@/lib/schema/admin-users'
 import { requireSuperadminSession } from '@/server/functions/auth'
 import {
