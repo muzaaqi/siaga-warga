@@ -1,5 +1,11 @@
 import * as React from 'react'
-import { FilterIcon, RotateCcwIcon, SearchIcon, XIcon } from 'lucide-react'
+import {
+  DownloadIcon,
+  FilterIcon,
+  RotateCcwIcon,
+  SearchIcon,
+  XIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   InputGroup,
@@ -13,12 +19,14 @@ interface TriageFilterBarProps {
   query: TriageQueueQuery
   onQueryChange: (updates: Partial<TriageQueueQuery>) => void
   onReset: () => void
+  onOpenExport?: () => void
 }
 
 export function TriageFilterBar({
   query,
   onQueryChange,
   onReset,
+  onOpenExport,
 }: TriageFilterBarProps) {
   const [searchTerm, setSearchTerm] = React.useState(query.search || '')
 
@@ -90,19 +98,32 @@ export function TriageFilterBar({
           ) : null}
         </InputGroup>
 
-        {isFiltered ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setSearchTerm('')
-              onReset()
-            }}
-          >
-            <RotateCcwIcon className="size-3.5" />
-            <span>Reset Filter</span>
-          </Button>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {onOpenExport ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenExport}
+            >
+              <DownloadIcon className="size-3.5" />
+              <span>Ekspor Data</span>
+            </Button>
+          ) : null}
+
+          {isFiltered ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearchTerm('')
+                onReset()
+              }}
+            >
+              <RotateCcwIcon className="size-3.5" />
+              <span>Reset Filter</span>
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {/* Baris 2: Filter Tingkat Prioritas */}
