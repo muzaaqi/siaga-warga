@@ -12,6 +12,7 @@ import { TriageEmptyState } from '@/components/triage/triage-empty-state'
 import { TriageFilterBar } from '@/components/triage/triage-filter-bar'
 import { TriageQueueCard } from '@/components/triage/triage-queue-card'
 import { TriageStatsHeader } from '@/components/triage/triage-stats-header'
+import { ExportDataDialog } from '@/components/triage/export-data-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -139,6 +140,7 @@ function TriageDashboard({ initialData, isSuperadmin }: TriageDashboardProps) {
   const [queueResponse, setQueueResponse] =
     React.useState<TriageQueueResponse>(initialData)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [isExportDialogOpen, setIsExportDialogOpen] = React.useState(false)
 
   const handleQueryChange = React.useCallback(
     async (updates: Partial<TriageQueueQuery>) => {
@@ -226,6 +228,7 @@ function TriageDashboard({ initialData, isSuperadmin }: TriageDashboardProps) {
           query={query}
           onQueryChange={handleQueryChange}
           onReset={handleReset}
+          onOpenExport={() => setIsExportDialogOpen(true)}
         />
       </section>
 
@@ -252,6 +255,12 @@ function TriageDashboard({ initialData, isSuperadmin }: TriageDashboardProps) {
           </div>
         )}
       </section>
+
+      {/* Dialog Ekspor Data untuk Damkar / BPBD */}
+      <ExportDataDialog
+        open={isExportDialogOpen}
+        onOpenChange={setIsExportDialogOpen}
+      />
     </div>
   )
 }
