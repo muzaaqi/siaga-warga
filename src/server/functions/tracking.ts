@@ -1,8 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
-import {
-  getReportTrackingInputSchema,
-  type ReportTrackingDetail,
-} from '@/lib/schema/tracking'
+import type { ReportTrackingDetail } from '@/lib/schema/tracking'
+import { getReportTrackingInputSchema } from '@/lib/schema/tracking'
 import { fetchReportByTrackingCode } from '@/server/services/tracking'
 
 /**

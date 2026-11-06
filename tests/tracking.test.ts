@@ -10,8 +10,7 @@ import {
 } from '@/server/services/tracking'
 import { getReportByTrackingCode } from '@/server/functions/tracking'
 import { db } from '@/server/db'
-import { reports, reportEvidence, reportStatusHistory } from '@/server/db/schema'
-import { eq } from 'drizzle-orm'
+import { reports } from '@/server/db/schema'
 
 describe('Plan 07: Public Tracking Timeline (/lacak/$code)', () => {
   describe('1. Zod Validation Schemas', () => {
