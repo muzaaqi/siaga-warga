@@ -67,6 +67,7 @@ export async function fetchPublicNewsFeed(
       reporterName: user.name,
       reporterImage: user.image,
       reporterRole: user.role,
+      reportReporterName: reports.reporterName,
     })
     .from(reports)
     .leftJoin(user, eq(reports.reporterUserId, user.id))
@@ -114,7 +115,9 @@ export async function fetchPublicNewsFeed(
       primaryImageUrl: evidenceMap.get(row.id) ?? null,
       reporter: {
         id: row.isAnonymous ? null : (row.reporterId ?? null),
-        name: row.isAnonymous ? 'Warga Siaga' : (row.reporterName || 'Warga Siaga'),
+        name: row.isAnonymous
+          ? 'Warga Siaga'
+          : (row.reporterName || row.reportReporterName || 'Warga Siaga'),
         image: row.isAnonymous ? null : (row.reporterImage ?? null),
         role: row.isAnonymous ? 'citizen' : (row.reporterRole ?? 'citizen'),
       },

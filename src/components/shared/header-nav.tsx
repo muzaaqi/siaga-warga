@@ -8,7 +8,7 @@ import {
   NewspaperIcon,
   ShieldCheckIcon,
   FileTextIcon,
-  SettingsIcon,
+  UserIcon,
   UsersIcon,
 } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
@@ -94,7 +94,7 @@ function UserDropdownMenuContent({
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem render={<Link to="/profil" />}>
-          <SettingsIcon />
+          <UserIcon />
           <span>Profil</span>
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link to="/profil" />}>
