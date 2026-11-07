@@ -10,6 +10,8 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { EmergencyBanner } from '@/components/shared/emergency-banner'
 import { HeaderNav } from '@/components/shared/header-nav'
 import { Footer } from '@/components/shared/footer'
+import { NotFound } from '@/components/shared/not-found'
+import { GlobalErrorFallback } from '@/components/shared/global-error-fallback'
 
 import appCss from '../styles.css?url'
 
@@ -46,6 +48,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
+  notFoundComponent: () => <NotFound />,
+  errorComponent: (props) => <GlobalErrorFallback {...props} />,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
