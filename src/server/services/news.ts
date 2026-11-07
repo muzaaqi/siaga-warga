@@ -1,5 +1,6 @@
 import { and, desc, eq, ilike, inArray, lt, or } from 'drizzle-orm'
 import type { GetNewsFeedInput, NewsFeedResponse } from '@/lib/schema/news'
+import { getNewsFeedInputSchema } from '@/lib/schema/news'
 import { db } from '@/server/db'
 import { user } from '@/server/db/schema/auth'
 import { reportEvidence } from '@/server/db/schema/evidence'
@@ -10,13 +11,19 @@ import { reports } from '@/server/db/schema/reports'
  * cursor pagination, dan proteksi privasi warga (Rule 7).
  */
 export async function fetchPublicNewsFeed(
-  input: GetNewsFeedInput,
+  rawInput: GetNewsFeedInput,
 ): Promise<NewsFeedResponse> {
+  const input = getNewsFeedInputSchema.parse(rawInput)
   const limit = input.limit
   const conditions = []
 
   // Hanya laporan yang sudah diverifikasi resmi oleh posko / moderator
   conditions.push(eq(reports.verificationStatus, 'verified'))
+
+  // Filter kategori insiden jika pengguna memilih selain 'all'
+  if (input.incidentType !== 'all') {
+    conditions.push(eq(reports.incidentType, input.incidentType))
+  }
 
   // Filter pencarian teks (alamat, deskripsi, atau kode pelacakan)
   if (input.search && input.search.trim().length > 0) {

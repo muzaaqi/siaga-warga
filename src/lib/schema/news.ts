@@ -5,12 +5,23 @@ import {
   verificationStatusEnum,
 } from './reports'
 
+export const newsCategoryFilterEnum = z.enum([
+  'all',
+  'karhutla',
+  'permukiman',
+  'industri',
+  'lainnya',
+])
+export type NewsCategoryFilter = z.infer<typeof newsCategoryFilterEnum>
+
 export const getNewsFeedInputSchema = z.object({
   cursor: z.string().optional(),
   limit: z.number().int().min(1).max(30).default(10),
   search: z.string().optional(),
+  incidentType: newsCategoryFilterEnum.default('all'),
 })
-export type GetNewsFeedInput = z.infer<typeof getNewsFeedInputSchema>
+export type GetNewsFeedInput = z.input<typeof getNewsFeedInputSchema>
+export type GetNewsFeedParsed = z.output<typeof getNewsFeedInputSchema>
 
 export const newsFeedItemSchema = z.object({
   id: z.string().uuid(),

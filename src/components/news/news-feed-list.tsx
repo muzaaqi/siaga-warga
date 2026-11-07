@@ -2,10 +2,14 @@ import * as React from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import {
+  FactoryIcon,
+  HomeIcon,
   InboxIcon,
+  LayersIcon,
   PlusIcon,
   RotateCcwIcon,
   SearchIcon,
+  TreesIcon,
   XIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -15,7 +19,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
-import type { NewsFeedResponse } from '@/lib/schema/news'
+import type { NewsCategoryFilter, NewsFeedResponse } from '@/lib/schema/news'
 import { getPublicNewsFeed } from '@/server/functions/news'
 import { NewsFeedSkeleton } from './news-feed-skeleton'
 import { NewsReportCard } from './news-report-card'
@@ -24,9 +28,22 @@ interface NewsFeedListProps {
   initialData?: NewsFeedResponse
 }
 
+const categoryFilters: Array<{
+  value: NewsCategoryFilter
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+}> = [
+  { value: 'all', label: 'Semua', icon: LayersIcon },
+  { value: 'karhutla', label: 'Karhutla', icon: TreesIcon },
+  { value: 'permukiman', label: 'Permukiman', icon: HomeIcon },
+  { value: 'industri', label: 'Industri', icon: FactoryIcon },
+]
+
 export function NewsFeedList({ initialData }: NewsFeedListProps) {
   const [searchInput, setSearchInput] = React.useState('')
   const [debouncedSearch, setDebouncedSearch] = React.useState('')
+  const [selectedCategory, setSelectedCategory] =
+    React.useState<NewsCategoryFilter>('all')
   const sentinelRef = React.useRef<HTMLDivElement | null>(null)
 
   // Debounce input pencarian selama 300ms untuk efisiensi kueri database
@@ -46,9 +63,9 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['publicNewsFeed', debouncedSearch],
+    queryKey: ['publicNewsFeed', debouncedSearch, selectedCategory],
     initialData:
-      !debouncedSearch && initialData
+      !debouncedSearch && selectedCategory === 'all' && initialData
         ? {
             pages: [initialData],
             pageParams: [undefined as string | undefined],
@@ -59,6 +76,7 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
         data: {
           cursor: pageParam,
           search: debouncedSearch || undefined,
+          incidentType: selectedCategory,
           limit: 10,
         },
       })
@@ -95,33 +113,61 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
 
   return (
     <div className="flex w-full flex-col gap-6">
-      {/* Search Bar Pengganti Tab Filter */}
-      <div className="relative w-full">
-        <InputGroup className="h-10">
-          <InputGroupAddon align="inline-start">
-            <SearchIcon className="size-4" aria-hidden="true" />
-          </InputGroupAddon>
-          <InputGroupInput
-            type="search"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Cari berita kebakaran"
-            className="h-10"
-            aria-label="Cari laporan kebakaran"
-          />
-          {searchInput && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => setSearchInput('')}
-              className="mr-2 shrink-0"
-              aria-label="Bersihkan pencarian"
-            >
-              <XIcon className="size-3.5" aria-hidden="true" />
-            </Button>
-          )}
-        </InputGroup>
+      {/* Search Bar & Pill Filter Kategori Cepat */}
+      <div className="flex flex-col gap-3">
+        <div className="relative w-full">
+          <InputGroup className="h-10">
+            <InputGroupAddon align="inline-start">
+              <SearchIcon className="size-4" aria-hidden="true" />
+            </InputGroupAddon>
+            <InputGroupInput
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Cari berita kebakaran"
+              className="h-10"
+              aria-label="Cari laporan kebakaran"
+            />
+            {searchInput && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => setSearchInput('')}
+                className="mr-2 shrink-0"
+                aria-label="Bersihkan pencarian"
+              >
+                <XIcon className="size-3.5" aria-hidden="true" />
+              </Button>
+            )}
+          </InputGroup>
+        </div>
+
+        {/* Bilah Tombol Pil Kategori */}
+        <div
+          role="toolbar"
+          aria-label="Filter kategori insiden"
+          className="flex items-center gap-2 overflow-x-auto pb-1"
+        >
+          {categoryFilters.map((filter) => {
+            const Icon = filter.icon
+            const isActive = selectedCategory === filter.value
+            return (
+              <Button
+                key={filter.value}
+                type="button"
+                variant={isActive ? 'default' : 'outline'}
+                size="pill"
+                onClick={() => setSelectedCategory(filter.value)}
+                aria-pressed={isActive}
+                aria-label={`Saring laporan kategori ${filter.label}`}
+              >
+                <Icon className="size-3.5" aria-hidden="true" />
+                <span>{filter.label}</span>
+              </Button>
+            )
+          })}
+        </div>
       </div>
 
       {/* State Kesalahan Saat Memuat */}
@@ -168,24 +214,27 @@ export function NewsFeedList({ initialData }: NewsFeedListProps) {
           </div>
           <div className="space-y-1">
             <h3 className="text-base font-semibold text-foreground">
-              {debouncedSearch
+              {debouncedSearch || selectedCategory !== 'all'
                 ? 'Tidak Ada Laporan yang Cocok'
                 : 'Belum Ada Laporan Terpublikasi'}
             </h3>
             <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-              {debouncedSearch
-                ? `Tidak ditemukan laporan terverifikasi dengan kata kunci "${debouncedSearch}". Coba kata kunci lain atau bersihkan pencarian.`
+              {debouncedSearch || selectedCategory !== 'all'
+                ? `Tidak ditemukan laporan terverifikasi${selectedCategory !== 'all' ? ` untuk kategori ${categoryFilters.find((c) => c.value === selectedCategory)?.label}` : ''}${debouncedSearch ? ` dengan kata kunci "${debouncedSearch}"` : ''}. Coba pilih kategori lain atau bersihkan penyaringan.`
                 : 'Laporan yang dikirimkan warga akan tampil di feed ini secara transparan setelah melalui proses verifikasi posko.'}
             </p>
           </div>
-          {debouncedSearch ? (
+          {debouncedSearch || selectedCategory !== 'all' ? (
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setSearchInput('')}
+              onClick={() => {
+                setSearchInput('')
+                setSelectedCategory('all')
+              }}
             >
-              <span>Bersihkan Pencarian</span>
+              <span>Bersihkan Filter</span>
             </Button>
           ) : (
             <Button
