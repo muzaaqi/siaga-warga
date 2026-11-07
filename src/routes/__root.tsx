@@ -8,6 +8,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { EmergencyBanner } from '@/components/shared/emergency-banner'
+import { OfflineIndicator } from '@/components/shared/offline-indicator'
 import { HeaderNav } from '@/components/shared/header-nav'
 import { Footer } from '@/components/shared/footer'
 import { NotFound } from '@/components/shared/not-found'
@@ -34,12 +35,45 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         title: 'SiagaWarga - Platform Pelaporan & Tracking Kebakaran Terbuka',
       },
+      {
+        name: 'theme-color',
+        content: '#1b4d3e',
+      },
+      {
+        name: 'mobile-web-app-capable',
+        content: 'yes',
+      },
+      {
+        name: 'apple-mobile-web-app-capable',
+        content: 'yes',
+      },
+      {
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'default',
+      },
+      {
+        name: 'apple-mobile-web-app-title',
+        content: 'SiagaWarga',
+      },
     ],
     links: [
       {
         rel: 'icon',
         href: '/favicon.ico',
         sizes: 'any',
+      },
+      {
+        rel: 'icon',
+        href: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/icon.svg',
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.webmanifest',
       },
       {
         rel: 'stylesheet',
@@ -66,6 +100,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/20 selection:text-primary">
         <div className="relative flex min-h-screen flex-col">
           <EmergencyBanner />
+          <OfflineIndicator />
           <HeaderNav />
           <main className="flex-1 pb-24 md:pb-0">{children}</main>
           <Footer />
