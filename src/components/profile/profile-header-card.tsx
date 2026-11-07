@@ -18,6 +18,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { UserAvatar } from '@/components/shared/user-avatar'
 import type { MyProfileUser } from '@/lib/schema/profile'
+import { authClient } from '@/lib/auth-client'
 import { updateMyProfile } from '@/server/functions/profile'
 import { AvatarPickerOverlay } from './avatar-picker-overlay'
 
@@ -63,12 +64,24 @@ export function ProfileHeaderCard({
 
       try {
         setIsSubmitting(true)
+        // 1. Perbarui profil di database melalui server function
         await updateMyProfile({
           data: {
             name: trimmedName,
             image: selectedImage ?? undefined,
           },
         })
+
+        // 2. Sinkronkan sesi Better Auth klien agar hook useSession() di navbar segera diperbarui
+        try {
+          await authClient.updateUser({
+            name: trimmedName,
+            image: selectedImage ?? undefined,
+          })
+        } catch {
+          // Abaikan jika pemanggilan authClient gagal di background
+        }
+
         setIsEditing(false)
         onProfileUpdated?.()
       } catch (err) {
