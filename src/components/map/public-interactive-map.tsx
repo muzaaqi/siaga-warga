@@ -1,10 +1,14 @@
 import { Link } from '@tanstack/react-router'
 import {
+  CompassIcon,
   ExternalLinkIcon,
   FlameIcon,
   InfoIcon,
+  LocateIcon,
   RadioIcon,
+  XIcon,
 } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -17,7 +21,13 @@ import {
   MarkerTooltip,
   MapControls,
 } from '@/components/ui/map'
+import type { MapRef } from '@/components/ui/map'
 import { formatRelativeTime } from '@/lib/utils'
+import {
+  findNearestIncident,
+  formatDistance,
+} from '@/lib/geo'
+import type { NearestIncidentResult } from '@/lib/geo'
 import type {
   PublicMapReportItem,
   PublicMapHotspotItem,
@@ -38,6 +48,15 @@ export function PublicInteractiveMap({
 }: PublicInteractiveMapProps) {
   // Koordinat tengah kepulauan Indonesia
   const defaultCenter: [number, number] = [118.0149, -2.5489]
+
+  const mapRef = useRef<MapRef | null>(null)
+  const [userLocation, setUserLocation] = useState<{
+    longitude: number
+    latitude: number
+  } | null>(null)
+  const [nearestIncident, setNearestIncident] =
+    useState<NearestIncidentResult | null>(null)
+  const [isProximityDismissed, setIsProximityDismissed] = useState(false)
 
   const handlingLabels: Record<string, string> = {
     not_forwarded: 'Belum Diteruskan',
@@ -61,14 +80,51 @@ export function PublicInteractiveMap({
     }
   }
 
+  const handleLocate = useCallback(
+    (coords: { longitude: number; latitude: number }) => {
+      setUserLocation(coords)
+      setIsProximityDismissed(false)
+      const nearest = findNearestIncident(coords, reports, hotspots)
+      setNearestIncident(nearest)
+    },
+    [reports, hotspots],
+  )
+
+  useEffect(() => {
+    if (userLocation) {
+      const nearest = findNearestIncident(userLocation, reports, hotspots)
+      setNearestIncident(nearest)
+    }
+  }, [userLocation, reports, hotspots])
+
+  const handleFlyToNearest = (target: NearestIncidentResult) => {
+    mapRef.current?.flyTo({
+      center: [target.longitude, target.latitude],
+      zoom: 14,
+      duration: 1500,
+    })
+  }
+
   return (
     <Card className="w-full">
       <CardContent>
         <div className="space-y-3">
           {/* Kontainer Utama Peta MapLibre GL */}
           <div className="relative h-[480px] w-full overflow-hidden rounded-xl border border-border bg-muted/40 sm:h-[560px]">
-            <Map center={defaultCenter} zoom={4.8} className="size-full">
-              <MapControls showZoom position="top-right" />
+            <Map
+              ref={mapRef}
+              center={defaultCenter}
+              zoom={4.8}
+              className="size-full"
+            >
+              <MapControls
+                showZoom
+                showCompass
+                showLocate
+                showFullscreen
+                position="top-right"
+                onLocate={handleLocate}
+              />
 
               {/* 1. Layer Laporan Warga Terverifikasi (Ember Flame Markers) */}
               {showCitizenReports &&
@@ -193,7 +249,128 @@ export function PublicInteractiveMap({
                     </MarkerPopup>
                   </MapMarker>
                 ))}
+
+              {/* 3. Layer Penanda Lokasi Pengguna (User Location Halo Marker) */}
+              {userLocation && (
+                <MapMarker
+                  longitude={userLocation.longitude}
+                  latitude={userLocation.latitude}
+                >
+                  <MarkerContent>
+                    <div className="relative flex size-8 items-center justify-center cursor-pointer">
+                      <span className="absolute size-8 animate-ping rounded-full bg-[var(--info)]/40" />
+                      <div className="relative flex size-4 items-center justify-center rounded-full bg-[var(--info)] text-white shadow-md ring-2 ring-white transition-transform hover:scale-125" />
+                    </div>
+                  </MarkerContent>
+
+                  <MarkerTooltip>Lokasi Anda Saat Ini</MarkerTooltip>
+
+                  <MarkerPopup closeButton>
+                    <div className="w-56 space-y-1.5 p-1 text-xs">
+                      <div className="flex items-center gap-1.5 border-b border-border/60 pb-1">
+                        <LocateIcon className="size-3.5 text-[var(--info)]" />
+                        <span className="font-semibold text-foreground">
+                          Lokasi Anda Saat Ini
+                        </span>
+                      </div>
+                      <div className="space-y-0.5 text-[11px] text-muted-foreground font-mono">
+                        <p>Lintang: {userLocation.latitude.toFixed(5)}</p>
+                        <p>Bujur: {userLocation.longitude.toFixed(5)}</p>
+                      </div>
+                      {nearestIncident && (
+                        <div className="border-t border-border/50 pt-1 text-[11px]">
+                          <span className="text-muted-foreground">
+                            Insiden terdekat:{' '}
+                          </span>
+                          <span className="font-medium text-foreground">
+                            ~{formatDistance(nearestIncident.distanceKm)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </MarkerPopup>
+                </MapMarker>
+              )}
             </Map>
+
+            {/* Bilah Notifikasi Kedekatan Insiden (Floating Proximity Bar) */}
+            {userLocation && !isProximityDismissed && (
+              <div className="absolute bottom-3 left-3 right-3 z-10 sm:right-auto sm:max-w-sm">
+                <div className="rounded-xl border border-border/80 bg-card/95 p-3 shadow-lg backdrop-blur-md">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <LocateIcon className="size-4 text-[var(--info)]" />
+                      <span className="text-xs font-semibold text-foreground">
+                        Lokasi Anda Terdeteksi
+                      </span>
+                    </div>
+                    <Button
+                      size="icon-xs"
+                      variant="ghost"
+                      onClick={() => setIsProximityDismissed(true)}
+                      aria-label="Tutup notifikasi kedekatan"
+                    >
+                      <XIcon className="size-3" />
+                    </Button>
+                  </div>
+
+                  <div className="mt-2 space-y-1.5">
+                    {nearestIncident ? (
+                      <>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] text-muted-foreground">
+                            Jarak ke Titik Api:
+                          </span>
+                          <Badge
+                            variant={
+                              nearestIncident.distanceKm < 5
+                                ? 'warning'
+                                : 'info'
+                            }
+                            size="xs"
+                          >
+                            <span>
+                              {formatDistance(nearestIncident.distanceKm)}
+                            </span>
+                          </Badge>
+                        </div>
+
+                        <p className="line-clamp-1 text-xs font-medium text-foreground">
+                          {nearestIncident.title}
+                        </p>
+
+                        {nearestIncident.distanceKm < 5 ? (
+                          <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                            Perhatian: Anda berada dalam radius 5 km dari titik
+                            kebakaran aktif.
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-muted-foreground">
+                            Insiden terdekat berjarak aman dari koordinat GPS Anda.
+                          </p>
+                        )}
+
+                        <div className="pt-1">
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => handleFlyToNearest(nearestIncident)}
+                          >
+                            <CompassIcon className="size-3" />
+                            <span>Arahkan ke Titik Insiden</span>
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        Tidak ada titik insiden aktif di sekitar Anda saat ini.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Penafian Privasi Spasial (Rule 7) */}
