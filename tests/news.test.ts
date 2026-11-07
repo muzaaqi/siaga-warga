@@ -16,7 +16,26 @@ describe('Plan 05: Public Incident News Feed', () => {
         expect(result.data.limit).toBe(10)
         expect(result.data.cursor).toBeUndefined()
         expect(result.data.search).toBeUndefined()
+        expect(result.data.incidentType).toBe('all')
       }
+    })
+
+    it('harus menerima parameter query yang valid dengan filter kategori insiden', () => {
+      const result = getNewsFeedInputSchema.safeParse({
+        limit: 10,
+        incidentType: 'karhutla',
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.incidentType).toBe('karhutla')
+      }
+    })
+
+    it('harus menolak nilai kategori insiden yang tidak sah di luar enum', () => {
+      const result = getNewsFeedInputSchema.safeParse({
+        incidentType: 'kategori_palsu',
+      })
+      expect(result.success).toBe(false)
     })
 
     it('harus menerima parameter query yang valid dengan kata kunci pencarian', () => {
@@ -111,6 +130,33 @@ describe('Plan 05: Public Incident News Feed', () => {
       expect(searchResponse).toBeDefined()
       expect(Array.isArray(searchResponse.items)).toBe(true)
       for (const item of searchResponse.items) {
+        expect(item.verificationStatus).toBe('verified')
+      }
+    })
+
+    it('harus mendukung penyaringan kategori insiden spesifik pada fetchPublicNewsFeed', async () => {
+      const response = await fetchPublicNewsFeed({
+        limit: 5,
+        incidentType: 'karhutla',
+      })
+
+      expect(response).toBeDefined()
+      expect(Array.isArray(response.items)).toBe(true)
+      for (const item of response.items) {
+        expect(item.verificationStatus).toBe('verified')
+        expect(item.incidentType).toBe('karhutla')
+      }
+    })
+
+    it('harus mengembalikan semua jenis kategori insiden terverifikasi jika incidentType = all', async () => {
+      const response = await fetchPublicNewsFeed({
+        limit: 5,
+        incidentType: 'all',
+      })
+
+      expect(response).toBeDefined()
+      expect(Array.isArray(response.items)).toBe(true)
+      for (const item of response.items) {
         expect(item.verificationStatus).toBe('verified')
       }
     })
