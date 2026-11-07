@@ -94,7 +94,7 @@ export function generateWhatsAppShareUrl(
  * Menyalin teks ke clipboard peramban dengan penanganan kesalahan yang aman.
  */
 export async function copyTextToClipboard(text: string): Promise<boolean> {
-  if (typeof window === 'undefined' || !navigator.clipboard) {
+  if (typeof window === 'undefined') {
     return false
   }
 

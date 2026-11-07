@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import {
-  emergencyDispatchPayloadSchema,
-  type EmergencyDispatchPayload,
-} from '@/lib/schema/share'
+import type { EmergencyDispatchPayload } from '@/lib/schema/share'
+import { emergencyDispatchPayloadSchema } from '@/lib/schema/share'
 import {
   generateEmergencyDispatchText,
   generateWhatsAppShareUrl,

@@ -9,6 +9,7 @@ import {
   ShieldAlertIcon,
 } from 'lucide-react'
 import { UserAvatar } from '@/components/shared/user-avatar'
+import { EmergencyShareDialog } from '@/components/shared/emergency-share-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,21 +45,14 @@ const handlingStatusConfig: Record<
 export function NewsReportCard({ item }: NewsReportCardProps) {
   const navigate = useNavigate()
   const [isExpanded, setIsExpanded] = React.useState(false)
-  const [isCopied, setIsCopied] = React.useState(false)
+  const [isShareDialogOpen, setIsShareDialogOpen] = React.useState(false)
 
   const handlingBadge = handlingStatusConfig[item.handlingStatus]
   const HandlingIcon = handlingBadge.icon
 
-  const handleShare = async (e: React.MouseEvent) => {
+  const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation()
-    try {
-      const shareUrl = `${window.location.origin}/lacak/${item.trackingCode}`
-      await navigator.clipboard.writeText(shareUrl)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
-    } catch {
-      // Fallback diam
-    }
+    setIsShareDialogOpen(true)
   }
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -190,19 +184,10 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
                 variant="ghost"
                 size="icon-sm"
                 onClick={handleShare}
-                aria-label="Salin tautan laporan"
-                title={
-                  isCopied ? 'Tautan berhasil disalin' : 'Salin tautan laporan'
-                }
+                aria-label="Bagikan laporan darurat ke WhatsApp"
+                title="Bagikan laporan darurat"
               >
-                {isCopied ? (
-                  <CheckIcon
-                    className="size-4 text-[var(--color-pine)]"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <Share2Icon className="size-4" aria-hidden="true" />
-                )}
+                <Share2Icon className="size-4" aria-hidden="true" />
               </Button>
             </div>
 
@@ -239,6 +224,23 @@ export function NewsReportCard({ item }: NewsReportCardProps) {
           </p>
         </div>
       </CardContent>
+
+      <EmergencyShareDialog
+        open={isShareDialogOpen}
+        onOpenChange={setIsShareDialogOpen}
+        payload={{
+          trackingCode: item.trackingCode,
+          incidentType: item.incidentType,
+          verificationStatus: item.verificationStatus,
+          handlingStatus: item.handlingStatus,
+          submittedAtIso: item.submittedAtIso,
+          addressDisplay: item.addressDisplay,
+          latitude: item.latitude,
+          longitude: item.longitude,
+          description: item.description,
+          reporterName: item.reporter.name,
+        }}
+      />
     </Card>
   )
 }

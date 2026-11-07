@@ -5,6 +5,7 @@ import {
   CopyIcon,
   FlameIcon,
   PlusCircleIcon,
+  Share2Icon,
   ShieldAlertIcon,
   ShieldCheckIcon,
   ClockIcon,
@@ -12,6 +13,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { EmergencyShareDialog } from '@/components/shared/emergency-share-dialog'
 import { formatFullDateTime, formatRelativeTime } from '@/lib/utils'
 import type { ReportTrackingDetail } from '@/lib/schema/tracking'
 
@@ -21,6 +23,7 @@ interface TrackingOverviewCardProps {
 
 export function TrackingOverviewCard({ report }: TrackingOverviewCardProps) {
   const [copied, setCopied] = React.useState(false)
+  const [isShareDialogOpen, setIsShareDialogOpen] = React.useState(false)
 
   const handleCopyLink = React.useCallback(async () => {
     try {
@@ -106,6 +109,16 @@ export function TrackingOverviewCard({ report }: TrackingOverviewCardProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsShareDialogOpen(true)}
+            >
+              <Share2Icon className="size-3.5" />
+              <span>Bagikan Darurat</span>
+            </Button>
+
             <Button
               type="button"
               variant="outline"
@@ -201,6 +214,23 @@ export function TrackingOverviewCard({ report }: TrackingOverviewCardProps) {
           </p>
         </div>
       </CardContent>
+
+      <EmergencyShareDialog
+        open={isShareDialogOpen}
+        onOpenChange={setIsShareDialogOpen}
+        payload={{
+          trackingCode: report.trackingCode,
+          incidentType: report.incidentType,
+          verificationStatus: report.verificationStatus,
+          handlingStatus: report.handlingStatus,
+          observedAtIso: report.observedAtIso,
+          submittedAtIso: report.submittedAtIso,
+          addressDisplay: report.addressDisplay,
+          latitude: report.maskedLocation.latitude,
+          longitude: report.maskedLocation.longitude,
+          description: report.description,
+        }}
+      />
     </Card>
   )
 }
