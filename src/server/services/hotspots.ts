@@ -10,12 +10,18 @@ import type { PublicMapHotspotItem } from '@/lib/schema/map'
  * Format baris CSV standar NASA FIRMS:
  * country_id,latitude,longitude,bright_ti4,scan,track,acq_date,acq_time,satellite,instrument,confidence,version,bright_ti5,frp,daynight
  */
+export const MAX_HOTSPOTS_PER_SYNC = 1000
+
 export function parseNasaFirmsCsv(csvText: string): Array<NewSatelliteHotspot> {
   const lines = csvText.split('\n')
   const results: Array<NewSatelliteHotspot> = []
 
   // Lewati baris 0 (header)
   for (let i = 1; i < lines.length; i++) {
+    if (results.length >= MAX_HOTSPOTS_PER_SYNC) {
+      break
+    }
+
     const line = lines[i]?.trim()
     if (!line) continue
 
@@ -73,48 +79,66 @@ export function parseNasaFirmsCsv(csvText: string): Array<NewSatelliteHotspot> {
 }
 
 /**
+ * Variabel penahan sinkronisasi aktif untuk mencegah serangan Cache Stampede.
+ */
+let activeSyncPromise: Promise<number> | null = null
+
+/**
  * Menyinkronkan titik panas dari API NASA FIRMS ke tabel basis data PostGIS (Rule 6).
  */
 export async function syncNasaFirmsHotspots(): Promise<number> {
-  let mapKey: string | undefined
-  try {
-    const env = getServerEnv()
-    mapKey = env.NASA_FIRMS_MAP_KEY
-  } catch {
-    // Tidak apa-apa jika env server belum terkonfigurasi saat pengujian
+  // Jika sinkronisasi sedang berjalan, tunggu promise yang sama (cegah stampede)
+  if (activeSyncPromise) {
+    return activeSyncPromise
   }
 
-  if (!mapKey) {
-    return 0
-  }
-
-  const endpoint = `https://firms.modaps.eosdis.nasa.gov/api/country/csv/${mapKey}/VIIRS_SNPP_NRT/IDN/1`
-
-  try {
-    const response = await fetch(endpoint, {
-      headers: {
-        Accept: 'text/csv',
-      },
-      signal: AbortSignal.timeout(3000),
-    })
-
-    if (!response.ok) {
-      console.warn(`NASA FIRMS API mengembalikan HTTP ${response.status}`)
+  activeSyncPromise = (async () => {
+    // Lewati panggilan keluar saat pengujian unit otomatis
+    if (process.env.NODE_ENV === 'test') {
       return 0
     }
 
-    const csvText = await response.text()
-    const hotspots = parseNasaFirmsCsv(csvText)
+    let mapKey: string | undefined
+    try {
+      const env = getServerEnv()
+      mapKey = env.NASA_FIRMS_MAP_KEY
+    } catch {
+      // Tidak apa-apa jika env server belum terkonfigurasi saat pengujian
+    }
 
-    if (hotspots.length === 0) {
+    // Abaikan jika kunci belum diisi atau masih menggunakan placeholder bawaan
+    if (!mapKey || mapKey === 'your-nasa-firms-map-key' || mapKey.startsWith('your-')) {
       return 0
     }
 
-    // Simpan dalam batch ke basis data PostGIS
-    for (const spot of hotspots) {
-      await db
-        .insert(satelliteHotspots)
-        .values({
+    const safeKey = encodeURIComponent(mapKey.trim())
+    const endpoint = `https://firms.modaps.eosdis.nasa.gov/api/country/csv/${safeKey}/VIIRS_SNPP_NRT/IDN/1`
+
+    try {
+      const response = await fetch(endpoint, {
+        headers: {
+          Accept: 'text/csv',
+        },
+        signal: AbortSignal.timeout(5000),
+      })
+
+      if (!response.ok) {
+        console.warn(`NASA FIRMS API mengembalikan HTTP ${response.status}`)
+        return 0
+      }
+
+      const csvText = await response.text()
+      const hotspots = parseNasaFirmsCsv(csvText)
+
+      if (hotspots.length === 0) {
+        return 0
+      }
+
+      // Simpan dalam pecahan batch (100 per kueri) guna mereduksi round-trip database
+      const BATCH_SIZE = 100
+      for (let i = 0; i < hotspots.length; i += BATCH_SIZE) {
+        const chunk = hotspots.slice(i, i + BATCH_SIZE)
+        const rowsToInsert = chunk.map((spot) => ({
           source: spot.source,
           latitude: spot.latitude,
           longitude: spot.longitude,
@@ -123,14 +147,25 @@ export async function syncNasaFirmsHotspots(): Promise<number> {
           confidence: spot.confidence,
           acquiredAt: spot.acquiredAt,
           fetchedAt: new Date(),
-        })
-        .onConflictDoNothing()
-    }
+        }))
 
-    return hotspots.length
-  } catch (error) {
-    console.warn('Kendala jaringan saat sinkronisasi NASA FIRMS:', error)
-    return 0
+        await db
+          .insert(satelliteHotspots)
+          .values(rowsToInsert)
+          .onConflictDoNothing()
+      }
+
+      return hotspots.length
+    } catch (error) {
+      console.warn('Kendala jaringan saat sinkronisasi NASA FIRMS:', error)
+      return 0
+    }
+  })()
+
+  try {
+    return await activeSyncPromise
+  } finally {
+    activeSyncPromise = null
   }
 }
 

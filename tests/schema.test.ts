@@ -69,6 +69,47 @@ describe('Zod Isomorphic Schemas (SiagaWarga)', () => {
     }
   })
 
+  it('should reject observedAt timestamp in the future', () => {
+    const futureDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
+    const futurePayload = {
+      incidentType: 'karhutla',
+      description: 'Laporan kebakaran di masa depan yang tidak masuk akal.',
+      observedAt: futureDate,
+      latitude: -0.5,
+      longitude: 101.4,
+      r2ObjectKey: 'evidence/test-photo.webp',
+    }
+
+    const result = createReportInputSchema.safeParse(futurePayload)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const dateError = result.error.issues.find(
+        (issue) => issue.path[0] === 'observedAt',
+      )
+      expect(dateError?.message).toBe('Waktu kejadian tidak boleh berada di masa depan')
+    }
+  })
+
+  it('should reject malformed or external r2ObjectKey format', () => {
+    const malformedPayload = {
+      incidentType: 'permukiman',
+      description: 'Kebakaran rumah warga di pinggir jalan raya permukiman.',
+      observedAt: new Date().toISOString(),
+      latitude: -6.2088,
+      longitude: 106.8456,
+      r2ObjectKey: 'https://attacker.com/malicious.jpg',
+    }
+
+    const result = createReportInputSchema.safeParse(malformedPayload)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const keyError = result.error.issues.find(
+        (issue) => issue.path[0] === 'r2ObjectKey',
+      )
+      expect(keyError?.message).toBe('Format kunci bukti foto tidak valid')
+    }
+  })
+
   it('should validate statusType enum and require a reason note when updating report status', () => {
     const invalidStatusUpdate = {
       reportId: '123e4567-e89b-12d3-a456-426614174000',

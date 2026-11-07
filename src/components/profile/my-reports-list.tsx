@@ -19,8 +19,8 @@ export function MyReportsList({
   if (isLoading) {
     return (
       <div className="space-y-4" role="status" aria-label="Memuat laporan">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i} className="overflow-hidden">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <Card key={index} className="overflow-hidden">
             <CardContent>
               <div className="space-y-3">
                 <div className="flex items-center gap-2">

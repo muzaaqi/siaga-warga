@@ -1,12 +1,13 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import type { ErrorComponentProps } from '@tanstack/react-router'
-import { AlertCircleIcon, RotateCcwIcon } from 'lucide-react'
+import { AlertCircleIcon, LogInIcon, RotateCcwIcon } from 'lucide-react'
 import { getMyProfileAndReports } from '@/server/functions/profile'
 import { ProfilePage } from '@/components/profile/profile-page'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { signIn } from '@/lib/auth-client'
 
 export const Route = createFileRoute('/profil')({
   head: () => ({
@@ -68,34 +69,61 @@ function ProfilePending() {
 
 function ProfileError({ error, reset }: ErrorComponentProps) {
   const router = useRouter()
+  const errorMessage = error instanceof Error ? error.message : ''
+  const isAuthError =
+    errorMessage.toLowerCase().includes('autentikasi') ||
+    errorMessage.toLowerCase().includes('unauthenticated')
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signIn.social({
+        provider: 'google',
+        callbackURL: '/profil',
+      })
+    } catch {
+      // Fallback redirect jika terjadi kegagalan sdk
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:py-12">
-      <Alert variant="destructive">
+      <Alert variant={isAuthError ? 'warning' : 'destructive'}>
         <AlertCircleIcon className="size-4" />
-        <AlertTitle>Gagal Memuat Profil Akun</AlertTitle>
+        <AlertTitle>
+          {isAuthError ? 'Sesi Masuk Diperlukan' : 'Gagal Memuat Profil Akun'}
+        </AlertTitle>
         <AlertDescription className="mt-1">
-          {(error instanceof Error ? error.message : undefined) ||
-            'Terjadi kendala saat mengambil data profil atau riwayat laporan Anda. Pastikan Anda telah masuk dengan akun yang aktif.'}
+          {isAuthError
+            ? 'Halaman profil dan riwayat laporan hanya dapat diakses setelah Anda masuk dengan akun SiagaWarga.'
+            : errorMessage ||
+              'Terjadi kendala saat mengambil data profil atau riwayat laporan Anda. Pastikan Anda telah masuk dengan akun yang aktif.'}
         </AlertDescription>
       </Alert>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <Button
-          variant="outline"
-          onClick={() => {
-            reset()
-            router.invalidate()
-          }}
-        >
-          <RotateCcwIcon className="size-4" />
-          Coba Lagi
-        </Button>
+        {isAuthError ? (
+          <Button variant="default" onClick={handleGoogleSignIn}>
+            <LogInIcon className="size-4" />
+            <span>Masuk dengan Google</span>
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            onClick={() => {
+              reset()
+              router.invalidate()
+            }}
+          >
+            <RotateCcwIcon className="size-4" />
+            <span>Coba Lagi</span>
+          </Button>
+        )}
+
         <Button
           variant="secondary"
           onClick={() => router.navigate({ to: '/' })}
         >
-          Kembali ke Beranda
+          <span>Kembali ke Beranda</span>
         </Button>
       </div>
     </div>

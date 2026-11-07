@@ -35,6 +35,7 @@ export function ReportForm() {
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [submitError, setSubmitError] = React.useState<string | null>(null)
   const [locationError, setLocationError] = React.useState<string | null>(null)
+  const [isLocationAdjusted, setIsLocationAdjusted] = React.useState(false)
 
   const initialValues: ReportFormValues = {
     photoData: null,
@@ -372,6 +373,7 @@ export function ReportForm() {
                   initialLat={initialValues.latitude}
                   initialLon={initialValues.longitude}
                   onChangeLocation={(newLat, newLon) => {
+                    setIsLocationAdjusted(true)
                     // Validasi batas wilayah Indonesia (Rule 5)
                     if (
                       newLat < -11 ||
@@ -393,9 +395,19 @@ export function ReportForm() {
               )}
             </form.Subscribe>
 
-            {locationError && (
+            {locationError ? (
               <p className="text-xs font-medium text-destructive">
                 {locationError}
+              </p>
+            ) : !isLocationAdjusted ? (
+              <p className="text-xs text-muted-foreground">
+                Titik saat ini berada di koordinat awal. Geser pin api, klik
+                peta, atau tekan ikon target di pojok kanan atas peta untuk
+                menentukan titik kebakaran secara tepat.
+              </p>
+            ) : (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                Titik lokasi kejadian telah disesuaikan oleh pelapor.
               </p>
             )}
 

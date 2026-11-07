@@ -76,7 +76,7 @@ export function Footer() {
                 <ShieldCheckIcon className="size-4" aria-hidden="true" />
               </span>
               <p className="text-xs leading-relaxed text-white/80 sm:text-sm">
-                Prinsip keamanan kebocoran PI. Nomor telepon dan koordinat
+                Prinsip perlindungan kebocoran data pribadi (Zero PII Leakage). Nomor telepon dan koordinat
                 presisi pelapor dilindungi secara ketat. Peta publik hanya
                 menyajikan estimasi wilayah tingkat kelurahan.
               </p>

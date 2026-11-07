@@ -118,6 +118,15 @@ IDN,-1.2345,102.3456,340.0,0.4,0.4,2026-11-06,0500,N,VIIRS,nominal,2.0NRT,295.2,
       expect(parsed).toHaveLength(1)
       expect(parsed[0].latitude).toBe(-1.2345)
     })
+
+    it('harus membatasi penguraian CSV maksimal 1000 titik panas guna memitigasi DoS memori (CWE-400)', () => {
+      const header = 'country_id,latitude,longitude,bright_ti4,scan,track,acq_date,acq_time,satellite,instrument,confidence,version,bright_ti5,frp,daynight'
+      const sampleRow = 'IDN,-1.2345,102.3456,340.0,0.4,0.4,2026-11-06,0500,N,VIIRS,nominal,2.0NRT,295.2,14.8,D'
+      const largeCsv = [header, ...Array(1200).fill(sampleRow)].join('\n')
+
+      const parsed = parseNasaFirmsCsv(largeCsv)
+      expect(parsed).toHaveLength(1000)
+    })
   })
 
   describe('3. Satellite Hotspot Caching & Database Queries', () => {
@@ -154,7 +163,10 @@ IDN,-1.2345,102.3456,340.0,0.4,0.4,2026-11-06,0500,N,VIIRS,nominal,2.0NRT,295.2,
         expect(result.stats.totalVerifiedReports).toBeGreaterThanOrEqual(0)
         expect(result.stats.totalActiveHotspots).toBeGreaterThanOrEqual(0)
 
-        // Verifikasi zero PII pada setiap laporan warga
+        // Verifikasi zero PII pada setiap laporan warga serta ID yang unik tanpa duplikasi
+        const reportIds = result.reports.map((r) => r.id)
+        expect(new Set(reportIds).size).toBe(reportIds.length)
+
         for (const report of result.reports) {
           expect((report as any).reporterPhone).toBeUndefined()
           expect((report as any).reporterName).toBeUndefined()

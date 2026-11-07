@@ -64,7 +64,9 @@ export async function findNearbyDuplicateReport(
   timeWindowHours: number = 4,
 ): Promise<NearbyReportMatch | null> {
   try {
-    const timeWindow = `${timeWindowHours} hours`
+    const safeHours = Math.max(1, Math.min(168, Math.floor(Number(timeWindowHours)) || 4))
+    const safeRadius = Math.max(10, Math.min(50000, Math.floor(Number(radiusMeters)) || 2000))
+    const timeWindow = `${safeHours} hours`
 
     const queryResult = await dbInstance.execute(sql`
       SELECT 
@@ -80,7 +82,7 @@ export async function findNearbyDuplicateReport(
         AND ST_DWithin(
           location_geom::geography, 
           ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography, 
-          ${radiusMeters}
+          ${safeRadius}
         )
       ORDER BY distance_meters ASC
       LIMIT 1;

@@ -56,6 +56,10 @@ export const updateProfileInputSchema = z.object({
   image: z
     .string()
     .url('Tautan foto profil tidak valid')
+    .refine(
+      (url) => url.startsWith('https://') || url.startsWith('http://'),
+      'Hanya tautan berprotokol https:// atau http:// yang diizinkan',
+    )
     .or(
       z
         .string()

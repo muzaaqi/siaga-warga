@@ -100,7 +100,7 @@ export function buildTrackingPhases(report: {
 
   // 3. Fase 3: Verifikasi Lapangan (Human-in-the-Loop)
   const verificationAudit = report.auditHistory.find(
-    (a) => a.statusType === 'verification',
+    (audit) => audit.statusType === 'verification',
   )
   const verificationTimeIso = verificationAudit
     ? verificationAudit.createdAt.toISOString()
@@ -160,7 +160,7 @@ export function buildTrackingPhases(report: {
 
   // 4. Fase 4: Tindak Lanjut Instansi (Damkar / BPBD)
   const handlingAudit = report.auditHistory.find(
-    (a) => a.statusType === 'handling',
+    (audit) => audit.statusType === 'handling',
   )
   const handlingTimeIso = handlingAudit
     ? handlingAudit.createdAt.toISOString()
@@ -310,11 +310,11 @@ export async function fetchReportByTrackingCode(
     handlingStatus: report.handlingStatus,
     isPotentialDuplicate: Boolean(report.isPotentialDuplicate),
     satelliteHotspotMatched: Boolean(report.satelliteHotspotMatched),
-    auditHistory: auditRecords.map((a) => ({
-      statusType: a.statusType,
-      newValue: a.newValue,
-      createdAt: a.createdAt,
-      reasonNote: a.reasonNote,
+    auditHistory: auditRecords.map((audit) => ({
+      statusType: audit.statusType,
+      newValue: audit.newValue,
+      createdAt: audit.createdAt,
+      reasonNote: audit.reasonNote,
     })),
   })
 

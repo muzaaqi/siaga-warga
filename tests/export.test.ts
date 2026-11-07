@@ -93,6 +93,16 @@ describe('Incident Data Export Damkar & BPBD (Plan 11)', () => {
       )
     })
 
+    it('harus menetralisasi CSV formula injection (CWE-1236) pada teks berbahaya', () => {
+      expect(escapeCsvValue("=cmd|'/C calc'!A0")).toBe("'=cmd|'/C calc'!A0")
+      expect(escapeCsvValue('@SUM(1+1)*cmd')).toBe("'@SUM(1+1)*cmd")
+      expect(escapeCsvValue('+123-malicious')).toBe("'+123-malicious")
+      expect(escapeCsvValue('-malicious-formula')).toBe("'-malicious-formula")
+      // Koordinat negatif sah berupa angka tetap tidak terpengaruh
+      expect(escapeCsvValue(-6.2088)).toBe('-6.2088')
+      expect(escapeCsvValue('-0.5021')).toBe('-0.5021')
+    })
+
     it('harus menghasilkan berkas CSV terstruktur dengan header dan baris data yang tepat', () => {
       const sampleRows: Array<ExportReportRow> = [
         {

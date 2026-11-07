@@ -160,5 +160,28 @@ describe('Plan 05: Public Incident News Feed', () => {
         expect(item.verificationStatus).toBe('verified')
       }
     })
+
+    it('harus menangani pencarian teks yang memuat karakter wildcard SQL (%, _) secara aman', async () => {
+      const response = await fetchPublicNewsFeed({
+        limit: 5,
+        search: '%_\\',
+      })
+
+      expect(response).toBeDefined()
+      expect(Array.isArray(response.items)).toBe(true)
+    })
+
+    it('harus memastikan koordinat pada feed disamarkan (Rule 7) dan berada dalam batas Indonesia', async () => {
+      const response = await fetchPublicNewsFeed({
+        limit: 5,
+      })
+
+      for (const item of response.items) {
+        expect(item.latitude).toBeGreaterThanOrEqual(-11)
+        expect(item.latitude).toBeLessThanOrEqual(6)
+        expect(item.longitude).toBeGreaterThanOrEqual(95)
+        expect(item.longitude).toBeLessThanOrEqual(141)
+      }
+    })
   })
 })
