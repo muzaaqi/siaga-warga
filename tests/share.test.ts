@@ -151,5 +151,21 @@ describe('Emergency WhatsApp Dispatcher (Plan 12)', () => {
       expect(url).toContain('phone=628123456789')
       expect(url).toContain('text=' + encodeURIComponent(sampleText))
     })
+
+    it('harus menormalisasi format nomor lokal Indonesia awalan 0 menjadi 62', () => {
+      const sampleText = 'Laporan Darurat'
+      const url = generateWhatsAppShareUrl(sampleText, '08123456789')
+
+      expect(url).toContain('phone=628123456789')
+      expect(url).not.toContain('phone=0812')
+    })
+
+    it('harus mengabaikan nomor telepon yang tidak valid atau terlalu pendek (< 8 digit)', () => {
+      const sampleText = 'Laporan Darurat'
+      const url = generateWhatsAppShareUrl(sampleText, '123')
+
+      expect(url).not.toContain('phone=')
+      expect(url.startsWith('https://api.whatsapp.com/send?text=')).toBe(true)
+    })
   })
 })

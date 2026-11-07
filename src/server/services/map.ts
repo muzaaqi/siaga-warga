@@ -1,4 +1,4 @@
-import { and, desc, eq, gte } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray } from 'drizzle-orm'
 import { db } from '@/server/db'
 import { reports, reportEvidence } from '@/server/db/schema'
 import { calculateMaskedCoordinates } from '@/server/services/tracking'
@@ -37,7 +37,7 @@ export async function fetchPublicMapData(
     conditions.push(eq(reports.handlingStatus, handlingStatus as any))
   }
 
-  // 2. Query laporan warga terverifikasi
+  // 2. Query laporan warga terverifikasi (tanpa join bukti untuk menghindari penggandaan baris)
   const verifiedReports = await db
     .select({
       id: reports.id,
@@ -50,15 +50,32 @@ export async function fetchPublicMapData(
       longitude: reports.longitude,
       addressDisplay: reports.addressDisplay,
       handlingStatus: reports.handlingStatus,
-      thumbnailUrl: reportEvidence.mediaUrl,
     })
     .from(reports)
-    .leftJoin(reportEvidence, eq(reportEvidence.reportId, reports.id))
     .where(and(...conditions))
     .orderBy(desc(reports.submittedAt))
     .limit(100)
 
-  // 3. Samarkan koordinat presisi ke tingkat kelurahan (~800m) guna melindungi privasi (Rule 7)
+  // 3. Ambil bukti foto utama secara batch guna mencegah multiplikasi baris dan duplikasi pin
+  const thumbnailMap = new Map<string, string>()
+  if (verifiedReports.length > 0) {
+    const reportIds = verifiedReports.map((r) => r.id)
+    const evidenceList = await db
+      .select({
+        reportId: reportEvidence.reportId,
+        mediaUrl: reportEvidence.mediaUrl,
+      })
+      .from(reportEvidence)
+      .where(inArray(reportEvidence.reportId, reportIds))
+
+    for (const evidence of evidenceList) {
+      if (!thumbnailMap.has(evidence.reportId)) {
+        thumbnailMap.set(evidence.reportId, evidence.mediaUrl)
+      }
+    }
+  }
+
+  // 4. Samarkan koordinat presisi ke tingkat kelurahan (~800m) guna melindungi privasi (Rule 7)
   const mappedReports: Array<PublicMapReportItem> = verifiedReports.map((r) => {
     const masked = calculateMaskedCoordinates(r.id, r.latitude, r.longitude)
 
@@ -73,7 +90,7 @@ export async function fetchPublicMapData(
       longitude: masked.longitude,
       addressDisplay: r.addressDisplay,
       handlingStatus: r.handlingStatus,
-      thumbnailUrl: r.thumbnailUrl || null,
+      thumbnailUrl: thumbnailMap.get(r.id) || null,
     }
   })
 

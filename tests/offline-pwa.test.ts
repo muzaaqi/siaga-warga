@@ -26,7 +26,7 @@ describe('PWA Web Manifest & Offline Signal Indicator (Plan 16)', () => {
       expect(Array.isArray(manifest.icons)).toBe(true)
       expect(manifest.icons.length).toBeGreaterThanOrEqual(2)
 
-      const svgIcon = manifest.icons.find((i: { type?: string }) => i.type === 'image/svg+xml')
+      const svgIcon = manifest.icons.find((icon: { type?: string }) => icon.type === 'image/svg+xml')
       expect(svgIcon).toBeDefined()
       expect(svgIcon.src).toBe('/icon.svg')
 
@@ -41,7 +41,7 @@ describe('PWA Web Manifest & Offline Signal Indicator (Plan 16)', () => {
       expect(Array.isArray(manifest.shortcuts)).toBe(true)
       expect(manifest.shortcuts.length).toBe(3)
 
-      const shortcutUrls = manifest.shortcuts.map((s: { url: string }) => s.url)
+      const shortcutUrls = manifest.shortcuts.map((shortcut: { url: string }) => shortcut.url)
       expect(shortcutUrls).toContain('/lapor')
       expect(shortcutUrls).toContain('/pantau')
       expect(shortcutUrls).toContain('/news')

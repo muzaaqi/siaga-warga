@@ -53,16 +53,16 @@ export async function fetchMyProfileAndReports(
       role: currentUser.role as 'citizen' | 'moderator' | 'superadmin',
       createdAtIso: currentUser.createdAt.toISOString(),
     },
-    reports: userReports.map((r) => ({
-      id: r.id,
-      trackingCode: r.trackingCode,
-      incidentType: r.incidentType,
-      description: r.description,
-      submittedAtIso: r.submittedAt.toISOString(),
-      addressDisplay: r.addressDisplay,
-      verificationStatus: r.verificationStatus,
-      handlingStatus: r.handlingStatus,
-      isPotentialDuplicate: r.isPotentialDuplicate,
+    reports: userReports.map((report) => ({
+      id: report.id,
+      trackingCode: report.trackingCode,
+      incidentType: report.incidentType,
+      description: report.description,
+      submittedAtIso: report.submittedAt.toISOString(),
+      addressDisplay: report.addressDisplay,
+      verificationStatus: report.verificationStatus,
+      handlingStatus: report.handlingStatus,
+      isPotentialDuplicate: report.isPotentialDuplicate,
     })),
   }
 }

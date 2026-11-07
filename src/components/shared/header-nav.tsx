@@ -4,6 +4,7 @@ import {
   FlameIcon,
   HomeIcon,
   LogOutIcon,
+  MapPinIcon,
   NewspaperIcon,
   ShieldCheckIcon,
   FileTextIcon,
@@ -138,9 +139,11 @@ export function HeaderNav() {
       ? 'home'
       : location.pathname.startsWith('/lapor')
         ? 'lapor'
-        : location.pathname.startsWith('/news')
-          ? 'news'
-          : 'home'
+        : location.pathname.startsWith('/pantau')
+          ? 'pantau'
+          : location.pathname.startsWith('/news')
+            ? 'news'
+            : 'home'
 
   const user = session?.user as
     | {
@@ -205,10 +208,18 @@ export function HeaderNav() {
             </Link>
 
             <Link
+              to="/pantau"
+              className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground"
+            >
+              <span>Pantau</span>
+              <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-foreground transition-all group-[.active]:block" />
+            </Link>
+
+            <Link
               to="/news"
               className="group relative py-6 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground"
             >
-              <span>News</span>
+              <span>Kabar</span>
               <span className="absolute bottom-0 left-0 hidden h-0.5 w-full bg-foreground transition-all group-[.active]:block" />
             </Link>
           </nav>
@@ -282,11 +293,18 @@ export function HeaderNav() {
             <MenuDockLabel>Lapor</MenuDockLabel>
           </MenuDockItem>
 
+          <MenuDockItem value="pantau" render={<Link to="/pantau" />}>
+            <MenuDockIcon>
+              <MapPinIcon />
+            </MenuDockIcon>
+            <MenuDockLabel>Pantau</MenuDockLabel>
+          </MenuDockItem>
+
           <MenuDockItem value="news" render={<Link to="/news" />}>
             <MenuDockIcon>
               <NewspaperIcon />
             </MenuDockIcon>
-            <MenuDockLabel>News</MenuDockLabel>
+            <MenuDockLabel>Kabar</MenuDockLabel>
           </MenuDockItem>
 
           {user ? (

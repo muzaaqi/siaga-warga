@@ -83,8 +83,17 @@ export function generateWhatsAppShareUrl(
   const encodedText = encodeURIComponent(text)
 
   if (phoneNumber && phoneNumber.trim().length > 0) {
-    const cleanedPhone = phoneNumber.replace(/\D/g, '')
-    return `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodedText}`
+    let cleanedPhone = phoneNumber.replace(/\D/g, '')
+
+    // Normalisasi format nomor lokal Indonesia: 08xx -> 628xx
+    if (cleanedPhone.startsWith('0')) {
+      cleanedPhone = `62${cleanedPhone.slice(1)}`
+    }
+
+    // Hanya sertakan parameter phone jika panjang nomor valid (minimal 8 digit)
+    if (cleanedPhone.length >= 8) {
+      return `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodedText}`
+    }
   }
 
   return `https://api.whatsapp.com/send?text=${encodedText}`

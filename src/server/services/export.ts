@@ -1,4 +1,4 @@
-import { and, desc, eq, gte } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray } from 'drizzle-orm'
 import { db } from '@/server/db'
 import { reports } from '@/server/db/schema/reports'
 import { reportEvidence } from '@/server/db/schema/evidence'
@@ -11,7 +11,7 @@ import type {
 
 /**
  * Sanitasi nilai sel untuk format CSV sesuai standar RFC 4180.
- * Mencegah CSV injection dan kerusakan parsing akibat koma, petik ganda, atau newline.
+ * Mencegah CSV formula injection (CWE-1236) dan kerusakan parsing akibat koma, petik ganda, atau newline.
  */
 export function escapeCsvValue(
   value: string | number | boolean | null | undefined,
@@ -20,7 +20,17 @@ export function escapeCsvValue(
     return ''
   }
 
-  const str = String(value)
+  let str = String(value)
+
+  // Netralkan CSV Formula Injection jika string diawali karakter formula dan bukan angka murni
+  if (
+    typeof value === 'string' &&
+    /^[=+\-@\t\r]/.test(str) &&
+    isNaN(Number(str))
+  ) {
+    str = `'${str}`
+  }
+
   if (
     str.includes(',') ||
     str.includes('"') ||
@@ -203,24 +213,34 @@ export async function fetchExportData(
     .orderBy(desc(reports.submittedAt))
     .limit(query.limit)
 
-  // Ambil bukti foto untuk setiap laporan
-  const rows: Array<ExportReportRow> = await Promise.all(
-    matchedReports.map(async (rep) => {
-      const evidence = await db
-        .select({ mediaUrl: reportEvidence.mediaUrl })
-        .from(reportEvidence)
-        .where(eq(reportEvidence.reportId, rep.id))
-        .limit(1)
+  // Ambil bukti foto secara batch untuk setiap laporan (Optimasi Kueri N+1)
+  let rows: Array<ExportReportRow> = []
 
-      return {
-        ...rep,
-        satelliteHotspotMatched: Boolean(rep.satelliteHotspotMatched),
-        isPotentialDuplicate: Boolean(rep.isPotentialDuplicate),
-        isAnonymous: Boolean(rep.isAnonymous),
-        evidenceMediaUrl: evidence[0]?.mediaUrl ?? null,
+  if (matchedReports.length > 0) {
+    const reportIds = matchedReports.map((r) => r.id)
+    const evidenceRows = await db
+      .select({
+        reportId: reportEvidence.reportId,
+        mediaUrl: reportEvidence.mediaUrl,
+      })
+      .from(reportEvidence)
+      .where(inArray(reportEvidence.reportId, reportIds))
+
+    const evidenceMap = new Map<string, string>()
+    for (const ev of evidenceRows) {
+      if (!evidenceMap.has(ev.reportId)) {
+        evidenceMap.set(ev.reportId, ev.mediaUrl)
       }
-    }),
-  )
+    }
+
+    rows = matchedReports.map((rep) => ({
+      ...rep,
+      satelliteHotspotMatched: Boolean(rep.satelliteHotspotMatched),
+      isPotentialDuplicate: Boolean(rep.isPotentialDuplicate),
+      isAnonymous: Boolean(rep.isAnonymous),
+      evidenceMediaUrl: evidenceMap.get(rep.id) ?? null,
+    }))
+  }
 
   const dateStr = new Date().toISOString().slice(0, 10)
   const isGeoJson = query.format === 'geojson'

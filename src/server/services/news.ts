@@ -5,6 +5,7 @@ import { db } from '@/server/db'
 import { user } from '@/server/db/schema/auth'
 import { reportEvidence } from '@/server/db/schema/evidence'
 import { reports } from '@/server/db/schema/reports'
+import { calculateMaskedCoordinates } from '@/server/services/tracking'
 
 /**
  * Mengambil feed kabar laporan publik yang terverifikasi dengan pencarian teks,
@@ -25,9 +26,10 @@ export async function fetchPublicNewsFeed(
     conditions.push(eq(reports.incidentType, input.incidentType))
   }
 
-  // Filter pencarian teks (alamat, deskripsi, atau kode pelacakan)
+  // Filter pencarian teks dengan sanitasi wildcard SQL ILIKE (%, _, \)
   if (input.search && input.search.trim().length > 0) {
-    const term = `%${input.search.trim()}%`
+    const escapedTerm = input.search.trim().replace(/[%_\\]/g, '\\$&')
+    const term = `%${escapedTerm}%`
     conditions.push(
       or(
         ilike(reports.description, term),
@@ -60,6 +62,7 @@ export async function fetchPublicNewsFeed(
       handlingStatus: reports.handlingStatus,
       latitude: reports.latitude,
       longitude: reports.longitude,
+      isAnonymous: reports.isAnonymous,
       reporterId: user.id,
       reporterName: user.name,
       reporterImage: user.image,
@@ -77,7 +80,7 @@ export async function fetchPublicNewsFeed(
   // Ambil bukti foto utama untuk laporan yang dimuat
   const evidenceMap = new Map<string, string>()
   if (slicedRows.length > 0) {
-    const reportIds = slicedRows.map((r) => r.id)
+    const reportIds = slicedRows.map((row) => row.id)
     const evidenceList = await db
       .select({
         reportId: reportEvidence.reportId,
@@ -93,26 +96,30 @@ export async function fetchPublicNewsFeed(
     }
   }
 
-  const items = slicedRows.map((row) => ({
-    id: row.id,
-    trackingCode: row.trackingCode,
-    incidentType: row.incidentType,
-    description: row.description,
-    submittedAtIso: row.submittedAt.toISOString(),
-    addressDisplay: row.addressDisplay,
-    verificationStatus: row.verificationStatus,
-    handlingStatus: row.handlingStatus,
-    // Jitter koordinat ke tingkat kelurahan (~100m - 1km) untuk melindungi privasi warga (Rule 7)
-    latitude: Math.round(row.latitude * 100) / 100,
-    longitude: Math.round(row.longitude * 100) / 100,
-    primaryImageUrl: evidenceMap.get(row.id) ?? null,
-    reporter: {
-      id: row.reporterId ?? null,
-      name: row.reporterName || 'Warga Siaga',
-      image: row.reporterImage ?? null,
-      role: row.reporterRole ?? 'citizen',
-    },
-  }))
+  const items = slicedRows.map((row) => {
+    // Samarkan koordinat secara deterministik (~800m) konsisten dengan /lacak dan /pantau (Rule 7)
+    const masked = calculateMaskedCoordinates(row.id, row.latitude, row.longitude)
+
+    return {
+      id: row.id,
+      trackingCode: row.trackingCode,
+      incidentType: row.incidentType,
+      description: row.description,
+      submittedAtIso: row.submittedAt.toISOString(),
+      addressDisplay: row.addressDisplay,
+      verificationStatus: row.verificationStatus,
+      handlingStatus: row.handlingStatus,
+      latitude: masked.latitude,
+      longitude: masked.longitude,
+      primaryImageUrl: evidenceMap.get(row.id) ?? null,
+      reporter: {
+        id: row.isAnonymous ? null : (row.reporterId ?? null),
+        name: row.isAnonymous ? 'Warga Siaga' : (row.reporterName || 'Warga Siaga'),
+        image: row.isAnonymous ? null : (row.reporterImage ?? null),
+        role: row.isAnonymous ? 'citizen' : (row.reporterRole ?? 'citizen'),
+      },
+    }
+  })
 
   const nextCursor =
     hasMore && slicedRows.length > 0

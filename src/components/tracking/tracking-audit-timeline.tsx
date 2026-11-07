@@ -33,7 +33,7 @@ export function TrackingAuditTimeline({
       <CardHeader>
         <div className="flex items-center gap-2">
           <HistoryIcon className="size-4 text-primary" />
-          <CardTitle>Buku Catatan Catatan Verifikasi Resmi</CardTitle>
+          <CardTitle>Buku Catatan Verifikasi Resmi</CardTitle>
         </div>
         <p className="text-xs text-muted-foreground">
           Seluruh pembaruan dan alasan penanganan dicatat secara permanen tanpa

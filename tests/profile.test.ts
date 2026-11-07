@@ -64,6 +64,20 @@ describe('Profile Schema Validation', () => {
       }
     })
 
+    test('rejects non-http/https URL schemes like javascript or data for image', () => {
+      const jsResult = updateProfileInputSchema.safeParse({
+        name: 'Budi Santoso',
+        image: 'javascript:alert(1)',
+      })
+      expect(jsResult.success).toBe(false)
+
+      const dataResult = updateProfileInputSchema.safeParse({
+        name: 'Budi Santoso',
+        image: 'data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==',
+      })
+      expect(dataResult.success).toBe(false)
+    })
+
     test('accepts optional image field', () => {
       const result = updateProfileInputSchema.safeParse({
         name: 'Budi Santoso',

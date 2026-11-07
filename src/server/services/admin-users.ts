@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
 import { db } from '@/server/db'
 import { user } from '@/server/db/schema/auth'
 import { reports } from '@/server/db/schema/reports'
@@ -107,24 +107,54 @@ export async function fetchAdminUsersList(
     .limit(query.limit)
     .offset(query.offset)
 
-  // 4. Kueri laporan dan tindakan moderasi untuk setiap pengguna
-  const userItems: Array<AdminUserItem> = await Promise.all(
-    matchedUsers.map(async (u) => {
-      const reportCountRes = await db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(reports)
-        .where(eq(reports.reporterUserId, u.id))
+  // 4. Kueri laporan dan tindakan moderasi secara batch (Optimasi Kueri N+1)
+  let userItems: Array<AdminUserItem> = []
 
-      const modCountRes = await db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(reportStatusHistory)
-        .where(
-          or(
-            eq(reportStatusHistory.changedBy, u.id),
-            eq(reportStatusHistory.changedBy, u.name),
-            ilike(reportStatusHistory.changedBy, `%${u.name}%`),
-          ),
-        )
+  if (matchedUsers.length > 0) {
+    const userIds = matchedUsers.map((u) => u.id)
+    const userNames = matchedUsers.map((u) => u.name)
+
+    // Agregasi jumlah laporan per pengguna dalam 1 kueri
+    const reportCountsMap = new Map<string, number>()
+    const reportCountsRes = await db
+      .select({
+        userId: reports.reporterUserId,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(reports)
+      .where(inArray(reports.reporterUserId, userIds))
+      .groupBy(reports.reporterUserId)
+
+    for (const r of reportCountsRes) {
+      if (r.userId) {
+        reportCountsMap.set(r.userId, r.count)
+      }
+    }
+
+    // Agregasi jumlah tindakan moderasi per pengguna dalam 1 kueri
+    const modCountsMap = new Map<string, number>()
+    const modCountsRes = await db
+      .select({
+        changedBy: reportStatusHistory.changedBy,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(reportStatusHistory)
+      .where(
+        or(
+          inArray(reportStatusHistory.changedBy, userIds),
+          inArray(reportStatusHistory.changedBy, userNames),
+        ),
+      )
+      .groupBy(reportStatusHistory.changedBy)
+
+    for (const m of modCountsRes) {
+      modCountsMap.set(m.changedBy, m.count)
+    }
+
+    userItems = matchedUsers.map((u) => {
+      const reportCount = reportCountsMap.get(u.id) ?? 0
+      const modCount =
+        (modCountsMap.get(u.id) ?? 0) + (modCountsMap.get(u.name) ?? 0)
 
       return {
         id: u.id,
@@ -133,11 +163,11 @@ export async function fetchAdminUsersList(
         image: u.image,
         role: u.role as UserRole,
         createdAt: u.createdAt,
-        reportsCount: reportCountRes[0]?.count ?? 0,
-        moderationActionsCount: modCountRes[0]?.count ?? 0,
+        reportsCount: reportCount,
+        moderationActionsCount: modCount,
       }
-    }),
-  )
+    })
+  }
 
   // 5. Total count pengguna yang cocok dengan kueri
   const totalCountRes = await db
@@ -193,6 +223,11 @@ export async function executeUserRoleChange(
     .returning()
 
   const updated = updatedList[0]
+
+  // Catat riwayat audit mutasi peran ke log sistem peladen (Rule 8)
+  console.info(
+    `[ROLE_CHANGE_AUDIT] Waktu: ${new Date().toISOString()} | Aktor Superadmin: ${currentSuperadminId} | Target: ${target.id} (${target.email}) | Peran: '${target.role}' -> '${input.newRole}' | Alasan: "${input.reasonNote}"`,
+  )
 
   const reportCountRes = await db
     .select({ count: sql<number>`count(*)::int` })

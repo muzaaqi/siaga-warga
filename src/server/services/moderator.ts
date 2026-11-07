@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
 import { db } from '@/server/db'
 import {
   reports,
@@ -191,35 +191,50 @@ export async function fetchTriageQueue(
     .limit(query.limit)
     .offset(query.offset)
 
-  // Ambil thumbnail bukti foto untuk setiap laporan
+  // Ambil thumbnail dan jumlah bukti foto secara batch untuk setiap laporan (Optimasi Kueri N+1)
   const items: Array<ModeratorQueueItem> = []
 
-  for (const rep of reportRows) {
+  if (reportRows.length > 0) {
+    const reportIds = reportRows.map((r) => r.id)
     const evidenceRows = await db
       .select({
+        reportId: reportEvidence.reportId,
         mediaUrl: reportEvidence.mediaUrl,
+        createdAt: reportEvidence.createdAt,
       })
       .from(reportEvidence)
-      .where(eq(reportEvidence.reportId, rep.id))
+      .where(inArray(reportEvidence.reportId, reportIds))
       .orderBy(reportEvidence.createdAt)
 
-    items.push({
-      id: rep.id,
-      trackingCode: rep.trackingCode,
-      incidentType: rep.incidentType,
-      description: rep.description,
-      observedAt: rep.observedAt.toISOString(),
-      submittedAt: rep.submittedAt.toISOString(),
-      addressDisplay: rep.addressDisplay,
-      verificationStatus: rep.verificationStatus,
-      priority: rep.priority,
-      handlingStatus: rep.handlingStatus,
-      isPotentialDuplicate: rep.isPotentialDuplicate,
-      clusterId: rep.clusterId,
-      satelliteHotspotMatched: rep.satelliteHotspotMatched,
-      evidenceThumbnailUrl: evidenceRows[0]?.mediaUrl ?? null,
-      evidenceCount: evidenceRows.length,
-    })
+    const thumbnailMap = new Map<string, string>()
+    const countMap = new Map<string, number>()
+
+    for (const ev of evidenceRows) {
+      if (!thumbnailMap.has(ev.reportId)) {
+        thumbnailMap.set(ev.reportId, ev.mediaUrl)
+      }
+      countMap.set(ev.reportId, (countMap.get(ev.reportId) ?? 0) + 1)
+    }
+
+    for (const rep of reportRows) {
+      items.push({
+        id: rep.id,
+        trackingCode: rep.trackingCode,
+        incidentType: rep.incidentType,
+        description: rep.description,
+        observedAt: rep.observedAt.toISOString(),
+        submittedAt: rep.submittedAt.toISOString(),
+        addressDisplay: rep.addressDisplay,
+        verificationStatus: rep.verificationStatus,
+        priority: rep.priority,
+        handlingStatus: rep.handlingStatus,
+        isPotentialDuplicate: rep.isPotentialDuplicate,
+        clusterId: rep.clusterId,
+        satelliteHotspotMatched: rep.satelliteHotspotMatched,
+        evidenceThumbnailUrl: thumbnailMap.get(rep.id) ?? null,
+        evidenceCount: countMap.get(rep.id) ?? 0,
+      })
+    }
   }
 
   return {

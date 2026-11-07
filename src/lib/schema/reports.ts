@@ -32,9 +32,21 @@ export const createReportInputSchema = z.object({
     .string()
     .min(15, 'Deskripsi kejadian minimal 15 karakter agar informatif')
     .max(1000, 'Deskripsi kejadian maksimal 1000 karakter'),
-  observedAt: z.string().datetime({
-    message: 'Waktu kejadian harus berupa format ISO datetime yang valid',
-  }),
+  observedAt: z
+    .string()
+    .datetime({
+      message: 'Waktu kejadian harus berupa format ISO datetime yang valid',
+    })
+    .refine(
+      (val) => {
+        const date = new Date(val)
+        // Toleransi 5 menit untuk perbedaan sinkronisasi jam peramban dan peladen
+        return date.getTime() <= Date.now() + 5 * 60 * 1000
+      },
+      {
+        message: 'Waktu kejadian tidak boleh berada di masa depan',
+      },
+    ),
   latitude: z
     .number()
     .min(-11, 'Koordinat lintang di luar batas wilayah Indonesia')
@@ -46,7 +58,12 @@ export const createReportInputSchema = z.object({
   addressDisplay: z.string().max(255).optional(),
 
   // Mandatory photo proof (Rule 4 & PRD 5.1)
-  r2ObjectKey: z.string().min(1, 'Foto bukti wajib diunggah'),
+  r2ObjectKey: z
+    .string()
+    .min(1, 'Foto bukti wajib diunggah')
+    .regex(/^(evidence|reports)\/[a-zA-Z0-9_\-./]+\.(webp|jpg|jpeg|png)$/, {
+      message: 'Format kunci bukti foto tidak valid',
+    }),
   fileHashSha256: z
     .string()
     .length(64, 'Hash bukti foto tidak valid')
