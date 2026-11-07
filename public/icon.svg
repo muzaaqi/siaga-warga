@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient (Subtle tactical depth) -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1b4d3e" />
+      <stop offset="100%" stop-color="#11352a" />
+    </linearGradient>
+
+    <!-- Flame Ember Gradient -->
+    <linearGradient id="flame" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ea580c" />
+      <stop offset="100%" stop-color="#f97316" />
+    </linearGradient>
+
+    <!-- Shield Border Highlight -->
+    <linearGradient id="shieldBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05" />
+    </linearGradient>
+  </defs>
+
+  <!-- App Icon Base Container -->
+  <rect width="512" height="512" rx="116" fill="url(#bg)" />
+
+  <!-- Tactical Outer Ring -->
+  <rect x="24" y="24" width="464" height="464" rx="96" fill="none" stroke="url(#shieldBorder)" stroke-width="3" />
+
+  <!-- Tactical Protection Shield Shape -->
+  <path d="M 256 80 L 380 134 C 380 260 326 364 256 424 C 186 364 132 260 132 134 Z"
+        fill="#143c30"
+        stroke="#236551"
+        stroke-width="8"
+        stroke-linejoin="round" />
+
+  <!-- Center Active Fire / Flame Emblem -->
+  <!-- Outer Flame Body -->
+  <path d="M 256 160 C 278 200 316 238 316 288 C 316 332 290 366 256 366 C 222 366 196 332 196 288 C 196 244 228 206 256 160 Z"
+        fill="url(#flame)" />
+
+  <!-- Inner Flame Core (Yellow/White hot combustion) -->
+  <path d="M 256 242 C 268 266 288 288 288 318 C 288 344 274 362 256 362 C 238 362 224 344 224 318 C 224 292 242 270 256 242 Z"
+        fill="#fef08a" />
+
+  <!-- Pulse Core Dot -->
+  <circle cx="256" cy="326" r="14" fill="#ffffff" />
+</svg>

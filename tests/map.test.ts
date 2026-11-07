@@ -121,54 +121,66 @@ IDN,-1.2345,102.3456,340.0,0.4,0.4,2026-11-06,0500,N,VIIRS,nominal,2.0NRT,295.2,
   })
 
   describe('3. Satellite Hotspot Caching & Database Queries', () => {
-    it('harus mengembalikan array titik panas satelit dari basis data / fallback', async () => {
-      const hotspots = await getOrSyncSatelliteHotspots(24)
-      expect(Array.isArray(hotspots)).toBe(true)
-      if (hotspots.length > 0) {
-        expect(hotspots[0].id).toBeDefined()
-        expect(hotspots[0].source).toBeDefined()
-        expect(typeof hotspots[0].latitude).toBe('number')
-        expect(typeof hotspots[0].longitude).toBe('number')
-      }
-    })
+    it(
+      'harus mengembalikan array titik panas satelit dari basis data / fallback',
+      async () => {
+        const hotspots = await getOrSyncSatelliteHotspots(24)
+        expect(Array.isArray(hotspots)).toBe(true)
+        if (hotspots.length > 0) {
+          expect(hotspots[0].id).toBeDefined()
+          expect(hotspots[0].source).toBeDefined()
+          expect(typeof hotspots[0].latitude).toBe('number')
+          expect(typeof hotspots[0].longitude).toBe('number')
+        }
+      },
+      15000,
+    )
   })
 
   describe('4. Map Data Service (fetchPublicMapData)', () => {
-    it('harus mengembalikan data peta lengkap dan hanya menyertakan laporan terverifikasi', async () => {
-      const result = await fetchPublicMapData({
-        incidentType: 'all',
-        timeRange: '7d',
-        handlingStatus: 'all',
-      })
+    it(
+      'harus mengembalikan data peta lengkap dan hanya menyertakan laporan terverifikasi',
+      async () => {
+        const result = await fetchPublicMapData({
+          incidentType: 'all',
+          timeRange: '7d',
+          handlingStatus: 'all',
+        })
 
-      expect(result).toBeDefined()
-      expect(Array.isArray(result.reports)).toBe(true)
-      expect(Array.isArray(result.hotspots)).toBe(true)
-      expect(result.stats).toBeDefined()
-      expect(result.stats.totalVerifiedReports).toBeGreaterThanOrEqual(0)
-      expect(result.stats.totalActiveHotspots).toBeGreaterThanOrEqual(0)
+        expect(result).toBeDefined()
+        expect(Array.isArray(result.reports)).toBe(true)
+        expect(Array.isArray(result.hotspots)).toBe(true)
+        expect(result.stats).toBeDefined()
+        expect(result.stats.totalVerifiedReports).toBeGreaterThanOrEqual(0)
+        expect(result.stats.totalActiveHotspots).toBeGreaterThanOrEqual(0)
 
-      // Verifikasi zero PII pada setiap laporan warga
-      for (const report of result.reports) {
-        expect((report as any).reporterPhone).toBeUndefined()
-        expect((report as any).reporterName).toBeUndefined()
-        expect((report as any).reporterUserId).toBeUndefined()
-        expect(typeof report.latitude).toBe('number')
-        expect(typeof report.longitude).toBe('number')
-      }
-    })
+        // Verifikasi zero PII pada setiap laporan warga
+        for (const report of result.reports) {
+          expect((report as any).reporterPhone).toBeUndefined()
+          expect((report as any).reporterName).toBeUndefined()
+          expect((report as any).reporterUserId).toBeUndefined()
+          expect(typeof report.latitude).toBe('number')
+          expect(typeof report.longitude).toBe('number')
+        }
+      },
+      15000,
+    )
 
-    it('harus memfilter laporan warga berdasarkan incidentType', async () => {
-      const result = await fetchPublicMapData({
-        incidentType: 'karhutla',
-        timeRange: '7d',
-        handlingStatus: 'all',
-      })
+    it(
+      'harus memfilter laporan warga berdasarkan incidentType',
+      async () => {
+        const result = await fetchPublicMapData({
+          incidentType: 'karhutla',
+          timeRange: '7d',
+          handlingStatus: 'all',
+        })
 
-      for (const report of result.reports) {
-        expect(report.incidentType).toBe('karhutla')
-      }
-    })
+        for (const report of result.reports) {
+          expect(report.incidentType).toBe('karhutla')
+        }
+      },
+      15000,
+    )
   })
 
   describe('5. Server Function Integration', () => {

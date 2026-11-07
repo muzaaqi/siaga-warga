@@ -1,0 +1,45 @@
+{
+  "name": "SiagaWarga - Pelaporan & Pantau Kebakaran",
+  "short_name": "SiagaWarga",
+  "description": "Platform pelaporan kebakaran terbuka dengan tracking transparan dan verifikasi spasial bencana di Indonesia.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#1b4d3e",
+  "categories": ["government", "news", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Laporkan Kebakaran",
+      "short_name": "Lapor",
+      "description": "Kirim laporan kejadian kebakaran baru dengan bukti foto dan lokasi",
+      "url": "/lapor"
+    },
+    {
+      "name": "Peta Pemantauan",
+      "short_name": "Pantau",
+      "description": "Pantau sebaran titik api aktif dan hotspot satelit NASA FIRMS",
+      "url": "/pantau"
+    },
+    {
+      "name": "Berita Insiden",
+      "short_name": "Kabar",
+      "description": "Lihat kabar insiden kebakaran terverifikasi terkini",
+      "url": "/news"
+    }
+  ]
+}

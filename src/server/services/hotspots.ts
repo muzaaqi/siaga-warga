@@ -95,6 +95,7 @@ export async function syncNasaFirmsHotspots(): Promise<number> {
       headers: {
         Accept: 'text/csv',
       },
+      signal: AbortSignal.timeout(3000),
     })
 
     if (!response.ok) {
